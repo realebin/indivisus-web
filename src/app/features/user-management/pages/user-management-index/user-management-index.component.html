@@ -1,0 +1,159 @@
+<div class="container mt-4">
+  <div class="my-4">
+    <h3 class="display-6 fw-bold text-primary">User Management</h3>
+  </div>
+  <ul class="nav nav-tabs tabs">
+    <li class="nav-item">
+      <a
+        class="nav-link"
+        href="javascript:;"
+        [class.active]="activeTab === _enumAppUser"
+        (click)="setActiveTab(_enumAppUser)"
+        aria-current="page"
+      >
+        App User
+      </a>
+    </li>
+    <li class="nav-item">
+      <a
+        href="javascript:;"
+        class="nav-link"
+        [class.active]="activeTab === _enumCustomer"
+        (click)="setActiveTab(_enumCustomer)"
+      >
+        Customer
+      </a>
+    </li>
+    <li class="nav-item">
+      <a
+        href="javascript:;"
+        class="nav-link"
+        [class.active]="activeTab === _enumSupplier"
+        (click)="setActiveTab(_enumSupplier)"
+      >
+        Supplier
+      </a>
+    </li>
+  </ul>
+
+  <!-- Tab Content -->
+  <div class="tab-content mt-4 tab-content">
+    <div *ngIf="activeTab === _enumAppUser">
+      <ng-container *ngIf="isLoading; else content">
+        <app-loader type="loading-absolute"></app-loader>
+      </ng-container>
+      <ng-template #content>
+        <button
+          class="btn btn-outline-primary m-2"
+          (click)="createNew(createUserModal)"
+        >
+          Create New User
+        </button>
+        <div class="alert alert-primary m-2" role="alert" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
+        <app-user-management-table-inquiry
+          [data]="appUsers"
+          [type]="_enumAppUser"
+          (editUserEvent)="createModalUser($event)"
+          (deleteUserEvent)="deleteUser()"
+        ></app-user-management-table-inquiry>
+      </ng-template>
+    </div>
+    <div *ngIf="activeTab === _enumCustomer">
+      <ng-container *ngIf="isLoading; else content">
+        <app-loader type="loading-absolute"></app-loader>
+      </ng-container>
+      <ng-template #content>
+        <button
+          class="btn btn-outline-primary m-2"
+          (click)="createNew(createCustomerModal)"
+        >
+          Create New Customer
+        </button>
+        <app-user-management-table-inquiry
+          [data]="customers"
+          [type]="_enumCustomer"
+          (editUserEvent)="createModalUser($event)"
+          (deleteUserEvent)="deleteUser()"
+        ></app-user-management-table-inquiry>
+      </ng-template>
+    </div>
+    <div *ngIf="activeTab === _enumSupplier">
+      <ng-container *ngIf="isLoading; else content">
+        <app-loader type="loading-absolute"></app-loader>
+      </ng-container>
+      <ng-template #content>
+        <button
+          class="btn btn-outline-primary m-2"
+          (click)="createNew(createSupplierModal)"
+        >
+          Create New Supplier
+        </button>
+        <app-user-management-table-inquiry
+          [data]="suppliers"
+          [type]="_enumSupplier"
+          (editUserEvent)="createModalUser($event)"
+          (deleteUserEvent)="deleteUser()"
+        ></app-user-management-table-inquiry>
+      </ng-template>
+    </div>
+  </div>
+
+  <ng-template #createUserModal let-modal>
+    <app-modal
+      [title]="isEditMode ? 'Edit User' : 'Create New User'"
+      [confirmButtonText]="'Save'"
+      [isConfirmBtnDisabled]="isLoading"
+      [isFormValid]="isUserFormValid"
+      [isLoading]="isLoading"
+      (confirm)="createEditUser()"
+    >
+      <app-user-management-create-user-form
+        [(data)]="requestDataUser"
+        [isEditMode]="isEditMode"
+        [errorMessageCreate]="errorMessageCreateAppUser"
+        (dataChange)="onUserFormDataChange($event)"
+        (formValidityChange)="onUserFormValidityChange($event)"
+      ></app-user-management-create-user-form>
+    </app-modal>
+  </ng-template>
+
+  <ng-template #createCustomerModal let-modal>
+    <app-modal
+      [title]="isEditMode ? 'Edit Customer' : 'Create New Customer'"
+      [confirmButtonText]="'Save'"
+      [isConfirmBtnDisabled]="isLoading"
+      [isFormValid]="isCustomerFormValid"
+      [isLoading]="isLoading"
+      (confirm)="createEditCustomer()"
+    >
+      <app-user-management-create-customer-form
+        [(data)]="requestDataCustomer"
+        [isEditMode]="isEditMode"
+        [errorMessageCreate]="errorMessageCreateCustomer"
+        (dataChange)="onCustomerFormDataChange($event)"
+        (formValidityChange)="onCustomerFormValidityChange($event)"
+      ></app-user-management-create-customer-form>
+    </app-modal>
+  </ng-template>
+
+  <ng-template #createSupplierModal let-modal>
+    <app-modal
+      [title]="isEditMode ? 'Edit Supplier' : 'Create New Supplier'"
+      [confirmButtonText]="'Save'"
+      [isConfirmBtnDisabled]="isLoading"
+      [isFormValid]="isSupplierFormValid"
+      [isLoading]="isLoading"
+      (confirm)="createEditSupplier()"
+    >
+      <app-user-management-create-supplier-form
+        [(data)]="requestDataSupplier"
+        [isEditMode]="isEditMode"
+        [errorMessageCreate]="errorMessageCreateSupplier"
+        (dataChange)="onSupplierFormDataChange($event)"
+        (formValidityChange)="onSupplierFormValidityChange($event)"
+      ></app-user-management-create-supplier-form>
+    </app-modal>
+  </ng-template>
+</div>

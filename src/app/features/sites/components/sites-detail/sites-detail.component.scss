@@ -1,0 +1,26 @@
+// ::ng-deep .size-item:not(:last-child) {
+//   margin-bottom: 4px;
+// }
+
+
+// ::ng-deep .cell-wrap-text {
+//   white-space: normal !important;
+//   line-height: 1.5;
+// }
+
+// ::ng-deep .size-item {
+//   margin-bottom: 5px;
+//   display: block;
+// }
+
+::ng-deep .vertical-center {
+  display: flex !important;
+  align-items: center !important;
+  height: 100% !important;
+}
+
+// Make sure this doesn't interfere with the multi-line sizing
+::ng-deep .ag-cell {
+  line-height: normal;
+}
+

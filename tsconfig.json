@@ -1,0 +1,47 @@
+/* To learn more about this file see: https://angular.io/config/tsconfig. */
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist/out-tsc",
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "declaration": false,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "@assets/*": ["./src/assets/*"],
+      "@env/*": ["./src/environments/*"],
+      "@node_modules/*": ["./node_modules/*"],
+      "@cores/*": ["./src/app/cores/*"],
+      "@shared/*": ["./src/app/shared/*"],
+      "@features/*": ["./src/app/features/*"],
+      "@transloco/*": ["./src/app/transloco/*"],
+      "@schemas/*": ["./src/app/data/schemas/*"],
+      "@services/*": ["./src/app/data/services/*"],
+      "@directives/*": ["./src/app/cores/directives/*"],
+      "@models/*": ["./src/app/data/models/*"],
+      "@http_services/*" :["./src/app/data/http-services/*"],
+      "@guards/*": ["./src/app/data/guards/*"],
+    },
+    "useDefineForClassFields": false,
+    "lib": ["ES2022", "dom"],
+    "strictPropertyInitialization": false
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
+}

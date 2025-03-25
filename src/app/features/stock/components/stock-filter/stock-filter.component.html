@@ -1,0 +1,141 @@
+<div class="row mb-3">
+  <!-- Stock Name Filter -->
+  <div class="col">
+    <label>Stock Name</label>
+    <div class="dropdown">
+      <button
+        class="btn btn-primary dropdown-toggle w-100"
+        type="button"
+        data-bs-toggle="dropdown"
+      >
+        Select Stock Name {{ selectedNames.length ? '(' + selectedNames.length + ')' : '' }}
+      </button>
+      <ul
+        class="dropdown-menu p-2"
+        style="max-height: 300px; overflow-y: auto; min-width: 250px"
+      >
+        <!-- Search Box -->
+        <li class="p-2">
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="stockSearchText"
+            (input)="filterStockList()"
+            placeholder="Search..."
+          />
+        </li>
+
+        <!-- Filtered List -->
+        <ng-container *ngFor="let item of filteredStockItems">
+          <li class="fw-bold">{{ item.description }}</li>
+          <li *ngFor="let stock of item.stocks">
+            <label class="dropdown-item">
+              <input
+                type="checkbox"
+                [value]="stock.productName || ''"
+                (change)="onStockNameChange(stock.productName || '', $event)"
+                [checked]="selectedNames.includes(stock.productName || '')"
+              />
+
+              {{ stock.productName }}
+            </label>
+          </li>
+        </ng-container>
+      </ul>
+    </div>
+
+
+    <!-- Selected Stock Pills BELOW the button -->
+    <div class="mt-2">
+      <span class="badge bg-primary me-2" *ngFor="let name of selectedNames">
+        {{ name }}
+        <span
+          (click)="removeStockName(name)"
+          class="ms-1 text-white"
+          style="cursor: pointer"
+          >&times;</span
+        >
+      </span>
+    </div>
+  </div>
+
+<!-- Site Filter -->
+<div class="col">
+  <label>Site</label>
+  <div class="dropdown">
+    <button
+      class="btn btn-primary dropdown-toggle w-100"
+      type="button"
+      id="siteDropdown"
+      data-bs-toggle="dropdown"
+      aria-expanded="false"
+    >
+      Select Site {{ selectedSites.length ? '(' + selectedSites.length + ')' : '' }}
+    </button>
+    <ul
+      class="dropdown-menu p-2"
+      style="max-height: 300px; overflow-y: auto; min-width: 250px"
+      aria-labelledby="siteDropdown"
+    >
+      <!-- Search Box -->
+      <li class="px-2 py-1">
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="siteSearchText"
+          (input)="filterSiteList()"
+          placeholder="Search site..."
+        />
+      </li>
+      <li><hr class="dropdown-divider"></li>
+
+      <!-- Site List -->
+      <ng-container *ngIf="filteredSites.length > 0; else noSites">
+        <li *ngFor="let site of filteredSites">
+          <label class="dropdown-item">
+            <input
+              type="checkbox"
+              [value]="site.id"
+              (change)="onSiteChange(site.id, $event)"
+              [checked]="selectedSites.includes(site.id)"
+            />
+            {{ site.name }} (ID: {{ site.id }})
+          </label>
+        </li>
+      </ng-container>
+
+      <ng-template #noSites>
+        <li class="dropdown-item text-muted">No sites available</li>
+      </ng-template>
+    </ul>
+  </div>
+
+  <!-- Selected Site Pills -->
+  <div class="mt-2">
+    <span
+      class="badge bg-success me-2 mb-1"
+      *ngFor="let siteId of selectedSites"
+    >
+      {{ getSiteName(siteId) }} ({{ siteId }})
+      <span
+        (click)="removeSite(siteId)"
+        class="ms-1 text-white"
+        style="cursor: pointer"
+      >&times;</span>
+    </span>
+  </div>
+</div>
+
+    <!-- Search Filter -->
+    <div class="col">
+      <label>Search</label>
+      <input
+        type="text"
+        class="form-control"
+        [(ngModel)]="searchText"
+        (input)="applyFilter()"
+        placeholder="Search..."
+      />
+    </div>
+  </div>
+

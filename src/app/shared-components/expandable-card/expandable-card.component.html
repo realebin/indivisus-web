@@ -1,0 +1,60 @@
+<!-- expandable-card.component.html -->
+<ng-container>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <!-- Use paginatedData instead of data -->
+      <div class="expandable-section" *ngFor="let item of paginatedData">
+        <div
+          class="expandable-header d-flex justify-content-between align-items-center p-3"
+          (click)="item.isExpanded = !item.isExpanded"
+        >
+          <div class="d-flex align-items-center">
+            <i
+              *ngIf="getHeaderIcon()"
+              [class]="'bi ' + getHeaderIcon() + ' me-2'"
+            ></i>
+            <span>{{ getHeaderValue(item, "left") }}</span>
+          </div>
+          <div class="d-flex align-items-center">
+            <span class="me-2">{{ getHeaderValue(item, "right") }}</span>
+            <i
+              class="bi"
+              [class.bi-chevron-up]="item.isExpanded"
+              [class.bi-chevron-down]="!item.isExpanded"
+            ></i>
+          </div>
+        </div>
+
+        <div class="expandable-details" [class.show]="item.isExpanded">
+          <div class="p-3">
+            <div class="row mb-2" *ngFor="let col of getDetails()">
+              <div class="col">{{ col.label }}</div>
+              <div class="col-auto">{{ item[col.field] }}</div>
+            </div>
+          </div>
+
+          <ng-container *ngTemplateOutlet="footerTemplate; context: { $implicit: item }"></ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Pagination Controls -->
+  <nav aria-label="Card pagination" class="mt-3">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" [class.disabled]="currentPage === 1">
+        <button class="page-link" (click)="previousPage()">Previous</button>
+      </li>
+      <li
+        class="page-item"
+        [class.active]="page === currentPage"
+        *ngFor="let page of displayedPages"
+      >
+        <button class="page-link" (click)="goToPage(page)">{{ page }}</button>
+      </li>
+      <li class="page-item" [class.disabled]="currentPage === maxPage">
+        <button class="page-link" (click)="nextPage()">Next</button>
+      </li>
+    </ul>
+  </nav>
+</ng-container>

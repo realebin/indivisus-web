@@ -1,0 +1,144 @@
+// /* COLORS */
+// $white: #fff !default;        //
+// $gray-100: #f5f9fa !default;  // BG footnote
+// $gray-200: #e9ecef !default;  // datepicker
+// $gray-300: #dee2e6 !default;  // datepicker
+// $gray-400: #c0c0c0 !default;  // carousel border
+// $gray-500: #adb5bd !default;  // datepicker
+// $gray-600: #868e96 !default;  // input color
+// $gray-700: #495057 !default;  // footnote
+// $gray-800: #343a40 !default;
+// $gray-900: #212529 !default;  // ng select
+// $black: #000 !default;        //
+
+// $dark-blue: #005caa !default;     // header, sidebar
+// $darker-blue: #144e83 !default;   // card, modal, table, list group
+// $mid-blue: #0094d5 !default;      // hero
+// $blue: #00b5f0 !default;          // banyak
+// $lighter-blue: #f5fcff !default;  // depo bg
+// $light-blue: #e6f3ff !default;    // onboarding, token, list-group
+// $dusty-blue: #5d86a0 !default;    // acc consumer credit
+// $indigo: #6610f2 !default;
+// $purple: #9a5ba4 !default;        // icon trx trjadwal
+// $pink: #e83e8c !default;
+// $red: #e25757 !default;           // dom
+// $orange: #f37c30 !default;        // icon paylater
+// $yellow: #ffc107 !default;
+// $green: #29b821 !default;
+// $green-lime: #7a853b !default;    // icon depo
+// $teal: #28BAB7 !default;          // icon welma
+// $cyan: #17a2b8 !default;
+// $brown: #8d734a !default;
+// $silver: $gray-400 !default;
+
+// $colors: () !default;
+// $colors: map-merge(
+// 	(
+// 		"dark-blue": $dark-blue,
+// 		"darker-blue": $darker-blue,
+// 		"mid-blue": $mid-blue,
+// 		"blue": $blue,
+// 		"lighter-blue": $lighter-blue,
+// 		"light-blue": $light-blue,
+// 		"dusty-blue": $dusty-blue,
+// 		"indigo": $indigo,
+// 		"purple": $purple,
+// 		"pink": $pink,
+// 		"red": $red,
+// 		"orange": $orange,
+// 		"yellow": $yellow,
+// 		"green": $green,
+// 		"green-lime": $green-lime,
+// 		"teal": $teal,
+// 		"cyan": $cyan,
+// 		"brown": $brown,
+// 		"silver": $silver
+// 	),
+// 	$colors
+// );
+
+// $primary: $dark-blue !default;          //
+// $primary-light: #E6F3FF !default;
+// // $primary-dark: #006bb5 !default;
+// $primary-dark: $primary !default;
+
+// $secondary: $gray-600 !default;         // banyak
+// $secondary-light: #cecece !default;
+// $secondary-dark: $black !default;
+
+// $success: $green !default;              // banyak
+// $success-light: #c2ffc5 !default;
+// $success-dark: #009649 !default;
+
+// $warning: $yellow !default;             // banyak
+// // $warning: $orange !default; // TODO: Warna warning di palette baru bukan yellow
+
+// // old color code change to new color code - 19 Oct 2023
+// // $warning-light: #faf5cc !default;
+// // $warning-dark: #d28000 !default;
+// $warning-light: #ffe592 !default;
+// $warning-dark: #885403 !default;
+
+// $danger: $red !default;                 // banyak
+// $danger-light: #ffd9d3 !default;
+// $danger-dark: #cd192e !default;
+
+// /** Note: `info`, `light`, `dark` tidak digunakan sampe saat ini. Value di sini cuma pelengkap, jadi ga valid ya **/
+// $info: $teal !default;
+// $info-light: lighten($info, 40) !default;
+// $info-dark: darken($info, 6) !default;
+
+// $light: $gray-100 !default;
+// $light-light: lighten($light, 40) !default;
+// $light-dark: darken($light, 6) !default;
+
+// $dark: $gray-800 !default;
+// $dark-light: lighten($dark, 40) !default;
+// $dark-dark: darken($dark, 6) !default;
+
+// $theme-colors: () !default;
+// $theme-colors: map-merge(
+// 	(
+// 		"primary": $primary,
+// 		"secondary": $secondary,
+// 		"success": $success,
+// 		"info": $info,
+// 		"warning": $warning,
+// 		"danger": $danger,
+// 		"light": $light,
+// 		"dark": $dark,
+// 	),
+// 	$theme-colors
+// );
+
+// $theme-text-colors: (
+//   "primary": #fff,
+//   "success": #fff,
+//   "info": #fff,
+//   "warning": #fff,
+//   "danger": #fff,
+//   "dark": #fff,
+//   "secondary": #fff
+// );
+
+
+// $theme-light-colors: (
+// 	"primary": $primary-light,
+// 	"success": $success-light,
+// 	"info": $info-light,
+// 	"warning": $warning-light,
+// 	"danger": $danger-light,
+// 	"dark": $dark-light,
+// 	"secondary": $secondary-light,
+// ) !default;
+
+// $theme-dark-colors: (
+// 	"primary": $primary-dark,
+// 	"success": $success-dark,
+// 	"info": $info-dark,
+// 	"warning": $warning-dark,
+// 	"danger": $danger-dark,
+// 	"dark": $dark-dark,
+// 	"secondary": $secondary-dark,
+// ) !default;
+

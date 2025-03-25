@@ -1,0 +1,24 @@
+.badge {
+  font-size: 0.85rem;  // Make the text smaller
+  padding: 0.3rem 0.6rem;  // Reduce padding
+  margin: 4px;  // Add spacing between pills
+  border-radius: 20px;  // Make them rounded
+  display: inline-flex;
+  align-items: center;
+}
+
+.badge span {
+  margin-left: 0.5rem; // Space between text and '×'
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.badge.bg-primary {
+  background-color: #007bff;  // Bootstrap primary blue
+  color: white;
+}
+
+.badge.bg-success {
+  background-color: #198754;  // Bootstrap success green
+  color: white;
+}

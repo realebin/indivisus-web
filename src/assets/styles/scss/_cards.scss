@@ -1,0 +1,8 @@
+.shadow-card {
+  background-color: #f8f9fa !important; /* Light background for content area */
+  padding:1.5rem !important;
+  border: 1px solid #dee2e6 !important; /* Matches tab border */
+  border-top: none !important; /* No border overlap with tabs */
+  border-radius: 0 0 5px 5px !important; /* Rounded corners at the bottom */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important; /* Elegant shadow */
+}

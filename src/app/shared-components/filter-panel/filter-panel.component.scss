@@ -1,0 +1,112 @@
+// Improved styling for the ag-grid
+::ng-deep .ag-theme-alpine {
+  // Fix for horizontal scrolling
+  .ag-root-wrapper {
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+  }
+
+  // Better mobile styling
+  .ag-header-cell {
+    padding: 0.5rem;
+  }
+
+  .ag-cell {
+    padding: 0.5rem;
+  }
+}
+
+// Filter panel styling
+.card {
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+
+  .card-body {
+    padding: 1rem;
+  }
+}
+
+
+// Sort buttons in the filter panel
+.sort-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  .btn {
+    flex: 1 1 45%;
+    min-width: 110px;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+    padding: 0.5rem 0.75rem;
+
+    i {
+      font-size: 0.85rem;
+      margin-left: 0.5rem;
+      transition: transform 0.2s ease;
+    }
+
+    &.btn-primary {
+      i {
+        color: white; // White icon for selected (blue) buttons
+        opacity: 1;
+      }
+    }
+
+    &.btn-outline-primary {
+      i {
+        color: #0d6efd; // Blue icon for non-selected buttons
+        opacity: 0.6;
+      }
+    }
+  }
+}
+// Active filter indicator styles
+.position-relative {
+  .badge {
+    font-size: 0.5rem;
+    padding: 0.25rem;
+  }
+}
+
+
+// Improved badge styling
+.btn-outline-secondary,
+.btn-secondary {
+  position: relative;
+
+  .badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    font-size: 0.6rem;
+    min-width: 0.8rem;
+    height: 0.8rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    border: 1px solid #fff;
+    transform: none;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.6);
+  }
+}
+
+// Animation for filter panel
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.container {
+  .card {
+    animation: slideDown 0.2s ease-out;
+  }
+}

@@ -1,0 +1,45 @@
+<div class="card shadow-sm border-0 mt-4">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>Product ID</th>
+          <th>Product Name</th>
+          <th>Type</th>
+          <th>Size</th>
+          <th>Remaining Stock (Package)</th>
+          <th>Price</th>
+          <th>Site</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let item of stocks">
+          <ng-container *ngFor="let stock of item.stocks || []">
+            <ng-container *ngFor="let bigPackage of stock.bigPackages || []">
+              <tr>
+                <td>{{ stock.idProduct }}</td>
+                <td>{{ stock.productName }}</td>
+                <td>{{ item.description }}</td>
+                <td>
+                  <ng-container *ngIf="bigPackage.sizes?.length; else noSize">
+                    <ng-container *ngFor="let size of bigPackage.sizes">
+                      {{ size.sizeDescription }} {{ size.sizeAmount }}<br>
+                    </ng-container>
+                  </ng-container>
+                  <ng-template #noSize>-</ng-template>
+                </td>
+                <td>{{ stock.remainingBigPackages }}</td>
+                <td>{{ formatPrice(500000) }}</td>
+                <td>{{ bigPackage.locationName }}</td>
+                <td>
+                  <a href="#" class="text-primary text-decoration-none">Edit</a>
+                </td>
+              </tr>
+            </ng-container>
+          </ng-container>
+        </ng-container>
+      </tbody>
+    </table>
+  </div>
+</div>

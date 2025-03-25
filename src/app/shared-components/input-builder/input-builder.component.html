@@ -1,0 +1,69 @@
+<div class="mb-3" [formGroup]="formGroup">
+  <label [for]="config.name" class="form-label">{{ config.label }}</label>
+
+  <ng-container [ngSwitch]="config.type">
+    <!-- Text Input -->
+    <input
+      *ngSwitchCase="'text'"
+      [id]="config.name"
+      type="text"
+      class="form-control"
+      [formControlName]="config.name"
+      [placeholder]="config.placeholder"
+      [ngClass]="{ 'is-invalid': isFieldInvalid() }"
+      [disabled]="!!config.isDisabled"
+    />
+
+    <!-- Password Input -->
+    <input
+      *ngSwitchCase="'password'"
+      [id]="config.name"
+      type="password"
+      class="form-control"
+      [formControlName]="config.name"
+      [placeholder]="config.placeholder"
+      [ngClass]="{ 'is-invalid': isFieldInvalid() }"
+      [disabled]="!!config.isDisabled"
+    />
+
+    <!-- Select Input -->
+    <select
+      *ngSwitchCase="'select'"
+      [id]="config.name"
+      class="form-select"
+      [formControlName]="config.name"
+      [ngClass]="{ 'is-invalid': isFieldInvalid() }"
+      [disabled]="!!config.isDisabled"
+    >
+      <option value="">Select an option</option>
+      <option *ngFor="let option of config.options" [value]="option.value">
+        {{ option.label }}
+      </option>
+    </select>
+
+    <!-- Date Input -->
+    <input
+      *ngSwitchCase="'date'"
+      [id]="config.name"
+      type="date"
+      class="form-control"
+      [formControlName]="config.name"
+      [ngClass]="{ 'is-invalid': isFieldInvalid() }"
+      [disabled]="!!config.isDisabled"
+    />
+
+    <input
+      *ngSwitchCase="'checkbox'"
+      [id]="config.name"
+      type="checkbox"
+      class="form-check-input"
+      [formControlName]="config.name"
+      [disabled]="!!config.isDisabled"
+    />
+  </ng-container>
+
+  <!-- Error Messages -->
+  <div *ngIf="isFieldInvalid()" class="invalid-feedback">
+    {{ getErrorMessage() }}
+  </div>
+</div>

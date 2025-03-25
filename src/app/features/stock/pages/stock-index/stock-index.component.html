@@ -1,0 +1,48 @@
+<div class="container px-2">
+  <div class="my-4">
+    <h3 class="display-6 fw-bold text-primary">Stock</h3>
+  </div>
+  <div class="shadow-card p-4">
+
+    <ng-container *ngIf="!isLoading; else loading">
+      <button
+      class="btn btn-outline-primary mb-4"
+      [routerLink]="['/stock/add-stocks']"
+    >
+      Add Stock
+    </button>
+      <div class="row mb-4">
+        <div class="col-md-12">
+          <app-stock-filter
+            [filterPrepare]="filterPrepare"
+            [stocks]="currentTabStocks"
+            (filterChange)="updateFilteredStocks($event)"
+          ></app-stock-filter>
+        </div>
+      </div>
+
+      <h5>List Items: </h5>
+      <ul class="nav nav-tabs tabs">
+        <li class="nav-item" *ngFor="let tab of tabs">
+          <a
+            class="nav-link"
+            href="javascript:;"
+            [class.active]="activeTab === tab.tabName"
+            (click)="setActiveTab(tab.tabName)"
+            aria-current="page"
+          >
+            {{ tab.tabName }}
+          </a>
+        </li>
+      </ul>
+      <div class="row">
+        <div class="col-md-12">
+          <app-stock-lists [stocks]="filteredStocks"></app-stock-lists>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #loading>
+      <app-loader type="loading-absolute"></app-loader>
+    </ng-template>
+  </div>
+</div>

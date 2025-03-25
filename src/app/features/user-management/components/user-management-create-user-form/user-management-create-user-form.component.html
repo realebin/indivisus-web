@@ -1,0 +1,31 @@
+<div class="container" *ngIf="!isLoading">
+  <div class="alert alert-danger" role="alert" *ngIf="errorMessageCreate">
+    {{ errorMessageCreate }}
+  </div>
+  <div class="alert alert-danger" role="alert" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+  <form [formGroup]="formGroup" class="needs-validation">
+    <app-input-builder
+      *ngFor="let field of fields.filter(this.isFieldConfig)"
+      [formGroup]="formGroup"
+      [config]="field"
+    ></app-input-builder>
+
+    <button
+      class="btn btn-outline-primary mb-2"
+      *ngIf="isEditMode"
+      (click)="togglePasswordFields()"
+    >
+      {{ btnPasswordText }}
+    </button>
+
+    <div *ngIf="getPasswordField()">
+      <app-input-builder
+        [formGroup]="formGroup"
+        [config]="getPasswordField()!"
+      ></app-input-builder>
+    </div>
+  </form>
+</div>
+<app-loader *ngIf="isLoading"></app-loader>

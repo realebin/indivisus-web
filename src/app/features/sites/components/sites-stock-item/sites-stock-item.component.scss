@@ -1,0 +1,39 @@
+.card {
+  border-left: 5px solid #007bff;
+}
+
+.card .fw-semibold {
+  color: #343a40;
+}
+
+.card .text-muted {
+  color: #6c757d;
+}
+
+.card .list-group-item {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.9rem;
+}
+
+.card .ms-3 {
+  margin-left: 1rem !important;
+}
+
+/* Styling for nested packages */
+.card .ms-3.border { /* Big and Smaller packages */
+  border-color: #ced4da;
+}
+
+.card .small.text-muted { /* Smaller and Smallest package labels */
+  font-size: 0.8rem;
+}
+
+.card ul.list-unstyled { /* Smallest packages */
+  margin-left: 1.5rem !important; /* Adjusted margin */
+  font-size: 0.85rem;
+  color: #777;
+}
+
+.badge.bg-secondary { /* Quantity badge */
+  font-size: 0.75rem;
+}

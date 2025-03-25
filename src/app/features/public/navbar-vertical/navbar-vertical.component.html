@@ -1,0 +1,26 @@
+<div
+  class="sidebar overflow-y-auto pb-4"
+  [ngClass]="{ collapsed: isCollapsed }"
+>
+  <ul class="nav flex-column mt-4 overflow-hidden">
+    <li class="nav-item" (click)="toggleSidebar()">
+      <a class="nav-link">
+        <i
+          class="bi me-2"
+          [ngClass]="
+            isCollapsed ? 'bi-arrow-right-circle' : 'bi-arrow-left-circle'
+          "
+        ></i>
+      </a>
+    </li>
+    <li class="nav-item" *ngFor="let item of navItems">
+      <a class="nav-link"
+         [routerLink]="item.href"
+         routerLinkActive="active"
+         [class.selected]="isActive(item.href)">
+        <i class="bi me-2" [ngClass]="item.icon"></i>
+        <span *ngIf="!isCollapsed">{{ item.label }}</span>
+      </a>
+    </li>
+  </ul>
+</div>

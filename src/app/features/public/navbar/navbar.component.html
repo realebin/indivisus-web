@@ -1,0 +1,70 @@
+<!-- Top Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">
+      <img
+        src="../../../../assets/png/logo.png"
+        alt="TextWare"
+        style="height: 40px"
+      />
+    </a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarContent"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="#">Buat Faktur</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="menDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+          >
+            Kelola Barang
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Shoes</a></li>
+            <li><a class="dropdown-item" href="#">Clothing</a></li>
+            <li><a class="dropdown-item" href="#">Accessories</a></li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" (click)="logout()">
+            Logout <i class="bi bi-box-arrow-right"></i>
+          </a>
+        </li>
+      </ul>
+      <form class="d-flex">
+        <input
+          class="form-control search-bar"
+          type="search"
+          placeholder="Search"
+        />
+      </form>
+    </div>
+  </div>
+</nav>
+
+<!-- Sidebar and Main Content -->
+<div class="p-0">
+  <app-navbar-vertical
+    (sidebarToggle)="onSidebarToggle($event)"
+    [navItems]="navItems"
+  ></app-navbar-vertical>
+  <!-- <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb> -->
+  <div class="main-content" [ngClass]="{ collapsed: isSidebarCollapsed }">
+    <div class="p-2">
+      <!-- <app-dashboard-info></app-dashboard-info> -->
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

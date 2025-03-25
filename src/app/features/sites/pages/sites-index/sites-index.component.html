@@ -1,0 +1,15 @@
+<div class="container px-2">
+  <div class="my-4">
+    <h3 class="display-6 fw-bold text-primary">Sites</h3>
+  </div>
+
+  <div class="shadow-card">
+    <button class="btn btn-outline-primary m-2 mb-4">Create Site</button>
+    <ng-container *ngIf="!isLoading; else loading">
+      <app-sites-inquiry [sites]="sites"></app-sites-inquiry>
+    </ng-container>
+    <ng-template #loading>
+      <app-loader *ngIf="isLoading" type="loading-absolute"></app-loader>
+    </ng-template>
+  </div>
+</div>

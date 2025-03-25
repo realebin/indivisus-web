@@ -1,0 +1,59 @@
+.card {
+  border: none;
+  background-color: white;
+}
+
+.card-header {
+  background-color: white;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.expandable-section {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.expandable-header {
+  cursor: pointer;
+  background-color: #f8f9fa;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #e9ecef;
+  }
+
+  &.expanded {
+    background-color: #343a40;
+    color: white;
+  }
+}
+
+.expandable-details {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  background-color: white;
+
+  &.show {
+    max-height: 500px;
+  }
+}
+
+.btn-link {
+  text-decoration: none;
+  padding: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.border-top {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.card-footer {
+  background-color: white;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+

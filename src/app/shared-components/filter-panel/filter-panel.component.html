@@ -1,0 +1,107 @@
+<!-- Filter Button -->
+<div class="container px-3 mt-3 mb-2">
+  <div class="d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">{{ title }}</h5>
+    <div>
+      <button
+        class="btn btn-outline-secondary"
+        [class.btn-secondary]="isVisible || hasActiveFilters"
+        [class.text-white]="isVisible || hasActiveFilters"
+        (click)="onTogglePanel()">
+        <i class="bi bi-funnel"></i>
+        <span class="ms-1 d-none d-sm-inline">Filter</span>
+        <!-- Alert badge -->
+        <span
+          *ngIf="hasActiveFilters"
+          class="badge rounded-pill bg-danger">
+          !
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Active filter summary -->
+  <div *ngIf="hasActiveFilters && !isVisible" class="mt-2 small text-muted">
+    <i class="bi bi-info-circle me-1"></i> {{ activeFilterText }}
+  </div>
+</div>
+
+<!-- Filter panel (expandable) -->
+<div class="container px-3 mb-3" *ngIf="isVisible">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <div class="mb-3">
+        <label class="form-label">Search</label>
+        <div class="input-group">
+          <span class="input-group-text">
+            <i class="bi bi-search"></i>
+          </span>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Search anything..."
+            [formControl]="searchControl"
+            aria-label="Search">
+          <button
+            *ngIf="searchControl.value"
+            class="btn btn-outline-secondary"
+            type="button"
+            (click)="clearSearch()">
+            <i class="bi bi-x"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Sort options -->
+      <div class="mb-3" *ngIf="sortOptions.length > 0">
+        <label class="form-label">Sort by</label>
+        <div class="sort-buttons">
+          <ng-container *ngFor="let option of sortOptions">
+            <button
+              type="button"
+              class="btn mb-2 me-2"
+              [class.btn-outline-primary]="sortField !== option.field"
+              [class.btn-primary]="sortField === option.field"
+              (click)="onSortData(option.field)">
+              {{ option.label }}
+              <i [class]="getSortIcon(option.field)"></i>
+            </button>
+          </ng-container>
+        </div>
+        <small class="text-muted mt-1 d-block">
+          Click a button to activate sorting, click again to toggle direction
+        </small>
+      </div>
+
+      <!-- Filter actions -->
+      <div class="d-flex justify-content-end">
+        <button
+          class="btn btn-outline-secondary me-2"
+          (click)="onResetFilters()"
+          [disabled]="!hasActiveFilters">
+          Reset
+        </button>
+        <button
+          class="btn btn-primary"
+          (click)="onDone()">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results count if searching -->
+  <div *ngIf="searchControl.value && resultCount !== null" class="mt-2 small text-muted">
+    Found {{ resultCount }} result{{ resultCount === 1 ? '' : 's' }}
+    for "{{ searchControl.value }}"
+  </div>
+</div>
+
+<!-- Empty search results message -->
+<div *ngIf="searchControl.value && resultCount === 0" class="text-center py-4">
+  <i class="bi bi-search" style="font-size: 2rem; opacity: 0.5;"></i>
+  <p class="mt-2">No results found for "{{ searchControl.value }}"</p>
+  <button class="btn btn-sm btn-outline-secondary" (click)="onResetFilters()">
+    Reset filters
+  </button>
+</div>

@@ -1,0 +1,52 @@
+<div class="card p-3 mb-2 bg-white shadow-sm">
+  <h6 class="fw-bold text-primary">
+      {{ stocks. productName }} ({{ stocks.remainingBigPackages }} big packs remaining)
+  </h6>
+
+  <div *ngIf="stocks.sizes?.length">
+      <p class="text-muted mb-1">Total all packs</p>
+      <ul class="list-group list-group-flush">
+          <li class="list-group-item" *ngFor="let size of stocks.sizes">
+              {{ size.sizeDescription }} - {{ size.sizeAmount }}
+          </li>
+      </ul>
+  </div>
+
+  <div *ngIf="stocks.bigPackages?.length">
+      <p class="text-muted mt-2">Big Packages:</p>
+      <div *ngFor="let bigPackage of stocks.bigPackages" class="ms-3 mb-2 p-2 border rounded">
+          <div class="d-flex justify-content-between align-items-center">
+              <p class="fw-semibold mb-0">Big Pack ID: {{ bigPackage.idBigPackages }}</p>
+              <div *ngIf="bigPackage.sizes?.length">
+                <!-- <p class="text-muted mb-1">Available Sizes:</p> -->
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item" *ngFor="let size of bigPackage.sizes">
+                        {{ size.sizeDescription }} - {{ size.sizeAmount }}
+                    </li>
+                </ul>
+            </div>
+          </div>
+
+          <div *ngIf="bigPackage.smallerPackages?.length">
+              <p class="mt-2 mb-1 small text-muted">Smaller Packages:</p>
+              <div *ngFor="let smallPackage of bigPackage.smallerPackages" class="ms-3 mb-2 p-2 border rounded">
+                  <div class="d-flex justify-content-between align-items-center">
+                      <p class="mb-0">
+                          {{ smallPackage.sizeDescription }} - {{ smallPackage.sizeAmount }}
+                          <!-- <span *ngIf="smallPackage.quantity" class="badge bg-secondary ms-2">x{{ smallPackage.quantity }}</span> -->
+                      </p>
+                  </div>
+
+                  <!-- <div *ngIf="smallPackage.theSmallestPackages?.length">
+                      <p class="mt-2 mb-1 small text-muted">Smallest Packages (Contents):</p>
+                      <ul class="list-unstyled ms-3 mb-0">
+                          <li *ngFor="let smallest of smallPackage.theSmallestPackages">
+                              {{ smallest.sizeDescription }} - {{ smallest.sizeAmount }}
+                          </li>
+                      </ul>
+                  </div> -->
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
