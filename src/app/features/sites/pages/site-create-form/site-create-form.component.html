@@ -3,53 +3,11 @@
     {{ errorMessage }}
   </div>
   <form [formGroup]="formGroup" class="needs-validation">
-    <div class="mb-3">
-      <label for="siteName" class="form-label">Site Name</label>
-      <input
-        type="text"
-        class="form-control"
-        id="siteName"
-        formControlName="siteName"
-        placeholder="Enter site name"
-        [ngClass]="{'is-invalid': formGroup.get('siteName')?.invalid && (formGroup.get('siteName')?.dirty || formGroup.get('siteName')?.touched)}"
-      >
-      <div class="invalid-feedback" *ngIf="formGroup.get('siteName')?.invalid && (formGroup.get('siteName')?.dirty || formGroup.get('siteName')?.touched)">
-        Site name is required
-      </div>
-    </div>
-
-    <div class="mb-3">
-      <label for="address" class="form-label">Address</label>
-      <input
-        type="text"
-        class="form-control"
-        id="address"
-        formControlName="address"
-        placeholder="Enter address"
-        [ngClass]="{'is-invalid': formGroup.get('address')?.invalid && (formGroup.get('address')?.dirty || formGroup.get('address')?.touched)}"
-      >
-      <div class="invalid-feedback" *ngIf="formGroup.get('address')?.invalid && (formGroup.get('address')?.dirty || formGroup.get('address')?.touched)">
-        Address is required
-      </div>
-    </div>
-
-    <div class="mb-3">
-      <label for="picUserId" class="form-label">PIC User</label>
-      <select
-        class="form-select"
-        id="picUserId"
-        formControlName="picUserId"
-        [ngClass]="{'is-invalid': formGroup.get('picUserId')?.invalid && (formGroup.get('picUserId')?.dirty || formGroup.get('picUserId')?.touched)}"
-      >
-        <option value="">Select a user</option>
-        <option *ngFor="let user of users" [value]="user.id">
-          {{ user.fullName }} ({{ user.username }})
-        </option>
-      </select>
-      <div class="invalid-feedback" *ngIf="formGroup.get('picUserId')?.invalid && (formGroup.get('picUserId')?.dirty || formGroup.get('picUserId')?.touched)">
-        PIC User is required
-      </div>
-    </div>
+    <app-input-builder
+      *ngFor="let field of fields"
+      [formGroup]="formGroup"
+      [config]="field"
+    ></app-input-builder>
   </form>
   <app-loader *ngIf="isLoading"></app-loader>
 </div>

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FieldConfig } from '@models/_component-base.model';
 import { SiteCreateEditModelRequest } from '@models/site.model';
 import { UserManagementInquiryAppUserModelResponse } from '@models/user-management.model';
 import { UserManagementService } from '@services/user-management.service';
@@ -24,6 +25,40 @@ export class SiteCreateFormComponent implements OnInit {
   formGroup!: FormGroup;
   users: any[] = [];
   isLoading: boolean = false;
+
+  fields: FieldConfig[] = [
+    {
+      name: 'siteName',
+      label: 'Site Name',
+      type: 'text',
+      placeholder: 'Enter site name',
+      validators: [Validators.required],
+      validationMessages: {
+        required: 'Site name is required'
+      }
+    },
+    {
+      name: 'address',
+      label: 'Address',
+      type: 'text',
+      placeholder: 'Enter address',
+      validators: [Validators.required],
+      validationMessages: {
+        required: 'Address is required'
+      }
+    },
+    {
+      name: 'picUserId',
+      label: 'PIC User',
+      type: 'select',
+      placeholder: 'Select a user',
+      validators: [Validators.required],
+      validationMessages: {
+        required: 'PIC User is required'
+      },
+      options: []
+    }
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -64,6 +99,14 @@ export class SiteCreateFormComponent implements OnInit {
     this.userManagementService.inquiryAppUser().subscribe({
       next: (response: UserManagementInquiryAppUserModelResponse) => {
         this.users = response.appUsers;
+        // Update the select options with the users
+        const picUserField = this.fields.find(field => field.name === 'picUserId');
+        if (picUserField) {
+          picUserField.options = this.users.map(user => ({
+            label: `${user.fullName} (${user.username})`,
+            value: user.id
+          }));
+        }
         this.isLoading = false;
       },
       error: (error) => {
