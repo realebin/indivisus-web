@@ -304,17 +304,17 @@ export class SiteHttpService {
   createEditSite(
     request: SiteCreateEditHttpRequest
   ): Observable<ApiResponse<{ epoch: number }>> {
-    return of({
-      error_schema: {
-        error_code: 'STS-1-000',
-        http_code: 200,
-        error_message: {
-          indonesian: 'Berhasil membuat site.',
-          english: 'Success on making the site.',
-        },
-      },
-      output_schema: { epoch: 1677145193628 },
-    }).pipe(delay(500));
+    // return of({
+    //   error_schema: {
+    //     error_code: 'STS-1-000',
+    //     http_code: 200,
+    //     error_message: {
+    //       indonesian: 'Berhasil membuat site.',
+    //       english: 'Success on making the site.',
+    //     },
+    //   },
+    //   output_schema: { epoch: 1677145193628 },
+    // }).pipe(delay(500));
 
     return this.httpClient.post<ApiResponse<{ epoch: number }>>(
       `${this.env.apiEndpoint}/site-management/site/create`,

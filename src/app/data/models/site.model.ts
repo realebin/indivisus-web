@@ -88,12 +88,9 @@ export interface SiteAllListOverviewModelResponse {
  * ? Request Section
  */
 export interface SiteCreateEditModelRequest {
-  id?: number;
+  siteName: string;
   address: string;
-  city: string;
-  name: string;
-  pic: string;
-  phone: string;
+  picUserId: string;
 }
 
 export interface SiteDeleteModelRequest {
@@ -227,14 +224,10 @@ export function transformToSiteCreateEditHttpRequest(
   request: SiteCreateEditModelRequest
 ): SiteCreateEditHttpRequest {
   const result: SiteCreateEditHttpRequest = {
-    id: request?.id,
+    site_name: request.siteName,
     address: request.address,
-    city: request.city,
-    name: request.name,
-    phone: request.phone,
-    pic: request.pic,
+    pic_user_id: request.picUserId
   };
-
   return result;
 }
 

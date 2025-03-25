@@ -4,7 +4,7 @@
   </div>
 
   <div class="shadow-card">
-    <button class="btn btn-outline-primary m-2 mb-4">Create Site</button>
+    <button class="btn btn-outline-primary m-2 mb-4" (click)="openCreateSiteModal()">Create Site</button>
     <ng-container *ngIf="!isLoading; else loading">
       <app-sites-inquiry [sites]="sites"></app-sites-inquiry>
     </ng-container>
@@ -12,4 +12,22 @@
       <app-loader *ngIf="isLoading" type="loading-absolute"></app-loader>
     </ng-template>
   </div>
+
+  <!-- Create Site Modal Template -->
+  <ng-template #createSiteModal>
+    <app-modal
+      [title]="'Create New Site'"
+      [confirmButtonText]="'Save'"
+      [isFormValid]="isSiteFormValid"
+      [isLoading]="isLoading"
+      (confirm)="createSite()"
+    >
+      <app-site-create-form
+        [data]="siteRequest"
+        [errorMessage]="errorMessage"
+        (dataChange)="onSiteFormDataChange($event)"
+        (formValidityChange)="onSiteFormValidityChange($event)"
+      ></app-site-create-form>
+    </app-modal>
+  </ng-template>
 </div>

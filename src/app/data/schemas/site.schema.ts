@@ -77,15 +77,21 @@ export interface SiteAllListOverviewHttpResponse {
 /**
  * ? Request Section
  */
-export interface SiteCreateEditHttpRequest {
-  id?: number;
-  address: string;
-  city: string;
-  name: string;
-  pic: string;
-  phone: string;
-}
+// export interface SiteCreateEditHttpRequest {
+//   id?: number;
+//   address: string;
+//   city: string;
+//   name: string;
+//   pic: string;
+//   phone: string;
+// }
 
 export interface SiteDeleteHttpRequest {
   id: number;
+}
+
+export interface SiteCreateEditHttpRequest {
+  site_name: string;
+  address: string;
+  pic_user_id: string;
 }
