@@ -1,9 +1,17 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core'; // Import ViewChild
-import { StockFilterPrepareModelResponse, StockItems } from '@models/stock.model';
-import { Subscription } from 'rxjs';
-import { StockService } from '@services/stock.service';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  TemplateRef,
+  ViewChild,
+} from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
-import { StockFilterComponent } from '@features/stock/components';
+import { StockHeaderModel } from '@models/stock.model';
+import { StockManagementService } from '@services/stock.service';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { Subscription } from 'rxjs';
+import { SortOption } from 'src/app/shared-components/filter-panel/filter-panel.component';
 
 @Component({
   selector: 'app-stock-index',
@@ -11,105 +19,156 @@ import { StockFilterComponent } from '@features/stock/components';
   styleUrls: ['./stock-index.component.scss'],
 })
 export class StockIndexComponent implements OnInit, OnDestroy {
-  @ViewChild(StockFilterComponent) stockFilterComponent: StockFilterComponent; // Add ViewChild
+  isLoading = false;
+  errorMessage: string;
+  stocks: StockHeaderModel[] = [];
+  filteredStocks: StockHeaderModel[] = [];
+  modalRef?: BsModalRef;
 
-  activeTab: string = '';
-  isLoading: boolean = false;
-  stocks: StockItems[] = [];
-  filterPrepare: StockFilterPrepareModelResponse;
-  inquiryStock$: Subscription;
-  inquiryFilter$: Subscription;
-  filteredStocks: StockItems[] = [];
-  tabs: { tabName: string }[] = [];
-  currentTabStocks: StockItems[] = [];
+  // Navigation to detail/create pages
+  navigateToDetail(stockId: string): void {
+    this.router.navigate(['/stock/detail', stockId]);
+  }
 
-  constructor(private stockService: StockService, private router: Router, private cdr: ChangeDetectorRef) {}
+  openCreateStockModal(): void {
+    this.router.navigate(['/stock/add-stocks']);
+  }
+
+  // Delete functionality
+  deleteStock(stockId: string): void {
+    if (confirm('Are you sure you want to delete this stock?')) {
+      this.isLoading = true;
+      this.stockService.deleteStock(stockId).subscribe({
+        next: () => {
+          this.loadStocks();
+        },
+        error: (error) => {
+          this.errorMessage = error.message || 'Error deleting stock';
+          this.isLoading = false;
+        },
+      });
+    }
+  }
+
+  // Filter panel properties
+  showFilterPanel = false;
+  searchFilter = new FormControl('');
+  sortField = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
+  // Sort options for the filter panel
+  sortOptions: SortOption[] = [
+    { field: 'productName', label: 'Product Name' },
+    { field: 'type', label: 'Type' },
+    { field: 'remainingStock', label: 'Remaining Stock' },
+    { field: 'price', label: 'Price' },
+    { field: 'siteName', label: 'Site' },
+  ];
+
+  private subscriptions: Subscription[] = [];
+
+  @ViewChild('createStockModal') createStockModal: TemplateRef<any>;
+  // @ViewChild(StockFilterComponent) stockFilterComponent: StockFilterComponent;
+
+  constructor(
+    private stockService: StockManagementService,
+    private modalService: BsModalService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.loadStocks();
+
+    // Subscribe to search filter changes
+    const searchSub = this.searchFilter.valueChanges.subscribe((value) => {
+      this.applyFilters();
+    });
+    this.subscriptions.push(searchSub);
+  }
 
   ngOnDestroy(): void {
-    this.inquiryStock$?.unsubscribe();
-    this.inquiryFilter$?.unsubscribe();
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
-  ngOnInit() {
-    this.inquiryStocks();
-    this.prepareStockFilter();
+  toggleFilterPanel(): void {
+    this.showFilterPanel = !this.showFilterPanel;
   }
 
-  inquiryStocks(): void {
-    this.isLoading = true;
-    this.inquiryStock$ = this.stockService.inquiryStocks().subscribe({
-      next: (response) => {
-        this.stocks = response.items ?? [];
-        this.tabs = this.stocks.map((item) => ({ tabName: item.description ?? '' }));
-        if (this.tabs.length > 0) {
-          this.activeTab = this.tabs[0].tabName;
-          this.filterStocksByTab();
+  // Filter functions
+  applyFilters(): void {
+    let filtered = [...this.stocks];
+
+    // Apply search filter
+    if (this.searchFilter.value) {
+      const searchTerm = this.searchFilter.value.toLowerCase();
+      filtered = filtered.filter(
+        (stock) =>
+          stock.productName.toLowerCase().includes(searchTerm) ||
+          stock.type.toLowerCase().includes(searchTerm) ||
+          stock.stockId.toLowerCase().includes(searchTerm) ||
+          stock.productId.toLowerCase().includes(searchTerm) ||
+          stock.siteName.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    // Apply sorting
+    if (this.sortField) {
+      filtered.sort((a, b) => {
+        const aValue = a[this.sortField as keyof StockHeaderModel];
+        const bValue = b[this.sortField as keyof StockHeaderModel];
+
+        // Handle numeric values
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+          return this.sortDirection === 'asc'
+            ? aValue - bValue
+            : bValue - aValue;
         }
-      },
-      error: (error) => {
-        console.error('Error loading stocks:', error);
-      },
-      complete: () => {
-        this.isLoading = false;
-      },
-    });
-  }
 
-  prepareStockFilter(): void {
-    this.isLoading = true;
-    this.inquiryFilter$ = this.stockService.prepareStockFilter().subscribe({
-      next: (response) => {
-        this.filterPrepare = response;
-      },
-      error: (error) => {
-        console.error('Error loading filter:', error);
-      },
-      complete: () => {
-        this.isLoading = false;
-      },
-    });
-  }
+        // Handle string values
+        const aString = String(aValue).toLowerCase();
+        const bString = String(bValue).toLowerCase();
+        return this.sortDirection === 'asc'
+          ? aString.localeCompare(bString)
+          : bString.localeCompare(aString);
+      });
+    }
 
-  onFilterChange(filterCriteria: any) {
-    let filtered = this.currentTabStocks.find(item => item.description === this.activeTab)?.stocks || [];
-    if (filterCriteria.name) {
-      filtered = filtered.filter(stock => stock.productName === filterCriteria.name);
-    }
-    if (filterCriteria.site) {
-      filtered = filtered.filter(stock => stock.bigPackages?.some(pkg => pkg.locationName === filterCriteria.site));
-    }
-    if (filterCriteria.searchText) {
-      const searchTextLower = filterCriteria.searchText.toLowerCase();
-      filtered = filtered.filter(stock => stock.productName?.toLowerCase().includes(searchTextLower));
-    }
-    const currentTabStock = this.currentTabStocks.find(item => item.description === this.activeTab);
-    if (currentTabStock) {
-      this.filteredStocks = [{ ...currentTabStock, stocks: filtered }];
-    }
-  }
-
-  updateFilteredStocks(filtered: StockItems[]) {
     this.filteredStocks = filtered;
   }
 
-  setActiveTab(tab: string) {
-    this.activeTab = tab;
-    this.filterStocksByTab();
-    this.clearFilters();
-    this.cdr.detectChanges();
+  onSortChange(event: { field: string }): void {
+    if (this.sortField === event.field) {
+      // Toggle direction if clicking the same field
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      // Set new field and default to ascending
+      this.sortField = event.field;
+      this.sortDirection = 'asc';
+    }
+
+    this.applyFilters();
   }
 
-  filterStocksByTab() {
-    this.currentTabStocks = this.stocks.filter((item) => item.description === this.activeTab);
-    this.filteredStocks = [...this.currentTabStocks];
+  resetFilters(): void {
+    this.searchFilter.setValue('');
+    this.sortField = '';
+    this.sortDirection = 'asc';
+    this.filteredStocks = [...this.stocks];
+  }
 
-    // ! Notes : Manually trigger change detection because the data on html cannot keep up duh.
-    this.cdr.detectChanges();
-}
-
-  clearFilters() {
-    if (this.stockFilterComponent) {
-      this.stockFilterComponent.clearFilters();
-    }
+  loadStocks(): void {
+    this.isLoading = true;
+    this.stockService.getAllStocks().subscribe({
+      next: (stocks) => {
+        this.stocks = stocks;
+        this.filteredStocks = [...stocks];
+        this.applyFilters();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.errorMessage = error.message || 'Error loading stocks';
+        this.isLoading = false;
+      },
+    });
   }
 }

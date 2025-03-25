@@ -3,43 +3,38 @@
     <table class="table table-hover mb-0">
       <thead>
         <tr>
-          <th>Product ID</th>
+          <th>Stock ID</th>
           <th>Product Name</th>
           <th>Type</th>
           <th>Size</th>
-          <th>Remaining Stock (Package)</th>
+          <th>Remaining Stock</th>
           <th>Price</th>
           <th>Site</th>
-          <th>Action</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        <ng-container *ngFor="let item of stocks">
-          <ng-container *ngFor="let stock of item.stocks || []">
-            <ng-container *ngFor="let bigPackage of stock.bigPackages || []">
-              <tr>
-                <td>{{ stock.idProduct }}</td>
-                <td>{{ stock.productName }}</td>
-                <td>{{ item.description }}</td>
-                <td>
-                  <ng-container *ngIf="bigPackage.sizes?.length; else noSize">
-                    <ng-container *ngFor="let size of bigPackage.sizes">
-                      {{ size.sizeDescription }} {{ size.sizeAmount }}<br>
-                    </ng-container>
-                  </ng-container>
-                  <ng-template #noSize>-</ng-template>
-                </td>
-                <td>{{ stock.remainingBigPackages }}</td>
-                <td>{{ formatPrice(500000) }}</td>
-                <td>{{ bigPackage.locationName }}</td>
-                <td>
-                  <a href="#" class="text-primary text-decoration-none">Edit</a>
-                </td>
-              </tr>
-            </ng-container>
-          </ng-container>
-        </ng-container>
+        <tr *ngFor="let stock of stocks" (click)="navigateToStockDetail(stock.stockId)" style="cursor: pointer;">
+          <td>{{ stock.stockId }}</td>
+          <td>{{ stock.productName }}</td>
+          <td>{{ stock.type }}</td>
+          <td>{{ getFormattedSizes(stock) }}</td>
+          <td>{{ stock.remainingStock }}</td>
+          <td>{{ formatPrice(stock.price) }}</td>
+          <td>{{ stock.siteName }}</td>
+          <td>
+            <button class="btn btn-sm btn-primary me-2" (click)="editStock(stock.stockId, $event)">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-danger" (click)="deleteStock(stock.stockId, $event)">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
+  <!-- <div *ngIf="!stocks || stocks.length === 0" class="text-center p-4">
+    <app-empty-data></app-empty-data>
+  </div> -->
 </div>

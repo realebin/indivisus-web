@@ -1,0 +1,225 @@
+<div class="container px-2">
+  <div class="my-4">
+    <h3 class="display-6 fw-bold text-primary">{{ isEditMode ? 'Edit Stock' : 'Add Stock' }}</h3>
+  </div>
+
+  <app-breadcrumbs [breadcrumbs]="breadcrumbs"></app-breadcrumbs>
+
+  <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <form [formGroup]="stockForm" (ngSubmit)="onSubmit()">
+        <!-- Stock Information -->
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <h5 class="mb-3">Basic Information</h5>
+
+            <div class="mb-3">
+              <label for="productId" class="form-label">Product ID*</label>
+              <input
+                type="text"
+                class="form-control"
+                id="productId"
+                formControlName="productId"
+                [ngClass]="{'is-invalid': stockForm.get('productId')?.invalid && stockForm.get('productId')?.touched}"
+              >
+              <div class="invalid-feedback">Product ID is required</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="productName" class="form-label">Product Name*</label>
+              <input
+                type="text"
+                class="form-control"
+                id="productName"
+                formControlName="productName"
+                [ngClass]="{'is-invalid': stockForm.get('productName')?.invalid && stockForm.get('productName')?.touched}"
+              >
+              <div class="invalid-feedback">Product name is required</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="type" class="form-label">Type*</label>
+              <select
+                class="form-select"
+                id="type"
+                formControlName="type"
+                [ngClass]="{'is-invalid': stockForm.get('type')?.invalid && stockForm.get('type')?.touched}"
+              >
+                <option value="">Select Type</option>
+                <option *ngFor="let type of stockTypes" [value]="type.value">{{ type.label }}</option>
+              </select>
+              <div class="invalid-feedback">Type is required</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="specs" class="form-label">Specifications</label>
+              <textarea
+                class="form-control"
+                id="specs"
+                formControlName="specs"
+                rows="3"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <h5 class="mb-3">Price & Location</h5>
+
+            <div class="mb-3">
+              <label for="price" class="form-label">Price*</label>
+              <input
+                type="number"
+                class="form-control"
+                id="price"
+                formControlName="price"
+                [ngClass]="{'is-invalid': stockForm.get('price')?.invalid && stockForm.get('price')?.touched}"
+                min="0"
+                step="0.01"
+              >
+              <div class="invalid-feedback">Valid price is required</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="sizeDescription" class="form-label">Size Description*</label>
+              <input
+                type="text"
+                class="form-control"
+                id="sizeDescription"
+                formControlName="sizeDescription"
+                [ngClass]="{'is-invalid': stockForm.get('sizeDescription')?.invalid && stockForm.get('sizeDescription')?.touched}"
+              >
+              <div class="invalid-feedback">Size description is required</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="siteId" class="form-label">Site*</label>
+              <select
+                class="form-select"
+                id="siteId"
+                formControlName="siteId"
+                [ngClass]="{'is-invalid': stockForm.get('siteId')?.invalid && stockForm.get('siteId')?.touched}"
+              >
+                <option value="">Select Site</option>
+                <option *ngFor="let site of sites" [value]="site.value">{{ site.label }}</option>
+              </select>
+              <div class="invalid-feedback">Site is required</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Big Packages (only for create mode) -->
+        <div *ngIf="!isEditMode">
+          <h5 class="mb-3">Packages</h5>
+
+          <div formArrayName="bigPackages">
+            <div *ngFor="let bigPackage of bigPackagesArray.controls; let i = index" [formGroupName]="i" class="card mb-3">
+              <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">Big Package #{{ i + 1 }}</h6>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-danger"
+                  (click)="removeBigPackage(i)"
+                  *ngIf="bigPackagesArray.length > 1"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+              <div class="card-body">
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Package Number</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      formControlName="packageNumber"
+                      placeholder="Auto-generated if empty"
+                    >
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Size Description*</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      formControlName="sizeDescription"
+                      [ngClass]="{'is-invalid': bigPackagesArray.at(i)?.get('sizeDescription')?.invalid && bigPackagesArray.at(i)?.get('sizeDescription')?.touched}"
+                    >
+                    <div class="invalid-feedback">Size description is required</div>
+                  </div>
+                </div>
+
+                <!-- Small Packages -->
+                <div formArrayName="smallPackages">
+                  <h6 class="mb-2">Small Packages</h6>
+
+                  <div *ngFor="let smallPackage of getSmallPackagesArray(i).controls; let j = index" [formGroupName]="j" class="card mb-2">
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">Small Package #{{ j + 1 }}</h6>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-danger"
+                          (click)="removeSmallPackage(i, j)"
+                          *ngIf="getSmallPackagesArray(i).length > 1"
+                        >
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+
+                      <div class="row g-2">
+                        <div class="col-md-6">
+                          <label class="form-label">Size Amount*</label>
+                          <input
+                            type="number"
+                            class="form-control"
+                            formControlName="sizeAmount"
+                            [ngClass]="{'is-invalid': getSmallPackagesArray(i).at(j)?.get('sizeAmount')?.invalid && getSmallPackagesArray(i).at(j)?.get('sizeAmount')?.touched}"
+                            min="0.1"
+                            step="0.1"
+                          >
+                          <div class="invalid-feedback">Valid size amount is required</div>
+                        </div>
+
+                        <div class="col-md-6">
+                          <label class="form-label">Size Description*</label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            formControlName="sizeDescription"
+                            [ngClass]="{'is-invalid': getSmallPackagesArray(i).at(j)?.get('sizeDescription')?.invalid && getSmallPackagesArray(i).at(j)?.get('sizeDescription')?.touched}"
+                          >
+                          <div class="invalid-feedback">Size description is required</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button type="button" class="btn btn-sm btn-outline-primary" (click)="addSmallPackage(i)">
+                    <i class="bi bi-plus-circle"></i> Add Small Package
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-grid gap-2 mb-4">
+            <button type="button" class="btn btn-outline-primary" (click)="addBigPackage()">
+              <i class="bi bi-plus-circle"></i> Add Big Package
+            </button>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-4">
+          <button type="button" class="btn btn-secondary me-2" (click)="cancel()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="stockForm.invalid || isLoading">
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1"></span>
+            {{ isEditMode ? 'Update' : 'Create' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<app-loader *ngIf="isLoading" type="loading-overlay"></app-loader>

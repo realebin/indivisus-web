@@ -1,25 +1,45 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { StockRoutingModule } from './stock-routing.module';
-import { StockIndexComponent } from './pages/stock-index/stock-index.component';
-import { StockFilterComponent } from './components/stock-filter/stock-filter.component';
-import { StockListsComponent } from './components/stock-lists/stock-lists.component';
-import { FormsModule } from '@node_modules/@angular/forms';
 import { SharedComponentsModule } from 'src/app/shared-components/shared-components.module';
+
+// Pages
+import { StockIndexComponent } from './pages/stock-index/stock-index.component';
+import { StockDetailComponent } from './pages/stock-detail/stock-detail.component';
+
 import { StockAddStocksComponent } from './pages/stock-add-stocks/stock-add-stocks.component';
+
+// Components
+
+import { StockListsComponent } from './components/stock-lists/stock-lists.component';
+import { BigPackageCreateComponent } from './components/big-package-create/big-package-create.component';
+import { SmallPackageCreateComponent } from './components/small-package-create/small-package-create.component';
+
+// AG Grid
+import { AgGridModule } from 'ag-grid-angular';
+import { StockFormComponent } from './components/stock-form/stock-form.component';
 
 @NgModule({
   declarations: [
+    // Pages
     StockIndexComponent,
-    StockFilterComponent,
-    StockListsComponent,
+    StockDetailComponent,
+    StockFormComponent,
     StockAddStocksComponent,
+
+    // Components
+    StockListsComponent,
+    BigPackageCreateComponent,
+    SmallPackageCreateComponent
   ],
   imports: [
     CommonModule,
     StockRoutingModule,
     FormsModule,
+    ReactiveFormsModule,
     SharedComponentsModule,
+    AgGridModule
   ],
 })
 export class StockModule {}

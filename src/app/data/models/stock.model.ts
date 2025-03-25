@@ -1,151 +1,161 @@
-import {
-  StockFilterPrepareHttpResponse,
-  StockInquiryHttpResponse,
-} from '@schemas/stock.schema';
+import { BigPackage, SmallPackage, StockCreateRequest, StockHeader, StockUpdateRequest } from "@schemas/stock.schema";
 
-/**
- * ? Response Section
- */
-export interface StockInquiryModelResponse {
-  items?: StockItems[];
+export interface StockHeaderModel {
+  stockId: string;
+  productId: string;
+  productName: string;
+  type: string;
+  specs: string;
+  price: number;
+  remainingStock: number;
+  totalSizeAmount: number;
+  sizeDescription: string;
+  siteId: string;
+  siteName: string;
+  bigPackages: BigPackageModel[];
+  createdAt: string;
+  createdBy: string;
+  changedOn: string;
+  changedBy: string;
 }
 
-export interface StockItems {
-  description?: string;
-  totalBigPackages?: number;
-  totalSmallPackages?: number;
-  totalSizes?: {
-    sizeDescription?: string;
-    sizeAmount?: number;
-  }[];
-  stocks?: {
-    idProduct: string;
-    productName?: string;
-    remainingBigPackages: number;
-    sizes?: {
-      sizeDescription?: string;
-      sizeAmount?: number;
-    }[];
-    bigPackages?: {
-      idLocation: string;
-      locationName: string;
-      idBigPackages?: string;
-      sizes?: {
-        sizeDescription?: string;
-        sizeAmount?: number;
-      }[];
-      smallerPackages: {
-        idSmallerPackages: string;
-        // quantity: number;
-        sizeDescription?: string;
-        sizeAmount?: number;
-        // theSmallestPackages: {
-        //   idTheSmallestPackages : string;
-        //   sizeDescription?: string;
-        //   sizeAmount?: number;
-        // }[]
-      }[];
-    }[];
-  }[];
+export interface BigPackageModel {
+  packageNumber: string;
+  totalQuantity: number;
+  totalSizeAmount: number;
+  sizeDescription: string;
+  isOpen: boolean;
+  smallPackages: SmallPackageModel[];
+  createdAt: string;
+  createdBy: string;
+  changedOn: string;
+  changedBy: string;
 }
 
-export interface StockFilterPrepareModelResponse {
-  epoch: number;
-  sites: {
-    id: number;
-    address: string;
-    city: string;
-    name: string;
-  }[];
-
+export interface SmallPackageModel {
+  packageId: string;
+  quantity: number;
+  sizeAmount: number;
+  sizeDescription: string;
+  isOpen: boolean;
+  createdAt: string;
+  createdBy: string;
+  changedOn: string;
+  changedBy: string;
 }
 
-/**
- * ? Request Section
- */
-// export interface StockInquiryModelRequest { // filter local aja deh
-//   id?: number;
-//   address: string;
-//   city: string;
-//   name: string;
-//   pic: string;
-//   phone: string;
-// }
-
-// export interface SiteDeleteModelRequest {
-//   id: number;
-// }
-
-/**
- * ? Transform Response Section
- */
-
-export function transformToStockInquiryModelResponse(
-  response: StockInquiryHttpResponse
-): StockInquiryModelResponse {
-  const result: StockInquiryModelResponse = {
-    items: response.items?.map((d) => {
-      return {
-        description: d.description,
-        totalBigPackages: d.total_big_packages,
-        totalSmallPackages: d.total_small_packages,
-        totalSizes: d.total_sizes?.map((s) => {
-          return {
-            sizeDescription: s.size_description,
-            sizeAmount: s.size_amount,
-          };
-        }),
-        stocks: d.stocks?.map((s) => {
-          return {
-            idProduct: s.id_product,
-            productName: s.product_name,
-            remainingBigPackages: s.remaining_big_packages,
-            sizes: s.sizes?.map((z) => {
-              return {
-                sizeDescription: z.size_description,
-                sizeAmount: z.size_amount,
-              };
-            }),
-            bigPackages: s.big_packages?.map((b) => {
-              return {
-                idLocation: b.id_location,
-                locationName: b.location_name,
-                idBigPackages: b.id_big_packages,
-                sizes: b.sizes?.map((z) => {
-                  return {
-                    sizeDescription: z.size_description,
-                    sizeAmount: z.size_amount,
-                  };
-                }),
-                smallerPackages: b.small_packages.map((s) => {
-                  return {
-                    idSmallerPackages: s.id_small_packages,
-                    sizeDescription: s.size_description,
-                    sizeAmount: s.size_amount,
-                  };
-                }),
-              };
-            }),
-          };
-        }),
-      };
-    }),
-  };
-  return result;
-}
-
-export function transformToStockFilterPrepareModelResponse(
-  response: StockFilterPrepareHttpResponse
-): StockFilterPrepareModelResponse {
+// Transform functions for HTTP response to model
+export function transformToStockHeaderModel(stock: StockHeader): StockHeaderModel {
   return {
-    epoch: response.epoch,
-    sites: response.sites.map((s) => {
-      return {
-        id: s.id,
-        address: s.address,
-        city: s.city,
-        name: s.name,
-      };
-    }),
+    stockId: stock.stock_id,
+    productId: stock.product_id,
+    productName: stock.product_name,
+    type: stock.type,
+    specs: stock.specs,
+    price: stock.price,
+    remainingStock: stock.remaining_stock,
+    totalSizeAmount: stock.total_size_amount,
+    sizeDescription: stock.size_description,
+    siteId: stock.site_id,
+    siteName: stock.site_name,
+    bigPackages: stock.big_packages.map(transformToBigPackageModel),
+    createdAt: stock.created_at,
+    createdBy: stock.created_by,
+    changedOn: stock.changed_on,
+    changedBy: stock.changed_by
+  };
+}
+
+export function transformToBigPackageModel(bigPackage: BigPackage): BigPackageModel {
+  return {
+    packageNumber: bigPackage.package_number,
+    totalQuantity: bigPackage.total_quantity,
+    totalSizeAmount: bigPackage.total_size_amount,
+    sizeDescription: bigPackage.size_description,
+    isOpen: bigPackage.is_open,
+    smallPackages: bigPackage.small_packages.map(transformToSmallPackageModel),
+    createdAt: bigPackage.created_at,
+    createdBy: bigPackage.created_by,
+    changedOn: bigPackage.changed_on,
+    changedBy: bigPackage.changed_by
+  };
+}
+
+export function transformToSmallPackageModel(smallPackage: SmallPackage): SmallPackageModel {
+  return {
+    packageId: smallPackage.package_id,
+    quantity: smallPackage.quantity,
+    sizeAmount: smallPackage.size_amount,
+    sizeDescription: smallPackage.size_description,
+    isOpen: smallPackage.is_open,
+    createdAt: smallPackage.created_at,
+    createdBy: smallPackage.created_by,
+    changedOn: smallPackage.changed_on,
+    changedBy: smallPackage.changed_by
+  };
+}
+
+// Transform functions for model to HTTP request
+export function transformToStockCreateRequest(model: {
+  productId: string;
+  productName: string;
+  type: string;
+  specs: string;
+  price: number;
+  sizeDescription: string;
+  siteId: string;
+  bigPackages: {
+    packageNumber: string;
+    sizeDescription: string;
+    smallPackages: {
+      sizeAmount: number;
+      sizeDescription: string;
+      createdBy: string;
+    }[];
+    createdBy: string;
+  }[];
+  createdBy: string;
+}): StockCreateRequest {
+  return {
+    product_id: model.productId,
+    product_name: model.productName,
+    type: model.type,
+    specs: model.specs,
+    price: model.price,
+    size_description: model.sizeDescription,
+    site_id: model.siteId,
+    big_packages: model.bigPackages.map(bp => ({
+      package_number: bp.packageNumber,
+      size_description: bp.sizeDescription,
+      small_packages: bp.smallPackages.map(sp => ({
+        size_amount: sp.sizeAmount,
+        size_description: sp.sizeDescription,
+        created_by: sp.createdBy
+      })),
+      created_by: bp.createdBy
+    })),
+    created_by: model.createdBy
+  };
+}
+
+export function transformToStockUpdateRequest(model: {
+  stockId: string;
+  productName: string;
+  type: string;
+  specs: string;
+  price: number;
+  sizeDescription: string;
+  siteId: string;
+  changedBy: string;
+}): StockUpdateRequest {
+  return {
+    stock_id: model.stockId,
+    product_name: model.productName,
+    type: model.type,
+    specs: model.specs,
+    price: model.price,
+    size_description: model.sizeDescription,
+    site_id: model.siteId,
+    changed_by: model.changedBy
   };
 }

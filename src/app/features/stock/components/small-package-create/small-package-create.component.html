@@ -1,0 +1,37 @@
+<div class="modal-header">
+  <h5 class="modal-title">Add New Small Package</h5>
+  <button type="button" class="btn-close" (click)="close()"></button>
+</div>
+<div class="modal-body">
+  <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="mb-3">
+      <label for="sizeAmount" class="form-label">Size Amount</label>
+      <input type="number" class="form-control" id="sizeAmount" formControlName="sizeAmount" min="0.1" step="0.1" required>
+      <div class="invalid-feedback" *ngIf="form.get('sizeAmount')?.touched && form.get('sizeAmount')?.invalid">
+        Valid size amount is required
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="sizeDescription" class="form-label">Size Description</label>
+      <input type="text" class="form-control" id="sizeDescription" formControlName="sizeDescription" required>
+      <div class="invalid-feedback" *ngIf="form.get('sizeDescription')?.touched && form.get('sizeDescription')?.invalid">
+        Size description is required
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="createdBy" class="form-label">Created By</label>
+      <input type="text" class="form-control" id="createdBy" formControlName="createdBy" readonly>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
+  <button type="button" class="btn btn-primary" [disabled]="form.invalid || isLoading" (click)="onSubmit()">
+    <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1"></span>
+    Save
+  </button>
+</div>
