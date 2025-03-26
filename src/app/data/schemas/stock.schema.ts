@@ -74,3 +74,12 @@ export interface StockUpdateRequest {
   site_id: string;
   changed_by: string;
 }
+
+export interface StockListResponse {
+  epoch: number;
+  data: StockHeader[];
+}
+export interface StockDetailResponse {
+  epoch: number;
+  data: StockHeader;
+}

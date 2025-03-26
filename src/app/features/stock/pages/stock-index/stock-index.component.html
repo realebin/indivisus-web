@@ -10,41 +10,41 @@
       <button class="btn btn-outline-primary" (click)="navigateToCreate()">
         <i class="bi bi-plus-circle"></i> Add Stock
       </button>
-
-      <button
-        class="btn"
-        [ngClass]="{'btn-outline-secondary': !showFilterPanel, 'btn-secondary text-white': showFilterPanel}"
-        (click)="toggleFilterPanel()">
-        <i class="bi bi-funnel"></i> Filter
-      </button>
     </div>
 
     <div *ngIf="showFilterPanel" class="mb-4">
       <app-filter-panel
-        title="Filter Stocks"
-        [isVisible]="true"
+        [title]="'Filter Users'"
+        [isVisible]="showFilterPanel"
         [sortOptions]="sortOptions"
         [searchControl]="searchFilter"
         [sortField]="sortField"
         [sortDirection]="sortDirection"
-        [resultCount]="filteredStocks.length"
+        (togglePanel)="toggleFilterPanel()"
         (sortChange)="onSortChange($event)"
         (resetFilters)="resetFilters()"
-        (doneFiltering)="toggleFilterPanel()">
+        (doneFiltering)="toggleFilterPanel()"
+      >
       </app-filter-panel>
     </div>
 
-    <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="alert alert-danger" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
 
     <ng-container *ngIf="!isLoading; else loading">
       <app-stock-management-table
         [data]="filteredStocks"
         (editStockEvent)="editStock($event)"
         (deleteStockEvent)="deleteStock($event)"
-        (viewDetailEvent)="navigateToDetail($event)">
+        (viewDetailEvent)="navigateToDetail($event)"
+      >
       </app-stock-management-table>
 
-      <div *ngIf="filteredStocks.length === 0 && !errorMessage" class="text-center py-5">
+      <div
+        *ngIf="filteredStocks.length === 0 && !errorMessage"
+        class="text-center py-5"
+      >
         <app-empty-data></app-empty-data>
       </div>
     </ng-container>

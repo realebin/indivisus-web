@@ -36,14 +36,15 @@ export class SitesIndexComponent implements OnInit {
     this.isLoading = true;
     this.siteService.inquirySites().subscribe({
       next: (response) => {
-        this.sites = response;
+        // Make sure we're properly handling the response structure
+        this.sites = response; // This should be an object with a 'sites' property
+        console.log('Sites loaded:', this.sites); // Add this for debugging
+        this.isLoading = false;
       },
       error: (error) => {
         console.error('Error loading sites:', error);
-      },
-      complete: () => {
         this.isLoading = false;
-      },
+      }
     });
   }
 

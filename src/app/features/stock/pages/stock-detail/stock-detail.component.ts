@@ -41,20 +41,22 @@ export class StockDetailComponent implements OnInit {
     });
   }
 
-  loadStockDetail(): void {
-    this.isLoading = true;
-    this.stockService.getStockById(this.stockId).subscribe({
-      next: (stock) => {
-        this.stock = stock;
+loadStockDetail(): void {
+  this.isLoading = true;
+  this.stockService.getStockById(this.stockId).subscribe({
+    next: (stock) => {
+      this.stock = stock;
+      if (stock && stock.productName) {
         this.breadcrumbs[1].label = stock.productName;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.errorMessage = error.message || 'Error loading stock details';
-        this.isLoading = false;
       }
-    });
-  }
+      this.isLoading = false;
+    },
+    error: (error) => {
+      this.errorMessage = error.message || 'Error loading stock details';
+      this.isLoading = false;
+    }
+  });
+}
 
   formatPrice(price: number): string {
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");

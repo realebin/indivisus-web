@@ -3,7 +3,15 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '@schemas/_base.schema';
 import { EnvironmentService } from '@services/environment.service';
-import { BigPackage, SmallPackage, StockCreateRequest, StockHeader, StockUpdateRequest } from '@schemas/stock.schema';
+import {
+  BigPackage,
+  SmallPackage,
+  StockCreateRequest,
+  StockDetailResponse,
+  StockHeader,
+  StockListResponse,
+  StockUpdateRequest,
+} from '@schemas/stock.schema';
 
 @Injectable({
   providedIn: 'root',
@@ -19,14 +27,14 @@ export class StockManagementHttpService {
   }
 
   // Stock Header Endpoints
-  getAllStocks(): Observable<ApiResponse<StockHeader[]>> {
-    return this.httpClient.get<ApiResponse<StockHeader[]>>(
+  getAllStocks(): Observable<ApiResponse<StockListResponse>> {
+    return this.httpClient.get<ApiResponse<StockListResponse>>(
       `${this.baseUrl}/stock/list-all`
     );
   }
 
-  getStockById(stockId: string): Observable<ApiResponse<StockHeader>> {
-    return this.httpClient.get<ApiResponse<StockHeader>>(
+  getStockById(stockId: string): Observable<ApiResponse<StockDetailResponse>> {
+    return this.httpClient.get<ApiResponse<StockDetailResponse>>(
       `${this.baseUrl}/stock/${stockId}`
     );
   }
@@ -49,49 +57,56 @@ export class StockManagementHttpService {
     );
   }
 
-  createStock(request: StockCreateRequest): Observable<ApiResponse<StockHeader>> {
-    return this.httpClient.post<ApiResponse<StockHeader>>(
+  createStock(request: StockCreateRequest): Observable<ApiResponse<StockDetailResponse>> {
+    return this.httpClient.post<ApiResponse<StockDetailResponse>>(
       `${this.baseUrl}/stock/create`,
       request
     );
   }
 
-  updateStock(request: StockUpdateRequest): Observable<ApiResponse<StockHeader>> {
+  updateStock(
+    request: StockUpdateRequest
+  ): Observable<ApiResponse<StockHeader>> {
     return this.httpClient.put<ApiResponse<StockHeader>>(
       `${this.baseUrl}/stock/update`,
       request
     );
   }
 
-  deleteStock(stockId: string): Observable<ApiResponse<{
-    stock_id: string;
-    product_id: string;
-    product_name: string;
-    type: string;
-    remaining_stock: number;
-  }>> {
-    return this.httpClient.delete<ApiResponse<{
+  deleteStock(stockId: string): Observable<
+    ApiResponse<{
       stock_id: string;
       product_id: string;
       product_name: string;
       type: string;
       remaining_stock: number;
-    }>>(
-      `${this.baseUrl}/stock/delete/${stockId}`
-    );
+    }>
+  > {
+    return this.httpClient.delete<
+      ApiResponse<{
+        stock_id: string;
+        product_id: string;
+        product_name: string;
+        type: string;
+        remaining_stock: number;
+      }>
+    >(`${this.baseUrl}/stock/delete/${stockId}`);
   }
 
   // Big Package Endpoints
-  createBigPackage(stockId: string, request: {
-    package_number: string;
-    size_description: string;
-    small_packages: {
-      size_amount: number;
+  createBigPackage(
+    stockId: string,
+    request: {
+      package_number: string;
       size_description: string;
+      small_packages: {
+        size_amount: number;
+        size_description: string;
+        created_by: string;
+      }[];
       created_by: string;
-    }[];
-    created_by: string;
-  }): Observable<ApiResponse<BigPackage>> {
+    }
+  ): Observable<ApiResponse<BigPackage>> {
     return this.httpClient.post<ApiResponse<BigPackage>>(
       `${this.baseUrl}/stock/${stockId}/big-package/create`,
       request
@@ -110,43 +125,54 @@ export class StockManagementHttpService {
     );
   }
 
-  deleteBigPackage(packageNumber: string): Observable<ApiResponse<{
-    package_number: string;
-    total_quantity: number;
-    stock_id: string;
-  }>> {
-    return this.httpClient.delete<ApiResponse<{
+  deleteBigPackage(packageNumber: string): Observable<
+    ApiResponse<{
       package_number: string;
       total_quantity: number;
       stock_id: string;
-    }>>(
-      `${this.baseUrl}/stock/big-package/${packageNumber}`
-    );
+    }>
+  > {
+    return this.httpClient.delete<
+      ApiResponse<{
+        package_number: string;
+        total_quantity: number;
+        stock_id: string;
+      }>
+    >(`${this.baseUrl}/stock/big-package/${packageNumber}`);
   }
 
-  markBigPackageAsOpen(packageNumber: string, changedBy: string): Observable<ApiResponse<{
-    package_number: string;
-    is_open: boolean;
-    changed_on: string;
-    changed_by: string;
-  }>> {
-    return this.httpClient.post<ApiResponse<{
+  markBigPackageAsOpen(
+    packageNumber: string,
+    changedBy: string
+  ): Observable<
+    ApiResponse<{
       package_number: string;
       is_open: boolean;
       changed_on: string;
       changed_by: string;
-    }>>(
-      `${this.baseUrl}/stock/big-package/${packageNumber}/mark-as-open`,
-      { changed_by: changedBy }
-    );
+    }>
+  > {
+    return this.httpClient.post<
+      ApiResponse<{
+        package_number: string;
+        is_open: boolean;
+        changed_on: string;
+        changed_by: string;
+      }>
+    >(`${this.baseUrl}/stock/big-package/${packageNumber}/mark-as-open`, {
+      changed_by: changedBy,
+    });
   }
 
   // Small Package Endpoints
-  createSmallPackage(packageNumber: string, request: {
-    size_amount: number;
-    size_description: string;
-    created_by: string;
-  }): Observable<ApiResponse<SmallPackage>> {
+  createSmallPackage(
+    packageNumber: string,
+    request: {
+      size_amount: number;
+      size_description: string;
+      created_by: string;
+    }
+  ): Observable<ApiResponse<SmallPackage>> {
     return this.httpClient.post<ApiResponse<SmallPackage>>(
       `${this.baseUrl}/stock/big-package/${packageNumber}/small-package/create`,
       request
@@ -166,32 +192,40 @@ export class StockManagementHttpService {
     );
   }
 
-  deleteSmallPackage(packageId: string): Observable<ApiResponse<{
-    package_id: string;
-    big_package_number: string;
-  }>> {
-    return this.httpClient.delete<ApiResponse<{
+  deleteSmallPackage(packageId: string): Observable<
+    ApiResponse<{
       package_id: string;
       big_package_number: string;
-    }>>(
-      `${this.baseUrl}/stock/small-package/${packageId}`
-    );
+    }>
+  > {
+    return this.httpClient.delete<
+      ApiResponse<{
+        package_id: string;
+        big_package_number: string;
+      }>
+    >(`${this.baseUrl}/stock/small-package/${packageId}`);
   }
 
-  markSmallPackageAsOpen(packageId: string, changedBy: string): Observable<ApiResponse<{
-    package_id: string;
-    is_open: boolean;
-    changed_on: string;
-    changed_by: string;
-  }>> {
-    return this.httpClient.post<ApiResponse<{
+  markSmallPackageAsOpen(
+    packageId: string,
+    changedBy: string
+  ): Observable<
+    ApiResponse<{
       package_id: string;
       is_open: boolean;
       changed_on: string;
       changed_by: string;
-    }>>(
-      `${this.baseUrl}/stock/small-package/${packageId}/mark-as-open`,
-      { changed_by: changedBy }
-    );
+    }>
+  > {
+    return this.httpClient.post<
+      ApiResponse<{
+        package_id: string;
+        is_open: boolean;
+        changed_on: string;
+        changed_by: string;
+      }>
+    >(`${this.baseUrl}/stock/small-package/${packageId}/mark-as-open`, {
+      changed_by: changedBy,
+    });
   }
 }
