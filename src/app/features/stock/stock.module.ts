@@ -19,6 +19,7 @@ import { SmallPackageCreateComponent } from './components/small-package-create/s
 // AG Grid
 import { AgGridModule } from 'ag-grid-angular';
 import { StockFormComponent } from './components/stock-form/stock-form.component';
+import { StockManagementTableComponent } from './components/stock-management-table/stock-management-table.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,8 @@ import { StockFormComponent } from './components/stock-form/stock-form.component
     // Components
     StockListsComponent,
     BigPackageCreateComponent,
-    SmallPackageCreateComponent
+    SmallPackageCreateComponent,
+    StockManagementTableComponent
   ],
   imports: [
     CommonModule,

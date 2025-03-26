@@ -1,74 +1,39 @@
-import {
-  Component,
-  OnDestroy,
-  OnInit,
-  TemplateRef,
-  ViewChild,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { StockHeaderModel } from '@models/stock.model';
 import { StockManagementService } from '@services/stock.service';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { Subscription } from 'rxjs';
-import { SortOption } from 'src/app/shared-components/filter-panel/filter-panel.component';
 
 @Component({
   selector: 'app-stock-index',
   templateUrl: './stock-index.component.html',
-  styleUrls: ['./stock-index.component.scss'],
+  styleUrls: ['./stock-index.component.scss']
 })
 export class StockIndexComponent implements OnInit, OnDestroy {
   isLoading = false;
-  errorMessage: string;
+  errorMessage: string = '';
   stocks: StockHeaderModel[] = [];
   filteredStocks: StockHeaderModel[] = [];
-  modalRef?: BsModalRef;
-
-  // Navigation to detail/create pages
-  navigateToDetail(stockId: string): void {
-    this.router.navigate(['/stock/detail', stockId]);
-  }
-
-  openCreateStockModal(): void {
-    this.router.navigate(['/stock/add-stocks']);
-  }
-
-  // Delete functionality
-  deleteStock(stockId: string): void {
-    if (confirm('Are you sure you want to delete this stock?')) {
-      this.isLoading = true;
-      this.stockService.deleteStock(stockId).subscribe({
-        next: () => {
-          this.loadStocks();
-        },
-        error: (error) => {
-          this.errorMessage = error.message || 'Error deleting stock';
-          this.isLoading = false;
-        },
-      });
-    }
-  }
 
   // Filter panel properties
   showFilterPanel = false;
   searchFilter = new FormControl('');
   sortField = '';
   sortDirection: 'asc' | 'desc' = 'asc';
+  sortOptions = [
+    { label: 'Name', value: 'name', field: 'name' },
+    { label: 'Created Date', value: 'createdAt', field: 'createdAt' }
+  ];
+  modalRef?: BsModalRef;
 
-  // Sort options for the filter panel
-  sortOptions: SortOption[] = [
-    { field: 'productName', label: 'Product Name' },
-    { field: 'type', label: 'Type' },
-    { field: 'remainingStock', label: 'Remaining Stock' },
-    { field: 'price', label: 'Price' },
-    { field: 'siteName', label: 'Site' },
+  breadcrumbs = [
+    { label: 'Dashboard', url: '/dashboard' },
+    { label: 'Stock Management' }
   ];
 
   private subscriptions: Subscription[] = [];
-
-  @ViewChild('createStockModal') createStockModal: TemplateRef<any>;
-  // @ViewChild(StockFilterComponent) stockFilterComponent: StockFilterComponent;
 
   constructor(
     private stockService: StockManagementService,
@@ -80,14 +45,57 @@ export class StockIndexComponent implements OnInit, OnDestroy {
     this.loadStocks();
 
     // Subscribe to search filter changes
-    const searchSub = this.searchFilter.valueChanges.subscribe((value) => {
+    const searchSub = this.searchFilter.valueChanges.subscribe(() => {
       this.applyFilters();
     });
     this.subscriptions.push(searchSub);
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.forEach((sub) => sub.unsubscribe());
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
+
+  loadStocks(): void {
+    this.isLoading = true;
+    this.stockService.getAllStocks().subscribe({
+      next: (stocks) => {
+        this.stocks = stocks;
+        this.filteredStocks = [...stocks];
+        this.applyFilters();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.errorMessage = error.message || 'Error loading stocks';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  navigateToDetail(stock: StockHeaderModel): void {
+    this.router.navigate(['/stock/detail', stock.stockId]);
+  }
+
+  navigateToCreate(): void {
+    this.router.navigate(['/stock/add']);
+  }
+
+  editStock(stock: StockHeaderModel): void {
+    this.router.navigate(['/stock/edit', stock.stockId]);
+  }
+
+  deleteStock(stock: StockHeaderModel): void {
+    if (confirm(`Are you sure you want to delete ${stock.productName}?`)) {
+      this.isLoading = true;
+      this.stockService.deleteStock(stock.stockId).subscribe({
+        next: () => {
+          this.loadStocks();
+        },
+        error: (error) => {
+          this.errorMessage = error.message || 'Error deleting stock';
+          this.isLoading = false;
+        }
+      });
+    }
   }
 
   toggleFilterPanel(): void {
@@ -154,21 +162,5 @@ export class StockIndexComponent implements OnInit, OnDestroy {
     this.sortField = '';
     this.sortDirection = 'asc';
     this.filteredStocks = [...this.stocks];
-  }
-
-  loadStocks(): void {
-    this.isLoading = true;
-    this.stockService.getAllStocks().subscribe({
-      next: (stocks) => {
-        this.stocks = stocks;
-        this.filteredStocks = [...stocks];
-        this.applyFilters();
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.errorMessage = error.message || 'Error loading stocks';
-        this.isLoading = false;
-      },
-    });
   }
 }
