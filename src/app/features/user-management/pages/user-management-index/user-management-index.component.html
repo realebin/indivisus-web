@@ -1,105 +1,129 @@
-<div class="container mt-4">
-  <div class="my-4">
-    <h3 class="display-6 fw-bold text-primary">User Management</h3>
+<div class="container-fluid px-4 py-4">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2 class="fw-bold text-primary mb-1">User Management</h2>
+      <p class="text-muted">Manage users, customers, and suppliers</p>
+    </div>
   </div>
-  <ul class="nav nav-tabs tabs">
-    <li class="nav-item">
-      <a
-        class="nav-link"
-        href="javascript:;"
-        [class.active]="activeTab === _enumAppUser"
-        (click)="setActiveTab(_enumAppUser)"
-        aria-current="page"
-      >
-        App User
-      </a>
-    </li>
-    <li class="nav-item">
-      <a
-        href="javascript:;"
-        class="nav-link"
-        [class.active]="activeTab === _enumCustomer"
-        (click)="setActiveTab(_enumCustomer)"
-      >
-        Customer
-      </a>
-    </li>
-    <li class="nav-item">
-      <a
-        href="javascript:;"
-        class="nav-link"
-        [class.active]="activeTab === _enumSupplier"
-        (click)="setActiveTab(_enumSupplier)"
-      >
-        Supplier
-      </a>
-    </li>
-  </ul>
+
+  <!-- Tabs -->
+  <div class="mb-4">
+    <ul class="nav nav-tabs tabs">
+      <li class="nav-item">
+        <a
+          class="nav-link"
+          href="javascript:void(0)"
+          [class.active]="activeTab === _enumAppUser"
+          (click)="setActiveTab(_enumAppUser)"
+        >
+          <i class="bi bi-person me-2"></i>App Users
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          href="javascript:void(0)"
+          class="nav-link"
+          [class.active]="activeTab === _enumCustomer"
+          (click)="setActiveTab(_enumCustomer)"
+        >
+          <i class="bi bi-people me-2"></i>Customers
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          href="javascript:void(0)"
+          class="nav-link"
+          [class.active]="activeTab === _enumSupplier"
+          (click)="setActiveTab(_enumSupplier)"
+        >
+          <i class="bi bi-building me-2"></i>Suppliers
+        </a>
+      </li>
+    </ul>
+  </div>
 
   <!-- Tab Content -->
-  <div class="tab-content mt-4 tab-content">
-    <div *ngIf="activeTab === _enumAppUser">
-      <ng-container *ngIf="isLoading; else content">
-        <app-loader type="loading-absolute"></app-loader>
-      </ng-container>
-      <ng-template #content>
-        <button
-          class="btn btn-outline-primary m-2"
-          (click)="createNew(createUserModal)"
-        >
-          Create New User
-        </button>
-        <div class="alert alert-primary m-2" role="alert" *ngIf="errorMessage">
-          {{ errorMessage }}
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+      <div class="p-4">
+        <!-- App Users Tab -->
+        <div *ngIf="activeTab === _enumAppUser">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="mb-0 text-primary">App Users</h5>
+            <button class="btn btn-primary" (click)="createNew(createUserModal)">
+              <i class="bi bi-plus-circle me-2"></i>Add New User
+            </button>
+          </div>
+
+          <ng-container *ngIf="isLoading; else usersContent">
+            <app-loader type="loading-relative"></app-loader>
+          </ng-container>
+
+          <ng-template #usersContent>
+            <div class="alert alert-primary alert-dismissible fade show mb-4" role="alert" *ngIf="errorMessage">
+              <i class="bi bi-info-circle me-2"></i> {{ errorMessage }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <app-user-management-table-inquiry
+              [data]="appUsers"
+              [type]="_enumAppUser"
+              (editUserEvent)="createModalUser($event)"
+              (deleteUserEvent)="deleteUser()"
+            ></app-user-management-table-inquiry>
+          </ng-template>
         </div>
-        <app-user-management-table-inquiry
-          [data]="appUsers"
-          [type]="_enumAppUser"
-          (editUserEvent)="createModalUser($event)"
-          (deleteUserEvent)="deleteUser()"
-        ></app-user-management-table-inquiry>
-      </ng-template>
-    </div>
-    <div *ngIf="activeTab === _enumCustomer">
-      <ng-container *ngIf="isLoading; else content">
-        <app-loader type="loading-absolute"></app-loader>
-      </ng-container>
-      <ng-template #content>
-        <button
-          class="btn btn-outline-primary m-2"
-          (click)="createNew(createCustomerModal)"
-        >
-          Create New Customer
-        </button>
-        <app-user-management-table-inquiry
-          [data]="customers"
-          [type]="_enumCustomer"
-          (editUserEvent)="createModalUser($event)"
-          (deleteUserEvent)="deleteUser()"
-        ></app-user-management-table-inquiry>
-      </ng-template>
-    </div>
-    <div *ngIf="activeTab === _enumSupplier">
-      <ng-container *ngIf="isLoading; else content">
-        <app-loader type="loading-absolute"></app-loader>
-      </ng-container>
-      <ng-template #content>
-        <button
-          class="btn btn-outline-primary m-2"
-          (click)="createNew(createSupplierModal)"
-        >
-          Create New Supplier
-        </button>
-        <app-user-management-table-inquiry
-          [data]="suppliers"
-          [type]="_enumSupplier"
-          (editUserEvent)="createModalUser($event)"
-          (deleteUserEvent)="deleteUser()"
-        ></app-user-management-table-inquiry>
-      </ng-template>
+
+        <!-- Customers Tab -->
+        <div *ngIf="activeTab === _enumCustomer">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="mb-0 text-primary">Customers</h5>
+            <button class="btn btn-primary" (click)="createNew(createCustomerModal)">
+              <i class="bi bi-plus-circle me-2"></i>Add New Customer
+            </button>
+          </div>
+
+          <ng-container *ngIf="isLoading; else customersContent">
+            <app-loader type="loading-relative"></app-loader>
+          </ng-container>
+
+          <ng-template #customersContent>
+            <app-user-management-table-inquiry
+              [data]="customers"
+              [type]="_enumCustomer"
+              (editUserEvent)="createModalUser($event)"
+              (deleteUserEvent)="deleteUser()"
+            ></app-user-management-table-inquiry>
+          </ng-template>
+        </div>
+
+        <!-- Suppliers Tab -->
+        <div *ngIf="activeTab === _enumSupplier">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="mb-0 text-primary">Suppliers</h5>
+            <button class="btn btn-primary" (click)="createNew(createSupplierModal)">
+              <i class="bi bi-plus-circle me-2"></i>Add New Supplier
+            </button>
+          </div>
+
+          <ng-container *ngIf="isLoading; else suppliersContent">
+            <app-loader type="loading-relative"></app-loader>
+          </ng-container>
+
+          <ng-template #suppliersContent>
+            <app-user-management-table-inquiry
+              [data]="suppliers"
+              [type]="_enumSupplier"
+              (editUserEvent)="createModalUser($event)"
+              (deleteUserEvent)="deleteUser()"
+            ></app-user-management-table-inquiry>
+          </ng-template>
+        </div>
+      </div>
     </div>
   </div>
 
+  <!-- Modals -->
   <ng-template #createUserModal let-modal>
     <app-modal
       [title]="isEditMode ? 'Edit User' : 'Create New User'"

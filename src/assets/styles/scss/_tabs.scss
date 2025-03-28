@@ -1,39 +1,167 @@
-/* Tab Styling */
-.tabs .nav-link {
-  color: #6c757d; /* Neutral color */
-  // font-weight: 500;
-  border-radius: 100;
-  border: 1px solid transparent;
-  transition: all 0.3s ease-in-out;
+/* Modern Tab Styling */
+.tabs {
+  border-bottom: 1px solid $border-color;
+  margin-bottom: 1.5rem;
+
+  .nav-item {
+    margin-bottom: -1px;
+  }
+
+  .nav-link {
+    color: $gray-600;
+    font-weight: 500;
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    padding: 0.75rem 1.25rem;
+    transition: all 0.2s ease-in-out;
+    position: relative;
+    background-color: transparent;
+
+    &:hover {
+      color: $primary;
+    }
+
+    &.active {
+      color: $primary;
+      border-bottom: 2px solid $primary;
+      background-color: transparent;
+      font-weight: 600;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background-color: $primary;
+      }
+    }
+  }
 }
 
-.tabs .nav-link:hover {
-  color: #495057; /* Darker on hover */
-  background-color: #f8f9fa; /* Light gray background */
-  border: 1px solid #dee2e6; /* Add border on hover */
+/* Bordered tabs */
+.tabs-bordered {
+  border-bottom: 1px solid $border-color;
+
+  .nav-link {
+    border: 1px solid transparent;
+    border-top-left-radius: $border-radius;
+    border-top-right-radius: $border-radius;
+    margin-bottom: -1px;
+
+    &.active {
+      border-color: $border-color;
+      border-bottom-color: $white;
+
+      &::after {
+        display: none;
+      }
+    }
+  }
 }
 
-.tabs .nav-link.active {
-  color: #fff; /* White text for active tab */
-  background-color: #0d6efd; /* Bootstrap primary color */
-  border: 1px solid #0d6efd;
-  font-weight: 600;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+/* Pills tabs */
+.tabs-pills {
+  border-bottom: 0;
+
+  .nav-link {
+    border-radius: $border-radius;
+    margin-right: 0.5rem;
+
+    &.active {
+      background-color: $primary;
+      color: $white;
+
+      &::after {
+        display: none;
+      }
+    }
+  }
 }
 
-/* Tab Content */
+/* Vertical tabs */
+.tabs-vertical {
+  display: flex;
+  border-bottom: 0;
+
+  .nav {
+    flex-direction: column;
+    border-right: 1px solid $border-color;
+    padding-right: 0;
+    margin-right: 1.5rem;
+    width: 200px;
+
+    .nav-link {
+      text-align: left;
+      border-radius: 0;
+      border-right: 2px solid transparent;
+      margin-bottom: 0;
+      padding: 0.75rem 1rem;
+
+      &.active {
+        border-bottom: 0;
+        border-right: 2px solid $primary;
+
+        &::after {
+          top: 0;
+          bottom: 0;
+          left: auto;
+          right: -2px;
+          height: auto;
+          width: 2px;
+        }
+      }
+    }
+  }
+}
+
+/* Tab content */
 .tab-content {
-  background-color: #f8f9fa; /* Light background for content area */
-  padding: 20px;
-  border: 1px solid #dee2e6; /* Matches tab border */
-  border-top: none; /* No border overlap with tabs */
-  border-radius: 0 0 5px 5px; /* Rounded corners at the bottom */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Elegant shadow */
+  background-color: $white;
+  padding: 1.5rem;
+  border-radius: 0 0 $border-radius $border-radius;
+  box-shadow: $card-box-shadow;
+
+  > .tab-pane {
+    padding: 0.5rem 0;
+  }
 }
 
-.tab-content p {
-  font-size: 16px;
-  color: #495057; /* Neutral text color */
+/* Line tabs (modern design) */
+.tabs-line {
+  border-bottom: 1px solid $border-color;
+
+  .nav-link {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    margin-right: 1.25rem;
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
 }
 
+/* Button tabs */
+.tabs-buttons {
+  border-bottom: 0;
+  margin-bottom: 1.5rem;
 
+  .nav-link {
+    border: 1px solid $border-color;
+    margin-right: 0.5rem;
+    border-radius: $border-radius;
+
+    &.active {
+      border-color: $primary;
+      background-color: $primary;
+      color: $white;
+
+      &::after {
+        display: none;
+      }
+    }
+  }
+}

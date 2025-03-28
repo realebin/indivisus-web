@@ -2,6 +2,7 @@
 @import "bootstrap/scss/functions";
 
 // ? Include your variable overrides BEFORE Bootstrap variables
+@import './variables';
 @import './colors';
 
 // ? Include Bootstrap variables and maps
@@ -49,11 +50,15 @@
 @import "bootstrap/scss/utilities/api";
 
 // ? Custom styles
-@import './loader';
-@import './cards';
 @import './global';
+@import './cards';
+@import './loader';
 @import './breadcrumbs';
 @import './badges';
 @import './navbar';
+@import './sidebar';
 @import './tabs';
-
+@import './forms';
+@import './tables';
+@import './buttons';
+@import './utilities';

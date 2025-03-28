@@ -1,18 +1,75 @@
 .navbar {
-  z-index: 1050;
-}
+  background-color: $white;
+  box-shadow: 0 2px 8px rgba(67, 89, 113, 0.1);
+  padding: 0.5rem 1rem;
+  z-index: 1040;
+  height: 60px;
 
-.wrapper {
-  display: flex;
-}
+  .navbar-brand {
+    display: flex;
+    align-items: center;
 
+    img {
+      max-height: 36px;
+      margin-right: 0.75rem;
+    }
 
-.main-content {
-  margin-left: 250px;
-  margin-top: 65px; /* Offset for navbar */
-  transition: margin-left 0.3s ease-in-out;
-}
+    span {
+      font-weight: 600;
+      font-size: 1.25rem;
+      color: $primary;
+    }
+  }
 
-.main-content.collapsed {
-  margin-left: 55px;
+  .navbar-toggler {
+    border: none;
+    padding: 0;
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+
+  .nav-link {
+    color: $gray-600;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+
+    &:hover {
+      color: $primary;
+    }
+  }
+
+  .dropdown-toggle::after {
+    margin-left: 0.5rem;
+  }
+
+  .search-bar {
+    border-radius: 50rem;
+    padding: 0.5rem 1rem;
+    padding-left: 2.5rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23adb5bd' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 1rem center;
+    border-color: $gray-200;
+
+    &:focus {
+      border-color: $primary;
+      box-shadow: 0 0 0 0.25rem rgba($primary, 0.1);
+    }
+  }
+
+  .user-dropdown {
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba($primary, 0.1);
+      color: $primary;
+      margin-right: 0.5rem;
+    }
+  }
 }

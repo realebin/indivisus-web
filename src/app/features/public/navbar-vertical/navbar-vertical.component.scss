@@ -1,69 +1,76 @@
 .sidebar {
-  height: calc(100vh - 56px); /* Full height minus navbar */
   position: fixed;
-  top: 56px; /* Offset for navbar */
+  top: 56px; /* Match navbar height */
   left: 0;
-  background-color: #343a40;
-  color: white;
-  transition: width 0.3s ease-in-out;
-  z-index: 1040;
+  height: calc(100vh - 56px);
+  width: 250px;
+  background-color: #2b3035;
+  z-index: 1030;
+  transition: width 0.2s ease;
+  overflow-y: auto;
 }
 
 .sidebar.collapsed {
-  // width: 80px;
+  width: 70px;
 }
 
-.sidebar:not(.collapsed) {
-  width: 250px;
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0.5rem 0;
 }
 
+.sidebar-item {
+  margin: 4px 0;
+}
 
-.nav-link {
-  color: white;
-  padding: 10px 15px;
+.sidebar-link {
   display: flex;
   align-items: center;
+  padding: 0.75rem 1rem;
+  color: #a3a4a6;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  margin: 0 0.5rem;
+  border-radius: 4px;
+}
+
+.sidebar-link:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
   text-decoration: none;
-  &.active,
-  &.selected {
-    background-color: #495057;
-    color: #fff;
-    position: relative;
-
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      height: 100%;
-      width: 4px;
-      background-color: #0d6efd; // Bootstrap primary color
-    }
-  }
-
-  &:hover {
-    background-color: #495057;
-    border-radius: 4px;
-  }
 }
 
+.sidebar-link.active,
+.sidebar-link.selected {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
+}
 
-.toggle-btn {
+.sidebar-link.active::before {
+  content: '';
   position: absolute;
-  top: 10px;
-  right: -20px;
-  background-color: #343a40;
-  border: none;
-  color: white;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1050;
+  left: -0.5rem;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background-color: #696cff;
 }
 
-.toggle-btn:hover {
-  background-color: #495057;
+.sidebar-link i {
+  font-size: 1.25rem;
+  min-width: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.sidebar-text {
+  margin-left: 0.75rem;
+  white-space: nowrap;
+}
+
+.mt-auto {
+  margin-top: auto;
 }

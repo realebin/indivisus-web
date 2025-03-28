@@ -1,0 +1,425 @@
+// Custom utility classes
+
+// Text utility classes
+.text-xs {
+  font-size: 0.75rem !important;
+}
+
+.text-sm {
+  font-size: 0.875rem !important;
+}
+
+.text-md {
+  font-size: 1rem !important;
+}
+
+.text-lg {
+  font-size: 1.25rem !important;
+}
+
+.text-xl {
+  font-size: 1.5rem !important;
+}
+
+.text-2xl {
+  font-size: 1.75rem !important;
+}
+
+.text-3xl {
+  font-size: 2rem !important;
+}
+
+// Font weights
+.fw-medium {
+  font-weight: 500 !important;
+}
+
+// Text colors for different theme colors
+.text-primary-light {
+  color: $primary-light !important;
+}
+
+.text-primary-dark {
+  color: $primary-dark !important;
+}
+
+.text-secondary-light {
+  color: $secondary-light !important;
+}
+
+.text-secondary-dark {
+  color: $secondary-dark !important;
+}
+
+.text-success-light {
+  color: $success-light !important;
+}
+
+.text-success-dark {
+  color: $success-dark !important;
+}
+
+.text-danger-light {
+  color: $danger-light !important;
+}
+
+.text-danger-dark {
+  color: $danger-dark !important;
+}
+
+.text-warning-light {
+  color: $warning-light !important;
+}
+
+.text-warning-dark {
+  color: $warning-dark !important;
+}
+
+.text-info-light {
+  color: $info-light !important;
+}
+
+.text-info-dark {
+  color: $info-dark !important;
+}
+
+// Background colors for different theme colors
+.bg-primary-light {
+  background-color: $primary-light !important;
+}
+
+.bg-primary-dark {
+  background-color: $primary-dark !important;
+}
+
+.bg-secondary-light {
+  background-color: $secondary-light !important;
+}
+
+.bg-secondary-dark {
+  background-color: $secondary-dark !important;
+}
+
+.bg-success-light {
+  background-color: $success-light !important;
+}
+
+.bg-success-dark {
+  background-color: $success-dark !important;
+}
+
+.bg-danger-light {
+  background-color: $danger-light !important;
+}
+
+.bg-danger-dark {
+  background-color: $danger-dark !important;
+}
+
+.bg-warning-light {
+  background-color: $warning-light !important;
+}
+
+.bg-warning-dark {
+  background-color: $warning-dark !important;
+}
+
+.bg-info-light {
+  background-color: $info-light !important;
+}
+
+.bg-info-dark {
+  background-color: $info-dark !important;
+}
+
+// Border colors for different theme colors
+.border-primary-light {
+  border-color: $primary-light !important;
+}
+
+.border-primary-dark {
+  border-color: $primary-dark !important;
+}
+
+.border-secondary-light {
+  border-color: $secondary-light !important;
+}
+
+.border-secondary-dark {
+  border-color: $secondary-dark !important;
+}
+
+.border-success-light {
+  border-color: $success-light !important;
+}
+
+.border-success-dark {
+  border-color: $success-dark !important;
+}
+
+.border-danger-light {
+  border-color: $danger-light !important;
+}
+
+.border-danger-dark {
+  border-color: $danger-dark !important;
+}
+
+.border-warning-light {
+  border-color: $warning-light !important;
+}
+
+.border-warning-dark {
+  border-color: $warning-dark !important;
+}
+
+.border-info-light {
+  border-color: $info-light !important;
+}
+
+.border-info-dark {
+  border-color: $info-dark !important;
+}
+
+// Shadow utilities
+.shadow-none {
+  box-shadow: none !important;
+}
+
+.shadow-sm {
+  box-shadow: 0 0.125rem 0.25rem rgba(67, 89, 113, 0.1) !important;
+}
+
+.shadow {
+  box-shadow: 0 0.5rem 1rem rgba(67, 89, 113, 0.15) !important;
+}
+
+.shadow-lg {
+  box-shadow: 0 1rem 3rem rgba(67, 89, 113, 0.175) !important;
+}
+
+.shadow-card {
+  box-shadow: $card-box-shadow !important;
+}
+
+// Border radius utilities
+.rounded-xs {
+  border-radius: 0.125rem !important;
+}
+
+.rounded-sm {
+  border-radius: 0.25rem !important;
+}
+
+.rounded {
+  border-radius: $border-radius !important;
+}
+
+.rounded-md {
+  border-radius: 0.5rem !important;
+}
+
+.rounded-lg {
+  border-radius: 0.75rem !important;
+}
+
+.rounded-xl {
+  border-radius: 1rem !important;
+}
+
+// Spacing utilities
+.gap-1 {
+  gap: 0.25rem !important;
+}
+
+.gap-2 {
+  gap: 0.5rem !important;
+}
+
+.gap-3 {
+  gap: 1rem !important;
+}
+
+.gap-4 {
+  gap: 1.5rem !important;
+}
+
+.gap-5 {
+  gap: 3rem !important;
+}
+
+// Transition utilities
+.transition {
+  transition: all 0.2s ease-in-out !important;
+}
+
+.transition-slow {
+  transition: all 0.3s ease-in-out !important;
+}
+
+.transition-fast {
+  transition: all 0.1s ease-in-out !important;
+}
+
+// Hover effects
+.hover-shadow {
+  transition: box-shadow 0.2s ease-in-out;
+
+  &:hover {
+    box-shadow: 0 0.5rem 1rem rgba(67, 89, 113, 0.15);
+  }
+}
+
+.hover-scale {
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.hover-elevate {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(67, 89, 113, 0.15);
+  }
+}
+
+// Cursor utilities
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+.cursor-move {
+  cursor: move !important;
+}
+
+.cursor-not-allowed {
+  cursor: not-allowed !important;
+}
+
+// Z-index utilities
+.z-0 {
+  z-index: 0 !important;
+}
+
+.z-10 {
+  z-index: 10 !important;
+}
+
+.z-50 {
+  z-index: 50 !important;
+}
+
+.z-100 {
+  z-index: 100 !important;
+}
+
+.z-1000 {
+  z-index: 1000 !important;
+}
+
+// Max width utilities
+.mw-100 {
+  max-width: 100% !important;
+}
+
+.mw-75 {
+  max-width: 75% !important;
+}
+
+.mw-50 {
+  max-width: 50% !important;
+}
+
+.mw-25 {
+  max-width: 25% !important;
+}
+
+// Min width utilities
+.min-w-100 {
+  min-width: 100% !important;
+}
+
+.min-w-75 {
+  min-width: 75% !important;
+}
+
+.min-w-50 {
+  min-width: 50% !important;
+}
+
+.min-w-25 {
+  min-width: 25% !important;
+}
+
+// Overflow utilities
+.overflow-visible {
+  overflow: visible !important;
+}
+
+.overflow-hidden {
+  overflow: hidden !important;
+}
+
+.overflow-auto {
+  overflow: auto !important;
+}
+
+.overflow-scroll {
+  overflow: scroll !important;
+}
+
+.overflow-x-auto {
+  overflow-x: auto !important;
+}
+
+.overflow-y-auto {
+  overflow-y: auto !important;
+}
+
+.overflow-x-hidden {
+  overflow-x: hidden !important;
+}
+
+.overflow-y-hidden {
+  overflow-y: hidden !important;
+}
+
+// Position utilities
+.position-absolute-center {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+.position-absolute-top {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+}
+
+.position-absolute-bottom {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+}
+
+.position-absolute-left {
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+}
+
+.position-absolute-right {
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  right: 0 !important;
+}

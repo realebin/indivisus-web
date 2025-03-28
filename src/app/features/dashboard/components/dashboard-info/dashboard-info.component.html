@@ -1,177 +1,187 @@
-<!-- dashboard.component.html -->
-<div class="dashboard-container">
-  <div class="p-4">
-    <div class="mb-4">
-      <h2 class="text-primary fw-bold">Dashboard</h2>
+<div class="container-fluid px-4 py-4">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2 class="fw-bold text-primary mb-1">Dashboard</h2>
+      <p class="text-muted">Overview of your business performance</p>
     </div>
+  </div>
 
-    <div class="row g-4">
-      <!-- Welcome Card -->
-      <div class="col-12">
-        <div class="card bg-primary bg-opacity-10 border-0">
-          <div class="card-body py-4">
-            <div class="row align-items-center">
-              <div class="col-md-8">
-                <h3 class="card-title text-primary mb-2">Welcome back, John Doe! 👋</h3>
-                <p class="card-text mb-0">Here's what's happening with your business today.</p>
-              </div>
-              <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                <button class="btn btn-primary">View Reports</button>
-              </div>
-            </div>
+  <!-- Welcome Card -->
+  <div class="welcome-card mb-4 rounded">
+    <div class="content-wrapper">
+      <div class="welcome-text">
+        <h3 class="welcome-title">Welcome back, John Doe! 👋</h3>
+        <p class="welcome-subtitle">
+          Here's what's happening with your business today.
+        </p>
+      </div>
+      <div class="welcome-actions">
+        <button class="btn-view-reports">
+          <i class="bi bi-graph-up-arrow"></i> View Reports
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+<!-- Stat Cards Row -->
+<div class="row stats-row mb-4">
+  <!-- Total Sites Card -->
+  <div class="col-sm-6 col-xl-3 mb-3">
+    <div class="stat-card">
+      <div class="stat-card-header">
+        <div class="icon-wrapper light-purple">
+          <i class="bi bi-building"></i>
+        </div>
+        <button class="menu-button">
+          <i class="bi bi-three-dots-vertical"></i>
+        </button>
+      </div>
+      <div class="stat-content">
+        <div class="stat-label">Total Sites</div>
+        <div class="stat-value">5</div>
+        <div class="stat-trend positive">
+          <i class="bi bi-arrow-up"></i> 12% <span class="trend-period">vs last month</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Total Invoice Card -->
+  <div class="col-sm-6 col-xl-3 mb-3">
+    <div class="stat-card">
+      <div class="stat-card-header">
+        <div class="icon-wrapper light-blue">
+          <i class="bi bi-receipt"></i>
+        </div>
+        <button class="menu-button">
+          <i class="bi bi-three-dots-vertical"></i>
+        </button>
+      </div>
+      <div class="stat-content">
+        <div class="stat-label">Total Invoice</div>
+        <div class="stat-value">120</div>
+        <div class="stat-trend positive">
+          <i class="bi bi-arrow-up"></i> 8% <span class="trend-period">vs last month</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stock Kain Card -->
+  <div class="col-sm-6 col-xl-3 mb-3">
+    <div class="stat-card">
+      <div class="stat-card-header">
+        <div class="icon-wrapper light-orange">
+          <i class="bi bi-box-seam"></i>
+        </div>
+        <button class="menu-button">
+          <i class="bi bi-three-dots-vertical"></i>
+        </button>
+      </div>
+      <div class="stat-content">
+        <div class="stat-label">Stock Kain</div>
+        <div class="stat-value">200 <span class="unit">Yard</span></div>
+        <div class="stat-trend negative">
+          <i class="bi bi-arrow-down"></i> 5% <span class="trend-period">vs last month</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stock Tali Card -->
+  <div class="col-sm-6 col-xl-3 mb-3">
+    <div class="stat-card">
+      <div class="stat-card-header">
+        <div class="icon-wrapper light-green">
+          <i class="bi bi-boxes"></i>
+        </div>
+        <button class="menu-button">
+          <i class="bi bi-three-dots-vertical"></i>
+        </button>
+      </div>
+      <div class="stat-content">
+        <div class="stat-label">Stock Tali</div>
+        <div class="stat-value">200 <span class="unit">Meter</span></div>
+        <div class="stat-trend positive">
+          <i class="bi bi-arrow-up"></i> 15% <span class="trend-period">vs last month</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+ <!-- Charts Row -->
+<div class="row mt-4">
+  <!-- Revenue Chart -->
+  <div class="col-lg-8 mb-4">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">Total Revenue</div>
+        <div class="chart-controls">
+          <div class="btn-group period-selector">
+            <button class="period-btn active">Monthly</button>
+            <button class="period-btn">Quarterly</button>
+            <button class="period-btn">Yearly</button>
+          </div>
+          <div class="year-dropdown">
+            <button class="year-btn">
+              2024 <i class="bi bi-chevron-down"></i>
+            </button>
           </div>
         </div>
       </div>
-
-      <!-- Quick Stats -->
-      <div class="col-sm-6 col-lg-3">
-        <div class="card h-100">
-          <div class="card-body">
-            <div class="d-flex align-items-center mb-3">
-              <div class="bg-primary bg-opacity-10 p-3 rounded">
-                <i class="bi bi-building fs-4 text-primary"></i>
-              </div>
-              <button class="btn btn-icon ms-auto p-0">
-                <i class="bi bi-three-dots-vertical"></i>
-              </button>
-            </div>
-            <h5 class="fw-normal mb-2">Total Sites</h5>
-            <h2 class="mb-2">5</h2>
-            <span class="badge bg-success">
-              <i class="bi bi-arrow-up me-1"></i>12%
-            </span>
+      <div class="chart-body">
+        <div class="chart-container">
+          <!-- Chart would be rendered here by Chart.js -->
+          <div id="revenue-chart" style="height: 320px; position: relative;">
+            <!-- Placeholder for the chart -->
           </div>
         </div>
       </div>
+    </div>
+  </div>
 
-      <div class="col-sm-6 col-lg-3">
-        <div class="card h-100">
-          <div class="card-body">
-            <div class="d-flex align-items-center mb-3">
-              <div class="bg-info bg-opacity-10 p-3 rounded">
-                <i class="bi bi-receipt fs-4 text-info"></i>
-              </div>
-              <button class="btn btn-icon ms-auto p-0">
-                <i class="bi bi-three-dots-vertical"></i>
-              </button>
-            </div>
-            <h5 class="fw-normal mb-2">Total Invoice</h5>
-            <h2 class="mb-2">120</h2>
-            <span class="badge bg-success">
-              <i class="bi bi-arrow-up me-1"></i>8%
-            </span>
+  <!-- Most Sold Items -->
+  <div class="col-lg-4 mb-4">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">Most Sold Items</div>
+        <div class="year-badge">YEAR 2024</div>
+      </div>
+      <div class="chart-body">
+        <div class="chart-container">
+          <!-- Chart would be rendered here by Chart.js -->
+          <div id="items-chart" style="height: 200px; position: relative;">
+            <!-- Placeholder for the chart -->
           </div>
         </div>
-      </div>
-
-      <div class="col-sm-6 col-lg-3">
-        <div class="card h-100">
-          <div class="card-body">
-            <div class="d-flex align-items-center mb-3">
-              <div class="bg-warning bg-opacity-10 p-3 rounded">
-                <i class="bi bi-box-seam fs-4 text-warning"></i>
-              </div>
-              <button class="btn btn-icon ms-auto p-0">
-                <i class="bi bi-three-dots-vertical"></i>
-              </button>
+        <div class="item-list mt-4">
+          <div class="item-entry">
+            <div class="item-icon light-blue">
+              <i class="bi bi-box"></i>
             </div>
-            <h5 class="fw-normal mb-2">Stock Kain</h5>
-            <h2 class="mb-2">200 <small class="fs-6 fw-normal">Yard</small></h2>
-            <span class="badge bg-danger">
-              <i class="bi bi-arrow-down me-1"></i>5%
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-sm-6 col-lg-3">
-        <div class="card h-100">
-          <div class="card-body">
-            <div class="d-flex align-items-center mb-3">
-              <div class="bg-success bg-opacity-10 p-3 rounded">
-                <i class="bi bi-boxes fs-4 text-success"></i>
+            <div class="item-details">
+              <div class="item-header">
+                <div class="item-name">Kain A Warna B</div>
+                <div class="item-badge positive">+24%</div>
               </div>
-              <button class="btn btn-icon ms-auto p-0">
-                <i class="bi bi-three-dots-vertical"></i>
-              </button>
-            </div>
-            <h5 class="fw-normal mb-2">Stock Tali</h5>
-            <h2 class="mb-2">200 <small class="fs-6 fw-normal">Meter</small></h2>
-            <span class="badge bg-success">
-              <i class="bi bi-arrow-up me-1"></i>15%
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Revenue Chart -->
-      <div class="col-lg-8">
-        <div class="card h-100">
-          <div class="card-header bg-transparent">
-            <div class="d-flex justify-content-between align-items-center">
-              <h5 class="mb-0">Total Revenue</h5>
-              <div class="dropdown">
-                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                  2024
-                </button>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="#">2024</a></li>
-                  <li><a class="dropdown-item" href="#">2023</a></li>
-                </ul>
+              <div class="item-progress">
+                <div class="progress-bar" style="width: 75%;"></div>
               </div>
             </div>
           </div>
-          <div class="card-body">
-            <div class="chart-container" style="height: 350px;">
-              <canvas id="totalRevenueChart"></canvas>
+          <div class="item-entry">
+            <div class="item-icon light-orange">
+              <i class="bi bi-box"></i>
             </div>
-            <div class="text-center mt-4">
-              <h4 class="text-success mb-0">Rp.120.000.000,-</h4>
-              <small class="text-muted">Total Revenue This Year</small>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Most Sold Items -->
-      <div class="col-lg-4">
-        <div class="card h-100">
-          <div class="card-header bg-transparent">
-            <div class="d-flex justify-content-between align-items-center">
-              <h5 class="mb-0">Most Sold Items</h5>
-              <span class="badge bg-warning text-dark">YEAR 2022</span>
-            </div>
-          </div>
-          <div class="card-body">
-            <div class="chart-container mb-4" style="height: 200px;">
-              <canvas id="profileReportChart"></canvas>
-            </div>
-            <div class="mt-4">
-              <div class="d-flex align-items-center mb-3">
-                <div class="flex-shrink-0">
-                  <div class="bg-primary bg-opacity-10 p-2 rounded">
-                    <i class="bi bi-box text-primary"></i>
-                  </div>
-                </div>
-                <div class="flex-grow-1 ms-3">
-                  <h6 class="mb-0">Kain A Warna B</h6>
-                  <small class="text-success">
-                    <i class="bi bi-arrow-up me-1"></i>100 Yard
-                  </small>
-                </div>
+            <div class="item-details">
+              <div class="item-header">
+                <div class="item-name">Tali A Warna B</div>
+                <div class="item-badge positive">+18%</div>
               </div>
-              <div class="d-flex align-items-center">
-                <div class="flex-shrink-0">
-                  <div class="bg-info bg-opacity-10 p-2 rounded">
-                    <i class="bi bi-box text-info"></i>
-                  </div>
-                </div>
-                <div class="flex-grow-1 ms-3">
-                  <h6 class="mb-0">Tali A Warna B</h6>
-                  <small class="text-success">
-                    <i class="bi bi-arrow-up me-1"></i>100 Kg
-                  </small>
-                </div>
+              <div class="item-progress">
+                <div class="progress-bar" style="width: 55%;"></div>
               </div>
             </div>
           </div>

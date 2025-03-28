@@ -1,70 +1,73 @@
 <!-- Top Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">
-      <img
-        src="../../../../assets/png/logo.png"
-        alt="TextWare"
-        style="height: 40px"
-      />
-    </a>
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarContent"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link" href="#">Buat Faktur</a>
+<nav class="navbar navbar-expand-lg fixed-top">
+  <div class="container-fluid px-3">
+    <!-- Logo and brand -->
+    <div class="d-flex align-items-center">
+      <a class="navbar-brand d-flex align-items-center me-3" href="#">
+        <img src="../../../../assets/png/logo.png" alt="Logo" class="me-2" style="height: 32px">
+        <span class="fw-semibold text-primary">Indivisus</span>
+      </a>
+
+      <!-- Menu items -->
+      <ul class="navbar-nav d-flex flex-row">
+        <li class="nav-item me-3">
+          <a class="nav-link d-flex align-items-center" href="#">
+            <i class="bi bi-file-earmark-text me-2"></i> Buat Faktur
+          </a>
         </li>
         <li class="nav-item dropdown">
-          <a
-            class="nav-link dropdown-toggle"
-            href="#"
-            id="menDropdown"
-            role="button"
-            data-bs-toggle="dropdown"
-          >
-            Kelola Barang
+          <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="menDropdown" role="button" data-bs-toggle="dropdown">
+            <i class="bi bi-box-seam me-2"></i> Kelola Barang
           </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">Shoes</a></li>
-            <li><a class="dropdown-item" href="#">Clothing</a></li>
-            <li><a class="dropdown-item" href="#">Accessories</a></li>
+          <ul class="dropdown-menu shadow-sm border-0 mt-2">
+            <li><a class="dropdown-item" href="#"><i class="bi bi-box me-2"></i>Inventory</a></li>
+            <li><a class="dropdown-item" href="#"><i class="bi bi-tags me-2"></i>Categories</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#"><i class="bi bi-graph-up me-2"></i>Reports</a></li>
           </ul>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#" (click)="logout()">
-            Logout <i class="bi bi-box-arrow-right"></i>
-          </a>
-        </li>
       </ul>
-      <form class="d-flex">
-        <input
-          class="form-control search-bar"
-          type="search"
-          placeholder="Search"
-        />
-      </form>
+    </div>
+
+    <!-- Right side items -->
+    <div class="ms-auto d-flex align-items-center">
+      <!-- Search bar -->
+      <div class="search-wrapper me-3">
+        <div class="input-group">
+          <span class="input-group-text border-end-0 bg-transparent">
+            <i class="bi bi-search text-muted"></i>
+          </span>
+          <input type="text" class="form-control border-start-0 ps-0" placeholder="Search...">
+        </div>
+      </div>
+
+      <!-- User dropdown -->
+      <div class="dropdown">
+        <a class="user-menu nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+          <div class="avatar d-flex align-items-center justify-content-center bg-light rounded-circle me-2" style="width: 32px; height: 32px;">
+            <i class="bi bi-person text-primary"></i>
+          </div>
+          <span>Admin</span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
+          <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
+          <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="#" (click)="logout()"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+        </ul>
+      </div>
     </div>
   </div>
 </nav>
 
 <!-- Sidebar and Main Content -->
-<div class="p-0">
+<div class="wrapper">
   <app-navbar-vertical
     (sidebarToggle)="onSidebarToggle($event)"
-    [navItems]="navItems"
-  ></app-navbar-vertical>
-  <!-- <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb> -->
-  <div class="main-content" [ngClass]="{ collapsed: isSidebarCollapsed }">
-    <div class="p-2">
-      <!-- <app-dashboard-info></app-dashboard-info> -->
-      <router-outlet></router-outlet>
-    </div>
+    [navItems]="navItems">
+  </app-navbar-vertical>
+
+  <div class="main-content" [ngClass]="{ 'collapsed': isSidebarCollapsed }">
+    <router-outlet></router-outlet>
   </div>
 </div>

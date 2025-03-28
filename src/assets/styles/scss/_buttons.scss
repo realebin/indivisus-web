@@ -1,0 +1,99 @@
+// Enhanced button styles
+.btn {
+  font-weight: 500;
+  padding: 0.5rem 1.25rem;
+  border-radius: $border-radius;
+  transition: all 0.2s ease-in-out;
+  font-size: 0.875rem;
+
+  &:focus, &:active, &:active:focus {
+    box-shadow: none;
+  }
+
+  // Icon buttons
+  .bi, i {
+    font-size: 1.1em;
+    vertical-align: -0.125em;
+
+    &:not(:last-child) {
+      margin-right: 0.5rem;
+    }
+
+    &:last-child:not(:first-child) {
+      margin-left: 0.5rem;
+    }
+  }
+
+  // Button variants
+  &.btn-primary {
+    background-color: $primary;
+    border-color: $primary;
+    color: #fff; // Ensuring white text on primary background
+
+    &:hover, &:focus, &:active {
+      background-color: $primary-dark;
+      border-color: $primary-dark;
+      color: #fff;
+    }
+  }
+
+  &.btn-light {
+    background-color: #fff;
+    border-color: $gray-200;
+    color: $gray-700;
+
+    &:hover, &:focus, &:active {
+      background-color: $gray-100;
+      border-color: $gray-300;
+      color: $gray-800;
+    }
+  }
+
+  &.btn-outline-primary {
+    border-color: $primary;
+    color: $primary;
+
+    &:hover, &:focus, &:active {
+      background-color: $primary;
+      border-color: $primary;
+      color: #fff;
+    }
+  }
+
+  // View reports button
+  &.btn-view-reports {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    background-color: #fff;
+    color: $gray-700;
+    border-color: $gray-200;
+
+    .bi {
+      margin-right: 0.5rem;
+    }
+
+    &:hover {
+      background-color: $gray-100;
+    }
+  }
+}
+
+// Welcome card buttons
+.welcome-card {
+  .btn {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: $primary;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+
+    &:hover {
+      background-color: #fff;
+      transform: translateY(-1px);
+    }
+  }
+}

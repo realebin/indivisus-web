@@ -1,97 +1,111 @@
-<section
-  class="bg-light vh-100 d-flex align-items-center justify-content-center"
->
-  <div
-    class="bg-light d-flex rounded-3 shadow-lg mw-100 p-4 align-items-center"
-    style="max-height: 75%"
-  >
-    <div class="col-md-6 px-3">
-      <h2 class="fw-bold fs-4 text-primary">Login</h2>
-      <p class="text-muted mt-2">Masuk dengan akun yang telah disediakan</p>
-
-      <!-- Form -->
-      <form
-        #form="ngForm"
-        (ngSubmit)="onSubmit()"
-        class="d-flex flex-column gap-3"
-      >
-        <!-- Username Input -->
-        <div class="form-group">
-          <input
-            type="text"
-            id="username"
-            class="form-control"
-            placeholder="Enter your username"
-            [(ngModel)]="formData.username"
-            name="username"
-            minlength="5"
-            required
-            #username="ngModel"
-          />
-          <!-- Validation Error Message -->
-          <div
-            *ngIf="username.invalid && username.touched"
-            class="text-danger mt-1 small"
-          >
-            Username must be at least 5 characters long.
+<section class="vh-100 d-flex align-items-center justify-content-center" style="background-color: #f5f5f9;">
+  <div class="container">
+    <div class="row g-0 shadow-lg rounded-3 overflow-hidden" style="max-width: 1000px; margin: 0 auto;">
+      <div class="col-md-6 bg-white p-5">
+        <div class="auth-content">
+          <!-- Logo -->
+          <div class="mb-4 text-center">
+            <img src="../../../assets/png/logo.png" alt="Logo" height="60" class="mb-2">
+            <h2 class="text-primary fw-bold mb-1">Textware</h2>
+            <p class="text-muted">Please login to continue</p>
           </div>
+
+          <!-- Login Form -->
+          <form #form="ngForm" (ngSubmit)="onSubmit()" class="d-flex flex-column gap-3">
+            <!-- Username Input -->
+            <div class="mb-3">
+              <label for="username" class="form-label">Username</label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="bi bi-person"></i>
+                </span>
+                <input
+                  type="text"
+                  id="username"
+                  class="form-control"
+                  placeholder="Enter your username"
+                  [(ngModel)]="formData.username"
+                  name="username"
+                  minlength="5"
+                  required
+                  #username="ngModel"
+                  [ngClass]="{'is-invalid': username.invalid && username.touched}"
+                >
+              </div>
+              <!-- Validation Error Message -->
+              <div *ngIf="username.invalid && username.touched" class="invalid-feedback d-block mt-1">
+                <span *ngIf="username.errors?.['required']">Username is required</span>
+                <span *ngIf="username.errors?.['minlength']">Username must be at least 5 characters long</span>
+              </div>
+            </div>
+
+            <!-- Password Input -->
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="bi bi-lock"></i>
+                </span>
+                <input
+                  [type]="isPasswordVisible ? 'text' : 'password'"
+                  id="password"
+                  class="form-control"
+                  placeholder="Enter your password"
+                  [(ngModel)]="formData.password"
+                  name="password"
+                  required
+                  #password="ngModel"
+                  [ngClass]="{'is-invalid': password.invalid && password.touched}"
+                >
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  (click)="togglePasswordVisibility()"
+                  tabindex="-1"
+                >
+                  <i [ngClass]="isPasswordVisible ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                </button>
+              </div>
+              <!-- Validation Error Message -->
+              <div *ngIf="password.invalid && password.touched" class="invalid-feedback d-block mt-1">
+                Password cannot be empty
+              </div>
+            </div>
+
+            <!-- Remember Me & Forgot Password -->
+            <!-- <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="rememberMe">
+                <label class="form-check-label text-muted" for="rememberMe">
+                  Remember me
+                </label>
+              </div>
+              <a href="javascript:void(0)" class="text-primary text-decoration-none">Forgot Password?</a>
+            </div> -->
+
+            <!-- Error Message -->
+            <div *ngIf="errorMessage" class="alert alert-danger py-2" role="alert">
+              <i class="bi bi-exclamation-circle me-1"></i> {{ errorMessage }}
+            </div>
+
+            <!-- Submit Button -->
+            <button
+              type="submit"
+              class="btn btn-primary d-flex align-items-center justify-content-center gap-2"
+              [disabled]="form.invalid || isLoading"
+            >
+              <span *ngIf="isLoading" class="spinner-border spinner-border-sm"></span>
+              <span>Login</span>
+            </button>
+          </form>
         </div>
+      </div>
 
-        <!-- Password Input -->
-        <div class="position-relative">
-          <input
-            [type]="isPasswordVisible ? 'text' : 'password'"
-            id="password"
-            class="form-control"
-            placeholder="Enter your password"
-            [(ngModel)]="formData.password"
-            name="password"
-            required
-            #password="ngModel"
-          />
-          <button
-            type="button"
-            class="btn position-absolute top-50 end-0 translate-middle-y"
-            (click)="togglePasswordVisibility()"
-            tabindex="-1"
-          >
-            <i
-              [ngClass]="isPasswordVisible ? 'bi bi-eye-slash' : 'bi bi-eye'"
-            ></i>
-          </button>
-          <!-- Validation Error Message -->
-          <div
-            *ngIf="password.invalid && password.touched"
-            class="text-danger mt-1 small"
-          >
-            Password cannot be empty
-          </div>
+      <!-- Right side - Just the image -->
+      <div class="col-md-6 d-none d-md-block position-relative">
+        <div class="">
+          <img src="../../../assets/png/login-placeholder.jpg" alt="Login Image" class="img-fluid rounded shadow" style="object-fit: cover;">
         </div>
-
-        <!-- Error Message -->
-        <div *ngIf="errorMessage" class="text-danger small">
-          {{ errorMessage }}
-        </div>
-
-        <!-- Submit Button -->
-        <button
-          type="submit"
-          class="btn btn-primary d-flex align-items-center justify-content-center gap-2"
-          [disabled]="form.invalid || isLoading"
-        >
-          Login
-        </button>
-      </form>
-    </div>
-
-    <div class="col-md-6 d-none d-md-block h-50">
-      <div class="d-flex align-items-end justify-content-end overflow-hidden">
-        <img
-          class="rounded embedded"
-          src="../../../assets/png/login-placeholder.jpg"
-          alt="Login Image"
-          style="height: 50vh"
-        />
       </div>
     </div>
   </div>

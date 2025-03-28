@@ -1,13 +1,199 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+// @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+// @import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap');
+
+// Base styles
+html {
+  height: 100%;
+}
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Public Sans', sans-serif;
+  background-color: $body-bg;
+  color: $body-color;
+  height: 100%;
 }
 
 :root {
-  --bs-font-sans-serif: 'Inter', sans-serif;
+  --bs-font-sans-serif: 'Public Sans', sans-serif;
 }
 
 * {
-  font-family: 'Inter', sans-serif !important;
+  font-family: 'Public Sans', sans-serif !important;
+}
+
+// Typography
+h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
+  font-weight: 600;
+  color: $gray-800;
+  margin-bottom: 0.5rem;
+}
+
+.display-6 {
+  font-weight: 700;
+}
+
+// Card styling
+.card {
+  border: none;
+  box-shadow: $card-box-shadow;
+  border-radius: $border-radius;
+  margin-bottom: 1.5rem;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    box-shadow: 0 4px 10px 0 rgba(67, 89, 113, 0.2);
+  }
+
+  .card-header {
+    background-color: transparent;
+    border-bottom: 1px solid $border-color;
+    padding: 1.25rem 1.5rem;
+
+    &:first-child {
+      border-radius: $border-radius $border-radius 0 0;
+    }
+  }
+
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  .card-footer {
+    background-color: transparent;
+    border-top: 1px solid $border-color;
+    padding: 1rem 1.5rem;
+  }
+}
+
+// Shadow utilities
+.shadow-none {
+  box-shadow: none !important;
+}
+
+.shadow-sm {
+  box-shadow: 0 0.125rem 0.25rem rgba(67, 89, 113, 0.1) !important;
+}
+
+.shadow {
+  box-shadow: 0 0.5rem 1rem rgba(67, 89, 113, 0.15) !important;
+}
+
+.shadow-lg {
+  box-shadow: 0 1rem 3rem rgba(67, 89, 113, 0.175) !important;
+}
+
+// Custom shadow card
+.shadow-card {
+  background-color: $white !important;
+  padding: 1.5rem !important;
+  border: none !important;
+  border-radius: $border-radius !important;
+  box-shadow: $card-box-shadow !important;
+}
+
+// Buttons styling
+.btn {
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  border-radius: $border-radius;
+  transition: all 0.2s ease-in-out;
+
+  &:focus, &:active {
+    box-shadow: none !important;
+  }
+
+  &.btn-primary {
+    background-color: $primary;
+    border-color: $primary;
+
+    &:hover, &:focus, &:active {
+      background-color: $primary-dark;
+      border-color: $primary-dark;
+    }
+  }
+
+  &.btn-outline-primary {
+    color: $primary;
+    border-color: $primary;
+
+    &:hover, &:focus, &:active {
+      background-color: $primary;
+      border-color: $primary;
+      color: $white;
+    }
+  }
+}
+
+// Table styling
+.table {
+  th {
+    font-weight: 600;
+    color: $gray-700;
+    background-color: $gray-100;
+    border-bottom-width: 1px;
+  }
+}
+
+// Form styling
+.form-control, .form-select {
+  padding: 0.5rem 1rem;
+  border-radius: $border-radius;
+  border-color: $gray-300;
+
+  &:focus {
+    border-color: $primary;
+    box-shadow: 0 0 0 0.25rem rgba($primary, 0.1);
+  }
+}
+
+.form-label {
+  font-weight: 500;
+  color: $gray-700;
+  margin-bottom: 0.5rem;
+}
+
+// Section spacing
+.page-section {
+  padding: 2rem 0;
+}
+
+// Utility classes
+.bg-light-primary {
+  background-color: $primary-light !important;
+  color: $primary-dark !important;
+}
+
+.bg-light-success {
+  background-color: $success-light !important;
+  color: $success-dark !important;
+}
+
+.bg-light-danger {
+  background-color: $danger-light !important;
+  color: $danger-dark !important;
+}
+
+.bg-light-warning {
+  background-color: $warning-light !important;
+  color: $warning-dark !important;
+}
+
+.bg-light-info {
+  background-color: $info-light !important;
+  color: $info-dark !important;
+}
+
+.text-gray {
+  color: $gray-600 !important;
+}
+
+// Vertical dividers
+.vr {
+  display: inline-block;
+  align-self: stretch;
+  width: 1px;
+  min-height: 1em;
+  background-color: $border-color;
+  opacity: 0.8;
 }
