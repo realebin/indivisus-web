@@ -69,6 +69,8 @@ loadStockDetail(): void {
 
   markBigPackageAsOpen(packageNumber: string): void {
     const username = localStorage.getItem('username');
+    const a = localStorage.getItem('token');
+    console.log(username)
     if (!username) {
       this.errorMessage = 'User not logged in';
       return;

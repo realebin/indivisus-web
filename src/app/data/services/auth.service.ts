@@ -26,8 +26,9 @@ export class AuthService {
           localStorage.setItem('authToken', JSON.stringify(response?.output_schema?.data?.token));
           localStorage.setItem('loggedUser', JSON.stringify(response?.output_schema));
         }
-        if(response?.output_schema?.username) {
-          localStorage.setItem('username', JSON.stringify(response?.output_schema?.username));
+        if(response?.output_schema?.data?.username) {
+          localStorage.setItem('username', JSON.stringify(response?.output_schema?.data?.username));
+          console.log(localStorage.getItem('username'))
         }
         return transformToAuthLoginModelResponse(response.output_schema);
       }),

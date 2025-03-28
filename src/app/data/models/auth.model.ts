@@ -4,13 +4,12 @@ import {
 } from '@schemas/auth-schema';
 
 export interface AuthLoginModelResponse {
-  epoch: number;
-  full_name: string;
-  role: string;
-  username: string;
   data: {
     token: string;
     expiresIn: number;
+    full_name: string;
+    role: string;
+    username: string;
   };
 }
 export interface AuthLoginModelRequest {
@@ -22,13 +21,12 @@ export function transformToAuthLoginModelResponse(
   response: AuthLoginHttpResponse
 ): AuthLoginModelResponse {
   const result: AuthLoginModelResponse = {
-    epoch: response.epoch,
-    full_name: response.full_name,
-    role: response.role,
-    username: response.username,
     data: {
       token: response.data.token,
       expiresIn: response.data.expires_in,
+      full_name: response.data.full_name,
+      role: response.data.role,
+      username: response.data.username,
     },
   };
 
