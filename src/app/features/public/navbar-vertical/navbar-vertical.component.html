@@ -1,8 +1,11 @@
-<div class="sidebar" [ngClass]="{ collapsed: isCollapsed }">
+<div class="sidebar" [ngClass]="{
+  'collapsed': isCollapsed,
+  'mobile-visible': isMobileVisible
+}">
   <div class="sidebar-content">
     <!-- Collapse button -->
-    <div class="sidebar-item" (click)="toggleSidebar()">
-      <a class="sidebar-link">
+    <div class="sidebar-item">
+      <a class="sidebar-link" (click)="toggleSidebar()" *ngIf="!isMobileView">
         <i class="bi" [ngClass]="isCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
         <span class="sidebar-text" *ngIf="!isCollapsed">Collapse Menu</span>
       </a>

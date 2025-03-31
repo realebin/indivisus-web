@@ -18,7 +18,7 @@ export class SitesDetailComponent implements OnInit {
   };
 
   colDefs: ColDef[] = [
-    { headerName: 'Product ID', field: 'idProduct' },
+    { headerName: 'Product ID', field: 'idProduct', cellClass: 'vertical-center' },
     {
       headerName: 'Product Name',
       field: 'productName',
@@ -38,6 +38,7 @@ export class SitesDetailComponent implements OnInit {
       headerName: 'Size',
       field: 'sizes',
       autoHeight: true,
+      cellClass: 'vertical-center',
       cellRenderer: (params: any) => {
         if (!params.value || !Array.isArray(params.value)) return '';
         const container = document.createElement('div');

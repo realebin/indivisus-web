@@ -3,50 +3,19 @@
   background-color: #fff;
   box-shadow: 0 1px 4px rgba(0,0,0,0.1);
   padding: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1040;
 }
 
-.navbar-brand span {
-  font-size: 1.25rem;
-  color: #696cff;
-}
-
-.nav-link {
+.btn-link {
   color: #495057;
-  padding: 0.5rem 0;
-  font-weight: normal;
+  text-decoration: none;
 }
 
-.nav-link:hover {
+.btn-link:hover {
   color: #696cff;
-}
-
-.dropdown-toggle::after {
-  margin-left: 0.5em;
-  vertical-align: 0.15em;
-}
-
-.search-wrapper .input-group {
-  border-radius: 20px;
-  overflow: hidden;
-  border: 1px solid #e9ecef;
-  background-color: #f8f9fa;
-}
-
-.search-wrapper .form-control {
-  border: none;
-  background-color: transparent;
-  padding-left: 0;
-  box-shadow: none;
-}
-
-.search-wrapper .input-group-text {
-  border: none;
-}
-
-.user-menu {
-  padding: 0.5rem;
-}
-
-.avatar {
-  font-size: 0.9rem;
+  text-decoration: none;
 }
