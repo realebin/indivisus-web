@@ -1,18 +1,9 @@
-<div class="container-fluid px-4 py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-primary mb-0">Invoice Details</h2>
-    <button class="btn btn-outline-secondary" (click)="navigateBack()">
-      <i class="bi bi-arrow-left me-1"></i>Back to List
-    </button>
+<div class="container px-2">
+  <div class="my-4">
+    <h3 class="display-6 fw-bold text-primary">Invoice Details</h3>
   </div>
 
-  <!-- Breadcrumbs -->
-  <app-breadcrumbs
-    [breadcrumbs]="[
-      { label: 'Invoices', url: '/invoice' },
-      { label: 'Invoice #' + invoiceNumber }
-    ]"
-  ></app-breadcrumbs>
+  <app-breadcrumbs [breadcrumbs]="breadcrumbs"></app-breadcrumbs>
 
   <!-- Alert for errors -->
   <div *ngIf="error" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
@@ -102,7 +93,7 @@
         </div>
       </div>
 
-      <!-- Summary by Type Card -->
+      <!-- Invoice Summary Card -->
       <div class="col-lg-6 mb-4">
         <div class="card shadow-sm h-100">
           <div class="card-header bg-white">
@@ -111,3 +102,74 @@
           <div class="card-body">
             <div class="table-responsive">
               <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th class="text-center">Quantity</th>
+                    <th class="text-end">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let group of getLineItemsByType()">
+                    <td>{{ group.type }}</td>
+                    <td class="text-center">{{ group.totalAmount | number:'1.2-2' }}</td>
+                    <td class="text-end">{{ formatCurrency(group.totalPrice) }}</td>
+                  </tr>
+                  <tr class="table-secondary">
+                    <td><strong>Grand Total</strong></td>
+                    <td class="text-center"><strong>{{ getTotalQuantity() | number:'1.2-2' }}</strong></td>
+                    <td class="text-end"><strong>{{ formatCurrency(invoice.totalPrice) }}</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Line Items Card -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-white">
+        <h5 class="mb-0">Line Items</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Product</th>
+                <th>Type</th>
+                <th>Package Info</th>
+                <th class="text-center">Quantity</th>
+                <th class="text-end">Unit Price</th>
+                <th class="text-end">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of invoice.lineItems; let i = index">
+                <td>{{ i + 1 }}</td>
+                <td>{{ item.productName }}</td>
+                <td>{{ item.type }}</td>
+                <td>
+                  <small class="d-block">BP: {{ item.bigPackageNumber }}</small>
+                  <small class="d-block">SP: {{ item.smallPackageId }}</small>
+                </td>
+                <td class="text-center">{{ item.unitAmount | number:'1.2-2' }} {{ item.sizeDescription }}</td>
+                <td class="text-end">{{ formatCurrency(item.unitPrice) }}</td>
+                <td class="text-end">{{ formatCurrency(item.totalPrice) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-start mt-4 mb-5">
+      <button class="btn btn-secondary" (click)="goBack()">
+        <i class="bi bi-arrow-left me-1"></i> Back to Invoice List
+      </button>
+    </div>
+  </div>
+</div>

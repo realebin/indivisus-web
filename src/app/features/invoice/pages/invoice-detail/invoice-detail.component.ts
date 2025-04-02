@@ -14,6 +14,11 @@ export class InvoiceDetailComponent implements OnInit {
   isLoading = false;
   error: string = '';
 
+  breadcrumbs = [
+    { label: 'Invoices', url: '/invoice' },
+    { label: 'Invoice Details' }
+  ];
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -21,10 +26,12 @@ export class InvoiceDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      this.invoiceNumber = params['id'];
+    this.route.paramMap.subscribe(params => {
+      this.invoiceNumber = params.get('id') || '';
       if (this.invoiceNumber) {
         this.loadInvoiceDetail();
+      } else {
+        this.error = 'Invoice number not provided';
       }
     });
   }
@@ -34,6 +41,7 @@ export class InvoiceDetailComponent implements OnInit {
     this.invoiceService.getInvoiceById(this.invoiceNumber).subscribe({
       next: (response) => {
         this.invoice = response.invoice;
+        this.breadcrumbs[1].label = `Invoice #${this.invoiceNumber}`;
         this.isLoading = false;
       },
       error: (error) => {
@@ -43,33 +51,35 @@ export class InvoiceDetailComponent implements OnInit {
     });
   }
 
+  goBack(): void {
+    this.router.navigate(['/invoice']);
+  }
+
   navigateToEdit(): void {
     this.router.navigate(['/invoice/edit', this.invoiceNumber]);
   }
 
-  navigateBack(): void {
-    this.router.navigate(['/invoice']);
-  }
-
   deleteInvoice(): void {
-    if (confirm('Are you sure you want to delete this invoice?')) {
-      this.isLoading = true;
-      this.invoiceService.deleteInvoice(this.invoiceNumber).subscribe({
-        next: () => {
-          this.router.navigate(['/invoice']);
-        },
-        error: (error) => {
-          this.error = error.message || 'Failed to delete invoice';
-          this.isLoading = false;
-        }
-      });
+    if (!confirm('Are you sure you want to delete this invoice?')) {
+      return;
     }
+
+    this.isLoading = true;
+    this.invoiceService.deleteInvoice(this.invoiceNumber).subscribe({
+      next: () => {
+        this.router.navigate(['/invoice']);
+      },
+      error: (error) => {
+        this.error = error.message || 'Failed to delete invoice';
+        this.isLoading = false;
+      }
+    });
   }
 
   updateStatus(status: 'PENDING' | 'PAID' | 'CANCELLED'): void {
     if (!this.invoice) return;
 
-    const invoiceData = {
+    const updateData = {
       invoiceNumber: this.invoice.invoiceNumber,
       customerId: this.invoice.customerId,
       siteId: this.invoice.siteId,
@@ -80,9 +90,9 @@ export class InvoiceDetailComponent implements OnInit {
     };
 
     this.isLoading = true;
-    this.invoiceService.updateInvoice(invoiceData).subscribe({
+    this.invoiceService.updateInvoice(updateData).subscribe({
       next: () => {
-        this.loadInvoiceDetail(); // Reload after update
+        this.loadInvoiceDetail();
       },
       error: (error) => {
         this.error = error.message || 'Failed to update invoice status';
@@ -95,7 +105,6 @@ export class InvoiceDetailComponent implements OnInit {
     this.isLoading = true;
     this.invoiceService.generateInvoicePdf(this.invoiceNumber).subscribe({
       next: (blob) => {
-        // Create download link and click it
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -114,17 +123,13 @@ export class InvoiceDetailComponent implements OnInit {
     });
   }
 
-  // Helper methods to format data
+  // Helper methods for formatting and data display
   getStatusBadgeClass(status: string): string {
     switch (status) {
-      case 'PENDING':
-        return 'bg-warning';
-      case 'PAID':
-        return 'bg-success';
-      case 'CANCELLED':
-        return 'bg-danger';
-      default:
-        return 'bg-secondary';
+      case 'PENDING': return 'bg-warning text-dark';
+      case 'PAID': return 'bg-success';
+      case 'CANCELLED': return 'bg-danger';
+      default: return 'bg-secondary';
     }
   }
 
@@ -162,5 +167,10 @@ export class InvoiceDetailComponent implements OnInit {
 
       return { type, items, totalAmount, totalPrice };
     });
+  }
+
+  getTotalQuantity(): number {
+    if (!this.invoice?.lineItems) return 0;
+    return this.invoice.lineItems.reduce((sum, item) => sum + item.unitAmount, 0);
   }
 }

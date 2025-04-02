@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { InvoiceDetailComponent, InvoiceIndexComponent } from './pages';
+import { InvoiceCreateComponent, InvoiceDetailComponent, InvoiceIndexComponent } from './pages';
 
 
 const routes: Routes = [
@@ -12,14 +12,14 @@ const routes: Routes = [
     path: 'detail/:id',
     component: InvoiceDetailComponent,
   },
-  // {
-  //   path: 'create',
-  //   component: InvoiceCreateComponent,
-  // },
-  // {
-  //   path: 'edit/:id',
-  //   component: InvoiceCreateComponent,
-  // }
+  {
+    path: 'create',
+    component: InvoiceCreateComponent,
+  },
+  {
+    path: 'edit/:id',
+    component: InvoiceCreateComponent,
+  }
 ];
 
 @NgModule({
