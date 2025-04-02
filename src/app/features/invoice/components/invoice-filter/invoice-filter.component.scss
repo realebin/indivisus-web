@@ -1,0 +1,9 @@
+/* Minimal custom CSS needed thanks to Bootstrap */
+.card {
+  transition: all 0.3s ease;
+}
+
+/* Animation for expanding/collapsing */
+.card-body {
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}

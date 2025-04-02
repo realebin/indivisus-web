@@ -53,6 +53,11 @@ const routes: Routes = [
         loadChildren: () =>
           import('@features/sites/sites.module').then((m) => m.SitesModule),
       },
+      {
+        path: 'invoice',
+        loadChildren: () =>
+          import('@features/invoice/invoice.module').then((m) => m.InvoiceModule),
+      },
     ],
   },
 ];

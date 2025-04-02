@@ -1,0 +1,12 @@
+.line-item-card {
+  border-left: 3px solid #696cff;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .card-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+}

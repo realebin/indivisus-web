@@ -1,0 +1,149 @@
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-header bg-white">
+    <h5 class="mb-0">{{ isEditMode ? 'Edit Invoice' : 'Create New Invoice' }}</h5>
+  </div>
+
+  <div class="card-body">
+    <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+      {{ errorMessage }}
+    </div>
+
+    <form [formGroup]="invoiceForm" (ngSubmit)="onSubmit()">
+      <div class="row g-3 mb-4">
+        <!-- Customer Selection -->
+        <div class="col-md-6">
+          <label for="customerId" class="form-label">Customer*</label>
+          <select
+            class="form-select"
+            id="customerId"
+            formControlName="customerId"
+            [ngClass]="{'is-invalid': invoiceForm.get('customerId')?.invalid && invoiceForm.get('customerId')?.touched}"
+          >
+            <option value="">-- Select Customer --</option>
+            <option *ngFor="let customer of customers" [value]="customer.id">
+              {{ customer.fullName }}
+            </option>
+          </select>
+          <div class="invalid-feedback">
+            Customer is required
+          </div>
+        </div>
+
+        <!-- Site Selection -->
+        <div class="col-md-6">
+          <label for="siteId" class="form-label">Site*</label>
+          <select
+            class="form-select"
+            id="siteId"
+            formControlName="siteId"
+            [ngClass]="{'is-invalid': invoiceForm.get('siteId')?.invalid && invoiceForm.get('siteId')?.touched}"
+          >
+            <option value="">-- Select Site --</option>
+            <option *ngFor="let site of sites" [value]="site.siteId">
+              {{ site.siteName }}
+            </option>
+          </select>
+          <div class="invalid-feedback">
+            Site is required
+          </div>
+        </div>
+
+        <!-- Due Date -->
+        <div class="col-md-4">
+          <label for="dueDate" class="form-label">Due Date*</label>
+          <input
+            type="date"
+            class="form-control"
+            id="dueDate"
+            formControlName="dueDate"
+            [ngClass]="{'is-invalid': invoiceForm.get('dueDate')?.invalid && invoiceForm.get('dueDate')?.touched}"
+          >
+          <div class="invalid-feedback">
+            Due date is required
+          </div>
+        </div>
+
+        <!-- Status (Only in edit mode) -->
+        <div class="col-md-4" *ngIf="isEditMode">
+          <label for="status" class="form-label">Status</label>
+          <select class="form-select" id="status" formControlName="status">
+            <option value="PENDING">Pending</option>
+            <option value="PAID">Paid</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
+        </div>
+
+        <!-- Notes -->
+        <div class="col-md-4">
+          <label for="notes" class="form-label">Notes</label>
+          <textarea
+            class="form-control"
+            id="notes"
+            formControlName="notes"
+            rows="2"
+            placeholder="Optional notes for this invoice"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Line Items Section -->
+      <div class="line-items-section">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">Line Items</h5>
+          <button
+            type="button"
+            class="btn btn-sm btn-primary"
+            (click)="addLineItem()"
+            [disabled]="!invoiceForm.get('siteId')?.value"
+          >
+            <i class="bi bi-plus-circle me-1"></i>Add Item
+          </button>
+        </div>
+
+        <!-- Warning message when no site is selected -->
+        <div *ngIf="!invoiceForm.get('siteId')?.value" class="alert alert-warning py-2">
+          <i class="bi bi-exclamation-triangle me-2"></i>Please select a site to add line items
+        </div>
+
+        <!-- List of line items -->
+        <div *ngIf="lineItemArray.length === 0 && invoiceForm.get('siteId')?.value" class="alert alert-info py-2">
+          <i class="bi bi-info-circle me-2"></i>Click "Add Item" to add products to this invoice
+        </div>
+
+        <div *ngFor="let item of lineItemArray; let i = index">
+          <app-invoice-line-item
+            [products]="products"
+            [lineItem]="item"
+            [index]="i"
+            (lineItemChange)="updateLineItem($event, i)"
+            (removeLineItem)="removeLineItem(i)"
+          ></app-invoice-line-item>
+        </div>
+
+        <!-- Total Price -->
+        <div *ngIf="lineItemArray.length > 0" class="card mt-3 bg-light">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-6 col-md-8 text-end">
+                <h5>Total:</h5>
+              </div>
+              <div class="col-6 col-md-4 text-end">
+                <h5>Rp {{ getTotalPrice() | number:'1.0-0' }}</h5>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Buttons -->
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">
+          <i class="bi bi-x-circle me-1"></i>Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="invoiceForm.invalid || isLoading || lineItemArray.length === 0">
+          <i class="bi bi-save me-1"></i>{{ isEditMode ? 'Update' : 'Create' }} Invoice
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

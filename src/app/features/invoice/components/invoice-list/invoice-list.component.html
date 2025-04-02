@@ -1,0 +1,69 @@
+<div class="card shadow-sm border-0">
+  <div *ngIf="invoices && invoices.length > 0; else noInvoices" class="table-responsive">
+    <ag-grid-angular
+      class="ag-theme-alpine"
+      style="width: 100%; height: 500px;"
+      [rowData]="invoices"
+      [columnDefs]="columnDefs"
+      [pagination]="true"
+      [paginationPageSize]="10"
+      (cellClicked)="onCellClicked($event)"
+      domLayout="autoHeight"
+    >
+    </ag-grid-angular>
+  </div>
+
+  <ng-template #noInvoices>
+    <div class="text-center p-5">
+      <img src="assets/svg/empty-data.svg" alt="No invoices" class="mb-3" style="max-width: 150px;">
+      <h5 class="text-muted">No invoices found</h5>
+      <p class="text-muted mb-4">Create your first invoice to get started.</p>
+      <button class="btn btn-primary" routerLink="/invoice/create">
+        <i class="bi bi-plus-circle me-2"></i>Create Invoice
+      </button>
+    </div>
+  </ng-template>
+</div>
+
+<!-- Mobile/Responsive View -->
+<div class="d-md-none">
+  <div *ngIf="invoices && invoices.length > 0; else mobileNoInvoices" class="list-group mb-4">
+    <div *ngFor="let invoice of invoices" class="list-group-item list-group-item-action flex-column align-items-start border mb-2 rounded shadow-sm">
+      <div class="d-flex w-100 justify-content-between align-items-center mb-2">
+        <h5 class="mb-1">
+          <a [routerLink]="['/invoice/detail', invoice.invoiceNumber]" class="text-primary text-decoration-none">
+            Invoice #{{ invoice.invoiceNumber }}
+          </a>
+        </h5>
+        <span class="badge" [ngClass]="getStatusBadgeClass(invoice.status)">{{ invoice.status }}</span>
+      </div>
+      <p class="mb-1">Customer: <strong>{{ invoice.customerName }}</strong></p>
+      <p class="mb-1">Site: {{ invoice.siteName }}</p>
+      <p class="mb-1">Date: {{ formatDate(invoice.createdAt) }}</p>
+      <p class="mb-1">Due Date: {{ formatDate(invoice.dueDate) }}</p>
+      <p class="mb-1">Total: <strong>{{ formatCurrency(invoice.totalPrice) }}</strong></p>
+
+      <div class="d-flex justify-content-end mt-2">
+        <button class="btn btn-sm btn-outline-primary me-2" (click)="onEdit(invoice.invoiceNumber)">
+          <i class="bi bi-pencil"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-danger me-2" (click)="onDelete(invoice.invoiceNumber)">
+          <i class="bi bi-trash"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" (click)="onViewPdf(invoice.invoiceNumber)">
+          <i class="bi bi-file-pdf"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #mobileNoInvoices>
+    <div class="text-center p-4">
+      <img src="assets/svg/empty-data.svg" alt="No invoices" class="mb-3" style="max-width: 120px;">
+      <h6 class="text-muted">No invoices found</h6>
+      <button class="btn btn-sm btn-primary mt-2" routerLink="/invoice/create">
+        <i class="bi bi-plus-circle me-1"></i>Create Invoice
+      </button>
+    </div>
+  </ng-template>
+</div>
