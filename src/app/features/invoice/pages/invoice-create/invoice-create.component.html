@@ -17,7 +17,7 @@
   <!-- Invoice Form -->
   <div class="card shadow-sm mb-4">
     <div class="card-header bg-white">
-      <h5 class="mb-0">{{ isEditMode ? 'Edit Invoice' : 'Create New Invoice' }}</h5>
+      <h5 class="mb-0">{{ isEditMode ? 'Edit Invoice Details' : 'New Invoice' }}</h5>
     </div>
 
     <div class="card-body">
@@ -30,14 +30,14 @@
               class="form-select"
               id="customerId"
               formControlName="customerId"
-              [ngClass]="{'is-invalid': isInvalid('customerId')}"
+              [ngClass]="{'is-invalid': invoiceForm.get('customerId')?.invalid && invoiceForm.get('customerId')?.touched}"
             >
               <option value="">-- Select Customer --</option>
               <option *ngFor="let customer of customers" [value]="customer.id">
                 {{ customer.fullName }}
               </option>
             </select>
-            <div class="invalid-feedback" *ngIf="isInvalid('customerId')">
+            <div class="invalid-feedback">
               Customer is required
             </div>
           </div>
@@ -49,14 +49,14 @@
               class="form-select"
               id="siteId"
               formControlName="siteId"
-              [ngClass]="{'is-invalid': isInvalid('siteId')}"
+              [ngClass]="{'is-invalid': invoiceForm.get('siteId')?.invalid && invoiceForm.get('siteId')?.touched}"
             >
               <option value="">-- Select Site --</option>
               <option *ngFor="let site of sites" [value]="site.siteId">
                 {{ site.siteName }}
               </option>
             </select>
-            <div class="invalid-feedback" *ngIf="isInvalid('siteId')">
+            <div class="invalid-feedback">
               Site is required
             </div>
           </div>
@@ -69,9 +69,9 @@
               class="form-control"
               id="dueDate"
               formControlName="dueDate"
-              [ngClass]="{'is-invalid': isInvalid('dueDate')}"
+              [ngClass]="{'is-invalid': invoiceForm.get('dueDate')?.invalid && invoiceForm.get('dueDate')?.touched}"
             >
-            <div class="invalid-feedback" *ngIf="isInvalid('dueDate')">
+            <div class="invalid-feedback">
               Due date is required
             </div>
           </div>
@@ -100,7 +100,7 @@
         </div>
 
         <!-- Line Items Section -->
-        <div class="line-items-section">
+        <div class="line-items-section border-top pt-4">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="mb-0">Line Items</h5>
             <button
@@ -123,7 +123,7 @@
             <i class="bi bi-info-circle me-2"></i>Click "Add Item" to add products to this invoice
           </div>
 
-          <div *ngFor="let item of lineItems; let i = index" class="card mb-3 line-item">
+          <div *ngFor="let item of lineItems; let i = index" class="card mb-3 border-primary border-opacity-25">
             <div class="card-header bg-light d-flex justify-content-between align-items-center">
               <h6 class="mb-0">Line Item #{{ i + 1 }}</h6>
               <button
@@ -138,7 +138,7 @@
               <div class="row g-3">
                 <!-- Product Selection -->
                 <div class="col-md-6">
-                  <label [for]="'productId-' + i" class="form-label">Product</label>
+                  <label [for]="'productId-' + i" class="form-label">Product*</label>
                   <select
                     class="form-select"
                     [id]="'productId-' + i"
@@ -156,7 +156,7 @@
 
                 <!-- Big Package Selection -->
                 <div class="col-md-6">
-                  <label [for]="'bigPackage-' + i" class="form-label">Big Package</label>
+                  <label [for]="'bigPackage-' + i" class="form-label">Big Package*</label>
                   <select
                     class="form-select"
                     [id]="'bigPackage-' + i"
@@ -169,13 +169,14 @@
                     <option value="">-- Select Package --</option>
                     <option *ngFor="let pkg of getBigPackages(i)" [value]="pkg.packageNumber">
                       {{ pkg.packageNumber }} ({{ pkg.totalSizeAmount }} {{ pkg.sizeDescription }})
+                      {{ pkg.isOpen ? '[Open]' : '[Closed]' }}
                     </option>
                   </select>
                 </div>
 
                 <!-- Small Package Selection -->
                 <div class="col-md-4">
-                  <label [for]="'smallPackage-' + i" class="form-label">Small Package</label>
+                  <label [for]="'smallPackage-' + i" class="form-label">Small Package*</label>
                   <select
                     class="form-select"
                     [id]="'smallPackage-' + i"
@@ -194,7 +195,7 @@
 
                 <!-- Unit Amount -->
                 <div class="col-md-4">
-                  <label [for]="'unitAmount-' + i" class="form-label">Amount</label>
+                  <label [for]="'unitAmount-' + i" class="form-label">Amount*</label>
                   <input
                     type="number"
                     class="form-control"
@@ -210,7 +211,7 @@
 
                 <!-- Unit Price -->
                 <div class="col-md-4">
-                  <label [for]="'unitPrice-' + i" class="form-label">Unit Price</label>
+                  <label [for]="'unitPrice-' + i" class="form-label">Unit Price*</label>
                   <div class="input-group">
                     <span class="input-group-text">Rp</span>
                     <input
@@ -230,7 +231,7 @@
               <!-- Item Total -->
               <div class="row mt-3">
                 <div class="col-12 text-end">
-                  <strong>Total:</strong> {{ getLineItemTotal(i) | currency:'IDR':'symbol':'1.0-0' }}
+                  <strong>Total:</strong> Rp {{ getLineItemTotal(i) | number:'1.0-0' }}
                 </div>
               </div>
             </div>
@@ -244,7 +245,7 @@
                   <h5>Total:</h5>
                 </div>
                 <div class="col-6 col-md-4 text-end">
-                  <h5>{{ getInvoiceTotal() | currency:'IDR':'symbol':'1.0-0' }}</h5>
+                  <h5>Rp {{ getInvoiceTotal() | number:'1.0-0' }}</h5>
                 </div>
               </div>
             </div>
@@ -252,14 +253,14 @@
         </div>
 
         <!-- Form Actions -->
-        <div class="d-flex justify-content-end mt-4 gap-2">
+        <div class="d-flex justify-content-end gap-2 mt-4">
           <button type="button" class="btn btn-secondary" (click)="cancel()">
             <i class="bi bi-x-circle me-1"></i>Cancel
           </button>
           <button
             type="submit"
             class="btn btn-primary"
-            [disabled]="invoiceForm.invalid || lineItems.length === 0 || isLoading || !isFormValid()"
+            [disabled]="invoiceForm.invalid || isLoading || lineItems.length === 0 || !isFormValid()"
           >
             <i class="bi bi-save me-1"></i>{{ isEditMode ? 'Update' : 'Create' }} Invoice
           </button>

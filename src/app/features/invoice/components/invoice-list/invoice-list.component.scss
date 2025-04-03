@@ -1,35 +1,35 @@
-/* Using Bootstrap classes primarily, minimal custom CSS needed */
-.ag-theme-alpine {
-  --ag-header-height: 50px;
-  --ag-header-foreground-color: #495057;
-  --ag-header-background-color: #f8f9fa;
-  --ag-header-cell-hover-background-color: #f1f3f5;
-  --ag-header-cell-moving-background-color: #f1f3f5;
+// /* Using Bootstrap classes primarily, minimal custom CSS needed */
+// .ag-theme-alpine {
+//   --ag-header-height: 50px;
+//   --ag-header-foreground-color: #495057;
+//   --ag-header-background-color: #f8f9fa;
+//   --ag-header-cell-hover-background-color: #f1f3f5;
+//   --ag-header-cell-moving-background-color: #f1f3f5;
 
-  /* Row colors */
-  --ag-odd-row-background-color: #ffffff;
-  --ag-row-hover-color: rgba(33, 150, 243, 0.1);
-  --ag-selected-row-background-color: rgba(33, 150, 243, 0.2);
+//   /* Row colors */
+//   --ag-odd-row-background-color: #ffffff;
+//   --ag-row-hover-color: rgba(33, 150, 243, 0.1);
+//   --ag-selected-row-background-color: rgba(33, 150, 243, 0.2);
 
-  /* Borders */
-  --ag-border-color: #dee2e6;
-  --ag-cell-horizontal-border: solid #f3f3f3;
-}
+//   /* Borders */
+//   --ag-border-color: #dee2e6;
+//   --ag-cell-horizontal-border: solid #f3f3f3;
+// }
 
-.invoice-link {
-  text-decoration: none;
-  color: #007bff;
+// .invoice-link {
+//   text-decoration: none;
+//   color: #007bff;
 
-  &:hover {
-    text-decoration: underline;
-  }
-}
+//   &:hover {
+//     text-decoration: underline;
+//   }
+// }
 
-/* For responsive card view on mobile */
-.list-group-item {
-  transition: transform 0.2s ease-in-out;
+// /* For responsive card view on mobile */
+// .list-group-item {
+//   transition: transform 0.2s ease-in-out;
 
-  &:hover {
-    transform: translateY(-2px);
-  }
-}
+//   &:hover {
+//     transform: translateY(-2px);
+//   }
+// }
