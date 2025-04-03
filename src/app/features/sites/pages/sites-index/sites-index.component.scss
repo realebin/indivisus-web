@@ -1,4 +1,5 @@
-/* site-index.component.scss */
+/* src/app/features/sites/pages/sites-index/sites-index.component.scss */
+
 .hover-shadow {
   transition: box-shadow 0.3s ease;
 }
@@ -7,23 +8,4 @@
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
 }
 
-/* site-detail.component.scss */
-::ng-deep .vertical-center {
-  display: flex !important;
-  align-items: center !important;
-  height: 100% !important;
-}
-
-// Make sure this doesn't interfere with the multi-line sizing
-::ng-deep .ag-cell {
-  line-height: normal;
-}
-
-/* site-product-detail.component.scss */
-.accordion-button:not(.collapsed) {
-  background-color: rgba(13, 110, 253, 0.1);
-  color: #0d6efd;
-}
-
-/* site-create-form.component.scss */
-// Minimal styling is needed since we're using Bootstrap 5
+/* Keeping CSS minimal as we're using Bootstrap 5.3 */

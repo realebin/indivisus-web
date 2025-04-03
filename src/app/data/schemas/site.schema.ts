@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/consistent-indexed-object-style */
+// src/app/data/schemas/site.schema.ts
+
 /**
  * Site Management Schemas
  */

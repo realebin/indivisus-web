@@ -1,3 +1,5 @@
+// src/app/data/http-services/site.http-service.ts
+
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -35,7 +37,7 @@ export class SiteHttpService {
   // GET all sites with stock overview
   getSitesWithOverview(): Observable<ApiResponse<SiteInquiryHttpResponse>> {
     return this.httpClient.get<ApiResponse<SiteInquiryHttpResponse>>(
-      `${this.baseUrl}/site/list-all-with-stock`
+      `${this.baseUrl}/site/list-with-overview`
     );
   }
 
@@ -50,7 +52,7 @@ export class SiteHttpService {
   getStockHeadersBySite(siteId: string, productType?: string): Observable<ApiResponse<SiteStockHeadersResponse>> {
     let url = `${this.baseUrl}/site/${siteId}/stocks`;
     if (productType) {
-      url += `?type=${productType}`;
+      url += `?productType=${productType}`;
     }
     return this.httpClient.get<ApiResponse<SiteStockHeadersResponse>>(url);
   }

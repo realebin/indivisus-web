@@ -1,3 +1,5 @@
+// src/app/features/sites/pages/sites-index/sites-index.component.ts
+
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl } from '@angular/forms';
@@ -180,10 +182,11 @@ export class SitesIndexComponent implements OnInit {
     this.siteService.createSite(this.siteRequest)
       .pipe(finalize(() => this.isLoading = false))
       .subscribe({
-        next: () => {
+        next: (message) => {
           this.modalRef?.hide();
           this.loadSites();
           this.resetSiteForm();
+          this.errorMessage = message;
         },
         error: (error) => {
           this.errorMessage = error.message || 'Failed to create site';
@@ -207,10 +210,11 @@ export class SitesIndexComponent implements OnInit {
     this.siteService.updateSite(updateRequest)
       .pipe(finalize(() => this.isLoading = false))
       .subscribe({
-        next: () => {
+        next: (message) => {
           this.modalRef?.hide();
           this.loadSites();
           this.resetSiteForm();
+          this.errorMessage = message;
         },
         error: (error) => {
           this.errorMessage = error.message || 'Failed to update site';
@@ -224,8 +228,9 @@ export class SitesIndexComponent implements OnInit {
       this.siteService.deleteSite(site.siteId)
         .pipe(finalize(() => this.isLoading = false))
         .subscribe({
-          next: () => {
+          next: (message) => {
             this.loadSites();
+            this.errorMessage = message;
           },
           error: (error) => {
             this.errorMessage = error.message || 'Failed to delete site';
@@ -244,13 +249,8 @@ export class SitesIndexComponent implements OnInit {
   }
 
   // Navigation to detail
-  navigateToDetail(event: any): void {
-    const siteId = event?.id; // Extract the `id` from the event object
-    if (siteId) {
-      this.router.navigate(['/sites', siteId]); // Navigate to the detail page
-    } else {
-      console.error('Site ID is missing in the event object:', event);
-    }
+  navigateToDetail(event:any): void {
+    this.router.navigate(['/site', event.siteId]);
   }
 
   // Filter panel methods
@@ -318,22 +318,7 @@ export class SitesIndexComponent implements OnInit {
   }
 
   // Handle action button clicks from the responsive-data-table
-  handleSiteAction(event: {type: string, item: any}): void {
-    const site = event.item;
-
-    switch (event.type) {
-      case 'view':
-        this.navigateToDetail(site.siteId);
-        break;
-      case 'edit':
-        this.openEditSiteModal(site);
-        break;
-      case 'delete':
-        this.deleteSite(site);
-        break;
-      default:
-        console.log('Unhandled action type:', event.type);
-        break;
-    }
+  editSite(site: SiteWithOverview): void {
+    this.openEditSiteModal(site);
   }
 }

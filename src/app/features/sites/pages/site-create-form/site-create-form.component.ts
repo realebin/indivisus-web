@@ -1,3 +1,5 @@
+// src/app/features/sites/pages/site-create-form/site-create-form.component.ts
+
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FieldConfig } from '@models/_component-base.model';
@@ -82,15 +84,10 @@ export class SiteCreateFormComponent implements OnInit {
 
   private initForm(): void {
     this.formGroup = this.fb.group({
-      siteName: ['', Validators.required],
-      address: ['', Validators.required],
-      picUserId: ['', Validators.required]
+      siteName: [this.data.siteName, Validators.required],
+      address: [this.data.address, Validators.required],
+      picUserId: [this.data.picUserId, Validators.required]
     });
-
-    // If data is available, populate the form
-    if (this.data) {
-      this.formGroup.patchValue(this.data);
-    }
   }
 
   private loadUsers(): void {

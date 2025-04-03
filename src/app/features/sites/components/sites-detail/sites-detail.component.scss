@@ -1,3 +1,5 @@
+/* src/app/features/sites/components/sites-detail/sites-detail.component.scss */
+
 ::ng-deep .vertical-center {
   display: flex !important;
   align-items: center !important;
@@ -9,23 +11,7 @@
   line-height: normal;
 }
 
-// Action buttons styling
-::ng-deep .action-button-container {
-  display: flex;
-  justify-content: space-between;
-}
-
-::ng-deep .btn-outline-danger {
-  color: #dc3545;
-  border-color: #dc3545;
-}
-
-::ng-deep .btn-outline-danger:hover {
-  color: #fff;
-  background-color: #dc3545;
-  border-color: #dc3545;
-}
-
+// Action buttons styling - minimal since we're using Bootstrap 5.3
 .hover-shadow {
   transition: box-shadow 0.3s ease;
 }

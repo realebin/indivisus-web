@@ -1,3 +1,5 @@
+// src/app/features/sites/components/sites-detail/sites-detail.component.ts
+
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SiteDetail, SiteStockHeader } from '@models/site.model';
@@ -161,7 +163,7 @@ export class SitesDetailComponent implements OnInit {
   handleAction(event: {type: string, item: any, id?: string}): void {
     switch (event.type) {
       case 'edit':
-        // Navigate to edit site page or open edit modal
+        // Navigate to edit site page
         this.router.navigate(['/site/edit', this.currentSiteId]);
         break;
       case 'custom':

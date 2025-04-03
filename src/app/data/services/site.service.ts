@@ -1,3 +1,5 @@
+// src/app/data/services/site.service.ts
+
 import { Injectable } from '@angular/core';
 import { Observable, catchError, map, throwError } from 'rxjs';
 import { SiteHttpService } from '@http_services/site.http-service';
@@ -88,22 +90,64 @@ export class SiteService {
   /**
    * Create new site
    */
-  createSite(request: SiteCreateRequest): Observable<ApiResponse<{ site_id: string }>> {
-    return this.siteHttpService.createSite(transformToSiteCreateHttpRequest(request));
+  createSite(request: SiteCreateRequest): Observable<string> {
+    return this.siteHttpService.createSite(transformToSiteCreateHttpRequest(request)).pipe(
+      map((response) => {
+        // Extract the success message from the response like in user management service
+        const language = 'indonesian';
+        const errorMessage = response.error_schema.error_message;
+
+        if (typeof errorMessage === 'object' && errorMessage !== null) {
+          return errorMessage[language];
+        }
+        return errorMessage || 'Site created successfully';
+      }),
+      catchError((error) => {
+        return throwError(() => error.message || 'Error creating site');
+      })
+    );
   }
 
   /**
    * Update existing site
    */
-  updateSite(request: SiteUpdateRequest): Observable<ApiResponse<{ site_id: string }>> {
-    return this.siteHttpService.updateSite(transformToSiteUpdateHttpRequest(request));
+  updateSite(request: SiteUpdateRequest): Observable<string> {
+    return this.siteHttpService.updateSite(transformToSiteUpdateHttpRequest(request)).pipe(
+      map((response) => {
+        // Extract the success message from the response like in user management service
+        const language = 'indonesian';
+        const errorMessage = response.error_schema.error_message;
+
+        if (typeof errorMessage === 'object' && errorMessage !== null) {
+          return errorMessage[language];
+        }
+        return errorMessage || 'Site updated successfully';
+      }),
+      catchError((error) => {
+        return throwError(() => error.message || 'Error updating site');
+      })
+    );
   }
 
   /**
    * Delete site
    */
-  deleteSite(siteId: string): Observable<ApiResponse<{ site_id: string }>> {
-    return this.siteHttpService.deleteSite(siteId);
+  deleteSite(siteId: string): Observable<string> {
+    return this.siteHttpService.deleteSite(siteId).pipe(
+      map((response) => {
+        // Extract the success message from the response like in user management service
+        const language = 'indonesian';
+        const errorMessage = response.error_schema.error_message;
+
+        if (typeof errorMessage === 'object' && errorMessage !== null) {
+          return errorMessage[language];
+        }
+        return errorMessage || 'Site deleted successfully';
+      }),
+      catchError((error) => {
+        return throwError(() => error.message || 'Error deleting site');
+      })
+    );
   }
 
   /**
