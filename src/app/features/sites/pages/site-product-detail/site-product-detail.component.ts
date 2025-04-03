@@ -56,37 +56,31 @@ export class SiteProductDetailComponent implements OnInit {
   }
 
   findProductInSite(): void {
-    if (!this.siteDetail?.items || !this.productId) {
-      this.errorMessage = 'Product not found in this site';
+    if (!this.productId) {
+      this.errorMessage = 'Product ID is missing';
       return;
     }
 
-    let foundProduct;
-    let foundType = '';
+    this.isLoading = true;
+    this.siteService.getStockHeadersBySite(this.siteId!)
+      .pipe(finalize(() => this.isLoading = false))
+      .subscribe({
+        next: (response) => {
+          const foundProduct = response.stockItems.find(
+            item => item.productId === this.productId
+          );
 
-    // Search through all items/types and their stocks
-    for (const item of this.siteDetail.items) {
-      if (!item.stocks) continue;
-
-      for (const stock of item.stocks) {
-        if (stock.productId === this.productId) {
-          foundProduct = stock;
-          foundType = item.description;
-          break;
+          if (foundProduct) {
+            this.productDetail = foundProduct;
+          } else {
+            this.errorMessage = 'Product not found in this site';
+          }
+        },
+        error: (error) => {
+          console.error('Error loading stock items:', error);
+          this.errorMessage = error.message || 'Failed to load product details';
         }
-      }
-
-      if (foundProduct) break;
-    }
-
-    if (foundProduct) {
-      this.productDetail = {
-        ...foundProduct,
-        type: foundType
-      };
-    } else {
-      this.errorMessage = 'Product not found in this site';
-    }
+      });
   }
 
   goBackToSite(): void {
@@ -103,23 +97,12 @@ export class SiteProductDetailComponent implements OnInit {
   }
 
   getTotalPackages(productDetail: any): number {
-    if (!productDetail?.bigPackages) return 0;
-    return productDetail.bigPackages.length;
+    if (!productDetail?.bigPackagesCount) return 0;
+    return productDetail.bigPackagesCount;
   }
 
   getSizeSummary(productDetail: any): string {
-    if (!productDetail?.sizes || productDetail.sizes.length === 0) return 'No size information';
-
-    return productDetail.sizes.map((size: any) =>
-      `${size.sizeAmount} ${size.sizeDescription}`
-    ).join(', ');
-  }
-
-  getPackageSizeDescription(bigPackage: any): string {
-    if (!bigPackage?.sizes || bigPackage.sizes.length === 0) return 'No size information';
-
-    return bigPackage.sizes.map((size: any) =>
-      `${size.sizeAmount} ${size.sizeDescription}`
-    ).join(', ');
+    if (!productDetail) return 'No size information';
+    return `${productDetail.remainingTotalStock} ${productDetail.sizeDescription}`;
   }
 }

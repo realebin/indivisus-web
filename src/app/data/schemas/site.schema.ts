@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/consistent-indexed-object-style */
 /**
  * Site Management Schemas
  */
@@ -21,7 +22,7 @@ export interface SiteAllListOverviewHttpResponse {
   }[];
 }
 
-// Response for list-with-overview endpoint
+// Response for list-all-with-stock endpoint
 export interface SiteInquiryHttpResponse {
   epoch: number;
   data: {
@@ -33,16 +34,13 @@ export interface SiteInquiryHttpResponse {
     pic_full_name: string;
     created_at: string;
     changed_on: string;
-    package_overview?: {
-      type: string;
-      total_packages: number | null;
-      total_size: number | null;
-    }[];
-    size_overview?: {
-      type: string;
-      total_packages: number | null;
-      total_size: number | null;
-    }[];
+    type_overviews?: {
+      [type: string]: {
+        total_package: number;
+        total_stock: number;
+        size_description: string;
+      };
+    };
   }[];
 }
 
@@ -58,31 +56,6 @@ export interface SiteDetailInquiryHttpResponse {
     pic_full_name: string;
     created_at: string;
     changed_on: string;
-    items?: {
-      description: string;
-      stocks?: {
-        id_product: string;
-        product_name: string;
-        remaining_big_packages: number;
-        sizes?: {
-          size_description: string;
-          size_amount: number;
-        }[];
-        big_packages?: {
-          id_big_packages: string;
-          sizes?: {
-            size_description: string;
-            size_amount: number;
-          }[];
-          smaller_packages: {
-            id_smaller_packages: string;
-            quantity?: number;
-            size_description: string;
-            size_amount: number;
-          }[];
-        }[];
-      }[];
-    }[];
   };
 }
 
@@ -90,15 +63,19 @@ export interface SiteDetailInquiryHttpResponse {
 export interface SiteStockHeadersResponse {
   epoch: number;
   data: {
-    stock_id: string;
-    product_id: string;
-    product_name: string;
-    type: string;
-    remaining_stock: number;
     site_id: string;
-    created_at: string;
-    changed_on: string;
-  }[];
+    site_name: string;
+    stock_items: {
+      stock_id: string;
+      product_id: string;
+      product_name: string;
+      type: string;
+      remaining_total_packages: number;
+      remaining_total_stock: number;
+      size_description: string;
+      big_packages_count: number;
+    }[];
+  };
 }
 
 /**

@@ -244,8 +244,13 @@ export class SitesIndexComponent implements OnInit {
   }
 
   // Navigation to detail
-  navigateToDetail(siteId: string): void {
-    this.router.navigate(['/site', siteId]);
+  navigateToDetail(event: any): void {
+    const siteId = event?.id; // Extract the `id` from the event object
+    if (siteId) {
+      this.router.navigate(['/sites', siteId]); // Navigate to the detail page
+    } else {
+      console.error('Site ID is missing in the event object:', event);
+    }
   }
 
   // Filter panel methods

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SiteAllListOverviewModelResponse } from '@models/site.model';
+import { SiteAllListResponse } from '@models/site.model';
 import { StockHeaderModel } from '@models/stock.model';
 import { SiteService } from '@services/site.service';
 import { StockManagementService } from '@services/stock.service';
@@ -124,7 +124,7 @@ export class StockFormComponent implements OnInit {
   loadSites(): void {
     this.isLoading = true;
     this.siteService.getSiteForFilter().subscribe({
-      next: (response: SiteAllListOverviewModelResponse) => {
+      next: (response: SiteAllListResponse) => {
         this.sites = response.data.map(site => ({
           value: site.siteId,
           label: site.siteName

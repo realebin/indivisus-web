@@ -35,7 +35,7 @@ export class SiteHttpService {
   // GET all sites with stock overview
   getSitesWithOverview(): Observable<ApiResponse<SiteInquiryHttpResponse>> {
     return this.httpClient.get<ApiResponse<SiteInquiryHttpResponse>>(
-      `${this.baseUrl}/site/list-with-overview`
+      `${this.baseUrl}/site/list-all-with-stock`
     );
   }
 
@@ -50,7 +50,7 @@ export class SiteHttpService {
   getStockHeadersBySite(siteId: string, productType?: string): Observable<ApiResponse<SiteStockHeadersResponse>> {
     let url = `${this.baseUrl}/site/${siteId}/stocks`;
     if (productType) {
-      url += `?productType=${productType}`;
+      url += `?type=${productType}`;
     }
     return this.httpClient.get<ApiResponse<SiteStockHeadersResponse>>(url);
   }
@@ -77,9 +77,11 @@ export class SiteHttpService {
       `${this.baseUrl}/site/delete/${siteId}`
     );
   }
+
+  // GET sites for filtering/dropdown use
   getSiteForFilter(): Observable<ApiResponse<SiteAllListOverviewHttpResponse>> {
     return this.httpClient.get<ApiResponse<SiteAllListOverviewHttpResponse>>(
-      `${this.env.apiEndpoint}/site-management/site/list-all`
+      `${this.baseUrl}/site/list-all`
     );
   }
 }

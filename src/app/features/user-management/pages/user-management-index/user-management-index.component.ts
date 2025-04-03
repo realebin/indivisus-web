@@ -17,7 +17,7 @@ import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { Subscription } from '@node_modules/rxjs/dist/types';
 import { UserManagementService } from '@services/user-management.service';
 import { SiteService } from '@services/site.service';
-import { SiteAllListOverviewModelResponse } from '@models/site.model';
+import { SiteAllListResponse } from '@models/site.model';
 import { UserManagementDictionaryEnum } from '@cores/enums/custom-variable.enum';
 @Component({
   selector: 'app-user-management-index',
@@ -79,7 +79,7 @@ export class UserManagementIndexComponent implements OnInit, OnDestroy {
     postalCode: '',
   };
 
-  siteList: SiteAllListOverviewModelResponse;
+  siteList: SiteAllListResponse;
 
   constructor(
     private userManagementService: UserManagementService,

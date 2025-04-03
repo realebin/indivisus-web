@@ -36,7 +36,7 @@
                   <i class="bi bi-box me-2"></i><strong>Type:</strong> {{ productDetail.type }}
                 </p>
                 <p class="text-muted mb-2">
-                  <i class="bi bi-rulers me-2"></i><strong>Sizes:</strong> {{ getSizeSummary(productDetail) }}
+                  <i class="bi bi-rulers me-2"></i><strong>Size:</strong> {{ getSizeSummary(productDetail) }}
                 </p>
                 <p class="text-muted mb-0">
                   <i class="bi bi-box-seam me-2"></i><strong>Total Packages:</strong> {{ getTotalPackages(productDetail) }}
@@ -55,83 +55,16 @@
     </div>
   </div>
 
-  <!-- Package Details -->
-  <div *ngIf="!isLoading && productDetail?.bigPackages?.length > 0" class="row">
-    <div class="col-12">
-      <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3">
-          <h5 class="mb-0"><i class="bi bi-boxes me-2"></i>Package Details</h5>
-        </div>
-        <div class="card-body">
-          <div class="accordion" id="packagesAccordion">
-            <div class="accordion-item" *ngFor="let bigPackage of productDetail.bigPackages; let i = index">
-              <h2 class="accordion-header">
-                <button class="accordion-button" type="button"
-                        [attr.data-bs-toggle]="'collapse'"
-                        [attr.data-bs-target]="'#package' + i"
-                        [attr.aria-expanded]="i === 0 ? 'true' : 'false'"
-                        [attr.aria-controls]="'package' + i">
-                  <strong>Package {{ bigPackage.bigPackageId }}</strong>
-                  <span class="ms-3 text-muted">
-                    <ng-container *ngIf="bigPackage.sizes && bigPackage.sizes.length > 0; else noSizeInfo">
-                      {{ getPackageSizeDescription(bigPackage) }}
-                    </ng-container>
-                    <ng-template #noSizeInfo>No size information</ng-template>
-                  </span>
-                </button>
-              </h2>
-              <div [id]="'package' + i" class="accordion-collapse collapse" [class.show]="i === 0"
-                   [attr.data-bs-parent]="'#packagesAccordion'">
-                <div class="accordion-body">
-                  <div class="mb-3">
-                    <h6 class="fw-bold">Package Sizes</h6>
-                    <div class="row">
-                      <div class="col-md-3 mb-2" *ngFor="let size of bigPackage.sizes">
-                        <div class="p-2 bg-light rounded">
-                          <small class="text-muted d-block">{{ size.sizeDescription }}</small>
-                          <span class="fw-bold">{{ size.sizeAmount }}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div *ngIf="bigPackage.smallerPackages?.length > 0">
-                    <h6 class="fw-bold">Smaller Packages</h6>
-                    <div class="table-responsive">
-                      <table class="table table-bordered table-hover">
-                        <thead class="table-light">
-                          <tr>
-                            <th>Package ID</th>
-                            <th>Size</th>
-                            <th>Quantity</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr *ngFor="let smallPackage of bigPackage.smallerPackages">
-                            <td>{{ smallPackage.smallerPackageId }}</td>
-                            <td>{{ smallPackage.sizeAmount }} {{ smallPackage.sizeDescription }}</td>
-                            <td>{{ smallPackage.quantity || 1 }}</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- No Packages Message -->
-  <div *ngIf="!isLoading && productDetail && (!productDetail.bigPackages || productDetail.bigPackages.length === 0)" class="row">
+  <!-- No Product Info Message -->
+  <div *ngIf="!isLoading && !productDetail && !errorMessage" class="row">
     <div class="col-12">
       <div class="card shadow-sm border-0">
         <div class="card-body py-5 text-center">
           <app-empty-data></app-empty-data>
-          <p class="text-muted">This product doesn't have any package details available.</p>
+          <p class="text-muted">Product information is unavailable</p>
+          <button class="btn btn-outline-secondary mt-3" (click)="goBackToSite()">
+            <i class="bi bi-arrow-left me-2"></i>Back to Site
+          </button>
         </div>
       </div>
     </div>
