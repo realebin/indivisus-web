@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-inferrable-types */
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FieldConfig } from '@models/_component-base.model';
-import { SiteCreateEditModelRequest } from '@models/site.model';
+import { SiteCreateRequest } from '@models/site.model';
 import { UserManagementInquiryAppUserModelResponse } from '@models/user-management.model';
 import { UserManagementService } from '@services/user-management.service';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-site-create-form',
@@ -12,19 +12,21 @@ import { UserManagementService } from '@services/user-management.service';
   styleUrls: ['./site-create-form.component.scss']
 })
 export class SiteCreateFormComponent implements OnInit {
-  @Input() data: SiteCreateEditModelRequest = {
+  @Input() data: SiteCreateRequest = {
     siteName: '',
     address: '',
     picUserId: ''
   };
-  @Input() isFormValid: boolean = false;
-  @Input() errorMessage: string = '';
+
+  @Input() isEditMode = false;
+  @Input() errorMessage = '';
+
   @Output() formValidityChange = new EventEmitter<boolean>();
-  @Output() dataChange = new EventEmitter<SiteCreateEditModelRequest>();
+  @Output() dataChange = new EventEmitter<SiteCreateRequest>();
 
   formGroup!: FormGroup;
   users: any[] = [];
-  isLoading: boolean = false;
+  isLoadingUsers = false;
 
   fields: FieldConfig[] = [
     {
@@ -41,7 +43,7 @@ export class SiteCreateFormComponent implements OnInit {
       name: 'address',
       label: 'Address',
       type: 'text',
-      placeholder: 'Enter address',
+      placeholder: 'Enter full address',
       validators: [Validators.required],
       validationMessages: {
         required: 'Address is required'
@@ -49,12 +51,12 @@ export class SiteCreateFormComponent implements OnInit {
     },
     {
       name: 'picUserId',
-      label: 'PIC User',
+      label: 'Person In Charge (PIC)',
       type: 'select',
       placeholder: 'Select a user',
       validators: [Validators.required],
       validationMessages: {
-        required: 'PIC User is required'
+        required: 'PIC is required'
       },
       options: []
     }
@@ -95,25 +97,29 @@ export class SiteCreateFormComponent implements OnInit {
   }
 
   private loadUsers(): void {
-    this.isLoading = true;
-    this.userManagementService.inquiryAppUser().subscribe({
-      next: (response: UserManagementInquiryAppUserModelResponse) => {
-        this.users = response.appUsers;
-        // Update the select options with the users
-        const picUserField = this.fields.find(field => field.name === 'picUserId');
-        if (picUserField) {
-          picUserField.options = this.users.map(user => ({
-            label: `${user.fullName} (${user.username})`,
-            value: user.id
-          }));
+    this.isLoadingUsers = true;
+    this.userManagementService.inquiryAppUser()
+      .pipe(finalize(() => this.isLoadingUsers = false))
+      .subscribe({
+        next: (response: UserManagementInquiryAppUserModelResponse) => {
+          this.users = response.appUsers;
+          // Update the select options with the users
+          const picUserField = this.fields.find(field => field.name === 'picUserId');
+          if (picUserField) {
+            picUserField.options = this.users.map(user => ({
+              label: `${user.fullName} (${user.username})`,
+              value: user.id.toString()
+            }));
+          }
+
+          // Patch the form data again in case the users loaded after initial patching
+          this.patchFormData();
+        },
+        error: (error) => {
+          console.error('Error loading users:', error);
+          this.errorMessage = error.message || 'Failed to load users';
         }
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading users:', error);
-        this.isLoading = false;
-      }
-    });
+      });
   }
 
   resetForm(): void {

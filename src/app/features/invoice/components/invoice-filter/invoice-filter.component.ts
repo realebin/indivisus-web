@@ -5,6 +5,7 @@ import { UserManagementService } from '@services/user-management.service';
 import { Customer } from '@models/user-management.model';
 import { SiteOverviewList } from '@models/site.model';
 
+
 export interface InvoiceFilter {
   customerId?: string;
   siteId?: string;

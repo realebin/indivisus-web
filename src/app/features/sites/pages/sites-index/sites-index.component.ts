@@ -1,8 +1,9 @@
-/* eslint-disable @typescript-eslint/no-inferrable-types */
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { SiteCreateEditModelRequest, SiteInquiryModelResponse } from '@models/site.model';
+import { Router } from '@angular/router';
+import { SiteCreateRequest, SiteInquiryResponse, SiteWithOverview } from '@models/site.model';
 import { SiteService } from '@services/site.service';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-sites-index',
@@ -12,12 +13,18 @@ import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 export class SitesIndexComponent implements OnInit {
   @ViewChild('createSiteModal') createSiteModal!: TemplateRef<any>;
 
-  isLoading: boolean = false;
-  sites: SiteInquiryModelResponse;
+  isLoading = false;
+  sites: SiteWithOverview[] = [];
+  siteResponse?: SiteInquiryResponse;
+
   modalRef?: BsModalRef;
-  isSiteFormValid: boolean = false;
-  errorMessage: string = '';
-  siteRequest: SiteCreateEditModelRequest = {
+  isSiteFormValid = false;
+  errorMessage = '';
+
+  isEditMode = false;
+  selectedSite?: SiteWithOverview;
+
+  siteRequest: SiteCreateRequest = {
     siteName: '',
     address: '',
     picUserId: ''
@@ -25,7 +32,8 @@ export class SitesIndexComponent implements OnInit {
 
   constructor(
     private siteService: SiteService,
-    private modalService: BsModalService
+    private modalService: BsModalService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -34,31 +42,39 @@ export class SitesIndexComponent implements OnInit {
 
   loadSites(): void {
     this.isLoading = true;
-    this.siteService.inquirySites().subscribe({
-      next: (response) => {
-        // Make sure we're properly handling the response structure
-        this.sites = response; // This should be an object with a 'sites' property
-        console.log('Sites loaded:', this.sites); // Add this for debugging
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading sites:', error);
-        this.isLoading = false;
-      }
-    });
+    this.siteService.getSitesWithOverview()
+      .pipe(finalize(() => this.isLoading = false))
+      .subscribe({
+        next: (response) => {
+          this.siteResponse = response;
+          this.sites = response.sites;
+        },
+        error: (error) => {
+          console.error('Error loading sites:', error);
+          this.errorMessage = error.message || 'Failed to load sites';
+        }
+      });
   }
 
   openCreateSiteModal(): void {
-    this.siteRequest = {
-      siteName: '',
-      address: '',
-      picUserId: ''
-    };
-    this.errorMessage = '';
-    this.modalRef = this.modalService.show(this.createSiteModal);
+    this.isEditMode = false;
+    this.selectedSite = undefined;
+    this.resetSiteForm();
+    this.modalRef = this.modalService.show(this.createSiteModal, { class: 'modal-lg' });
   }
 
-  onSiteFormDataChange(data: SiteCreateEditModelRequest): void {
+  openEditSiteModal(site: SiteWithOverview): void {
+    this.isEditMode = true;
+    this.selectedSite = site;
+    this.siteRequest = {
+      siteName: site.siteName,
+      address: site.address,
+      picUserId: site.picUserId
+    };
+    this.modalRef = this.modalService.show(this.createSiteModal, { class: 'modal-lg' });
+  }
+
+  onSiteFormDataChange(data: SiteCreateRequest): void {
     this.siteRequest = data;
   }
 
@@ -67,37 +83,110 @@ export class SitesIndexComponent implements OnInit {
   }
 
   createSite(): void {
+    if (!this.isSiteFormValid) {
+      return;
+    }
+
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.siteService.createEditSite(this.siteRequest).subscribe({
-      next: (response) => {
-        this.isLoading = false;
-        this.modalRef?.hide();
-        this.loadSites(); // Reload sites after creation
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.errorMessage = error.message || 'An error occurred while creating the site';
-      }
-    });
+    this.siteService.createSite(this.siteRequest)
+      .pipe(finalize(() => this.isLoading = false))
+      .subscribe({
+        next: (message) => {
+          this.modalRef?.hide();
+          this.loadSites();
+          this.resetSiteForm();
+          // You could show a success message here
+        },
+        error: (error) => {
+          this.errorMessage = error.message || 'Failed to create site';
+        }
+      });
+  }
+
+  updateSite(): void {
+    if (!this.isSiteFormValid || !this.selectedSite) {
+      return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    const updateRequest = {
+      siteId: this.selectedSite.siteId,
+      ...this.siteRequest
+    };
+
+    this.siteService.updateSite(updateRequest)
+      .pipe(finalize(() => this.isLoading = false))
+      .subscribe({
+        next: (message) => {
+          this.modalRef?.hide();
+          this.loadSites();
+          this.resetSiteForm();
+          // You could show a success message here
+        },
+        error: (error) => {
+          this.errorMessage = error.message || 'Failed to update site';
+        }
+      });
+  }
+
+  deleteSite(site: SiteWithOverview): void {
+    if (confirm(`Are you sure you want to delete site "${site.siteName}"?`)) {
+      this.isLoading = true;
+      this.siteService.deleteSite(site.siteId)
+        .pipe(finalize(() => this.isLoading = false))
+        .subscribe({
+          next: (message) => {
+            this.loadSites();
+            // You could show a success message here
+          },
+          error: (error) => {
+            this.errorMessage = error.message || 'Failed to delete site';
+          }
+        });
+    }
+  }
+
+  submitSiteForm(): void {
+    if (this.isEditMode) {
+      this.updateSite();
+    } else {
+      this.createSite();
+    }
+  }
+
+  resetSiteForm(): void {
+    this.siteRequest = {
+      siteName: '',
+      address: '',
+      picUserId: ''
+    };
+    this.errorMessage = '';
   }
 
   closeModal(): void {
     this.modalRef?.hide();
   }
 
-  // Add this method to handle site deletion if needed
-  deleteSite(id: number): void {
-    if (confirm('Are you sure you want to delete this site?')) {
-      this.siteService.deleteSite({ id }).subscribe({
-        next: () => {
-          this.loadSites(); // Reload the list after deletion
-        },
-        error: (error) => {
-          console.error('Error deleting site:', error);
-        },
-      });
+  handleSiteAction(event: {type: string, item: any}): void {
+    const site = event.item;
+
+    switch (event.type) {
+      case 'view':
+        this.router.navigate(['/site', site.siteId]);
+        break;
+      case 'edit':
+        this.openEditSiteModal(site);
+        break;
+      case 'delete':
+        this.deleteSite(site);
+        break;
+      default:
+        console.log('Unhandled action type:', event.type);
+        break;
     }
   }
 }

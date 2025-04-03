@@ -1,30 +1,98 @@
-<div class="container px-2">
-  <div class="my-4">
-    <h3 class="display-6 fw-bold text-primary">Sites</h3>
-  </div>
-
-  <app-breadcrumbs
-    [breadcrumbs]="[
-      { label: 'Sites', url: '/site' },
-      { label: siteDetail?.siteName || 'Site Detail' }
-    ]"
-  ></app-breadcrumbs>
-
-  <div *ngIf="!isLoading; else loading">
-    <div class="table-responsive">
-      <ag-grid-angular
-      style="width: 100%; height: 500px;"
-      [columnDefs]="colDefs"
-      [rowData]="rowData"
-      [domLayout]="'normal'"
-      [defaultColDef]="defaultColDef"
-      [suppressRowTransform]="true"
-      [pagination]="true"
-    ></ag-grid-angular>
+<div class="container px-4 py-4">
+  <!-- Header with breadcrumbs -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <app-breadcrumbs [breadcrumbs]="[
+        { label: 'Sites', url: '/site' },
+        { label: siteDetail?.siteName || 'Site Details' }
+      ]"></app-breadcrumbs>
     </div>
   </div>
 
-  <ng-template #loading>
-    <app-loader *ngIf="isLoading" type="loading-absolute"></app-loader>
-  </ng-template>
+  <!-- Loading State -->
+  <app-loader *ngIf="isLoading" type="loading-relative"></app-loader>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}
+    <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+  </div>
+
+  <!-- Site Information Card -->
+  <div *ngIf="!isLoading && siteDetail" class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <h3 class="fw-bold text-primary mb-3">{{ siteDetail.siteName }}</h3>
+
+              <div class="mb-3">
+                <p class="text-muted mb-2">
+                  <i class="bi bi-geo-alt me-2"></i><strong>Address:</strong> {{ siteDetail.address || 'Not specified' }}
+                </p>
+                <p class="text-muted mb-2">
+                  <i class="bi bi-person me-2"></i><strong>PIC:</strong> {{ siteDetail.picFullName }}
+                </p>
+                <p class="text-muted mb-0">
+                  <i class="bi bi-calendar me-2"></i><strong>Created:</strong>
+                  {{ siteDetail.createdAt | date:'medium' }}
+                </p>
+              </div>
+            </div>
+
+            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+              <app-action-buttons
+                [actions]="[
+                  { type: 'edit', icon: 'bi-pencil', label: 'Edit Site', buttonClass: 'btn-outline-primary' },
+                  { type: 'custom', icon: 'bi-arrow-left', label: 'Back to Sites', buttonClass: 'btn-outline-secondary' }
+                ]"
+                (actionClick)="handleAction($event)">
+              </app-action-buttons>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Stock Table -->
+  <div *ngIf="!isLoading && siteDetail && rowData.length > 0" class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+          <h5 class="mb-0"><i class="bi bi-box-seam me-2"></i>Stock Items</h5>
+        </div>
+        <div class="card-body p-0">
+          <ag-grid-angular
+            class="ag-theme-alpine"
+            style="width: 100%; height: 500px;"
+            [rowData]="rowData"
+            [columnDefs]="colDefs"
+            [defaultColDef]="defaultColDef"
+            (cellClicked)="onGridCellClicked($event)"
+            domLayout="autoHeight"
+            [suppressRowTransform]="true"
+            [pagination]="true"
+            [paginationPageSize]="10"
+          ></ag-grid-angular>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty Stock State -->
+  <div *ngIf="!isLoading && siteDetail && rowData.length === 0" class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm border-0">
+        <div class="card-body py-5 text-center">
+          <app-empty-data></app-empty-data>
+          <p class="text-muted">This site doesn't have any stock items yet.</p>
+          <button class="btn btn-primary mt-2">
+            <i class="bi bi-plus-circle me-2"></i>Add Stock Item
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

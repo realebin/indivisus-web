@@ -1,0 +1,142 @@
+<div class="container px-4 py-4">
+  <!-- Header with breadcrumbs -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <app-breadcrumbs [breadcrumbs]="[
+        { label: 'Sites', url: '/site' },
+        { label: siteDetail?.siteName || 'Site', url: siteId ? '/site/' + siteId : '/site' },
+        { label: productDetail?.productName || 'Product Details' }
+      ]"></app-breadcrumbs>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <app-loader *ngIf="isLoading" type="loading-relative"></app-loader>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}
+    <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+  </div>
+
+  <!-- Product Information -->
+  <div *ngIf="!isLoading && productDetail" class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-8">
+              <h3 class="fw-bold text-primary mb-3">{{ productDetail.productName }}</h3>
+
+              <div class="mb-3">
+                <p class="text-muted mb-2">
+                  <i class="bi bi-tag me-2"></i><strong>Product ID:</strong> {{ productDetail.productId }}
+                </p>
+                <p class="text-muted mb-2">
+                  <i class="bi bi-box me-2"></i><strong>Type:</strong> {{ productDetail.type }}
+                </p>
+                <p class="text-muted mb-2">
+                  <i class="bi bi-rulers me-2"></i><strong>Sizes:</strong> {{ getSizeSummary(productDetail) }}
+                </p>
+                <p class="text-muted mb-0">
+                  <i class="bi bi-box-seam me-2"></i><strong>Total Packages:</strong> {{ getTotalPackages(productDetail) }}
+                </p>
+              </div>
+            </div>
+
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+              <app-action-buttons
+                [actions]="[
+                  { type: 'custom', icon: 'bi-arrow-left', label: 'Back to Site', buttonClass: 'btn-outline-secondary' }
+                ]"
+                (actionClick)="goBackToSite()">
+              </app-action-buttons>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Package Details -->
+  <div *ngIf="!isLoading && productDetail?.bigPackages?.length > 0" class="row">
+    <div class="col-12">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+          <h5 class="mb-0"><i class="bi bi-boxes me-2"></i>Package Details</h5>
+        </div>
+        <div class="card-body">
+          <div class="accordion" id="packagesAccordion">
+            <div class="accordion-item" *ngFor="let bigPackage of productDetail.bigPackages; let i = index">
+              <h2 class="accordion-header">
+                <button class="accordion-button" type="button"
+                        [attr.data-bs-toggle]="'collapse'"
+                        [attr.data-bs-target]="'#package' + i"
+                        [attr.aria-expanded]="i === 0 ? 'true' : 'false'"
+                        [attr.aria-controls]="'package' + i">
+                  <strong>Package {{ bigPackage.bigPackageId }}</strong>
+                  <span class="ms-3 text-muted">
+                    <ng-container *ngIf="bigPackage.sizes && bigPackage.sizes.length > 0; else noSizeInfo">
+                      {{ getPackageSizeDescription(bigPackage) }}
+                    </ng-container>
+                    <ng-template #noSizeInfo>No size information</ng-template>
+                  </span>
+                </button>
+              </h2>
+              <div [id]="'package' + i" class="accordion-collapse collapse" [class.show]="i === 0"
+                   [attr.data-bs-parent]="'#packagesAccordion'">
+                <div class="accordion-body">
+                  <div class="mb-3">
+                    <h6 class="fw-bold">Package Sizes</h6>
+                    <div class="row">
+                      <div class="col-md-3 mb-2" *ngFor="let size of bigPackage.sizes">
+                        <div class="p-2 bg-light rounded">
+                          <small class="text-muted d-block">{{ size.sizeDescription }}</small>
+                          <span class="fw-bold">{{ size.sizeAmount }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div *ngIf="bigPackage.smallerPackages?.length > 0">
+                    <h6 class="fw-bold">Smaller Packages</h6>
+                    <div class="table-responsive">
+                      <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                          <tr>
+                            <th>Package ID</th>
+                            <th>Size</th>
+                            <th>Quantity</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let smallPackage of bigPackage.smallerPackages">
+                            <td>{{ smallPackage.smallerPackageId }}</td>
+                            <td>{{ smallPackage.sizeAmount }} {{ smallPackage.sizeDescription }}</td>
+                            <td>{{ smallPackage.quantity || 1 }}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Packages Message -->
+  <div *ngIf="!isLoading && productDetail && (!productDetail.bigPackages || productDetail.bigPackages.length === 0)" class="row">
+    <div class="col-12">
+      <div class="card shadow-sm border-0">
+        <div class="card-body py-5 text-center">
+          <app-empty-data></app-empty-data>
+          <p class="text-muted">This product doesn't have any package details available.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

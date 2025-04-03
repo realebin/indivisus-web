@@ -1,13 +1,28 @@
-<div class="container">
-  <div class="alert alert-danger" role="alert" *ngIf="errorMessage">
-    {{ errorMessage }}
+<div class="container p-3">
+  <!-- Error Alert -->
+  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}
+    <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
   </div>
+
+  <!-- Loading Users Indicator -->
+  <div *ngIf="isLoadingUsers" class="text-center mb-3">
+    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+    <span class="ms-2">Loading users...</span>
+  </div>
+
+  <!-- Form -->
   <form [formGroup]="formGroup" class="needs-validation">
     <app-input-builder
       *ngFor="let field of fields"
       [formGroup]="formGroup"
       [config]="field"
     ></app-input-builder>
+
+    <!-- Helper text for PIC selection -->
+    <div class="mb-3 small text-muted">
+      <i class="bi bi-info-circle me-1"></i>
+      The Person In Charge (PIC) is responsible for managing this site and its inventory.
+    </div>
   </form>
-  <app-loader *ngIf="isLoading"></app-loader>
 </div>
