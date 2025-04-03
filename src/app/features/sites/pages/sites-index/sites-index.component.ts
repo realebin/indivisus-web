@@ -1,9 +1,13 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { SiteCreateRequest, SiteInquiryResponse, SiteWithOverview } from '@models/site.model';
+import { FormControl } from '@angular/forms';
+import { SiteCreateRequest, SiteUpdateRequest, SiteWithOverview } from '@models/site.model';
 import { SiteService } from '@services/site.service';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { finalize } from 'rxjs';
+import { SortOption } from 'src/app/shared-components/filter-panel/filter-panel.component';
+import { ColumnConfig } from 'src/app/shared-components/expandable-card/expandable-card.component';
+import { ColDef } from 'ag-grid-community';
 
 @Component({
   selector: 'app-sites-index',
@@ -15,14 +19,82 @@ export class SitesIndexComponent implements OnInit {
 
   isLoading = false;
   sites: SiteWithOverview[] = [];
-  siteResponse?: SiteInquiryResponse;
-
+  filteredSites: SiteWithOverview[] = [];
   modalRef?: BsModalRef;
-  isSiteFormValid = false;
   errorMessage = '';
 
+  // Form related properties
+  isSiteFormValid = false;
   isEditMode = false;
   selectedSite?: SiteWithOverview;
+
+  // Filter panel properties
+  showFilterPanel = false;
+  searchFilter = new FormControl('');
+  sortField = 'siteName';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
+  // CardConfigs for mobile view
+  cardConfigs: { [key: string]: ColumnConfig[] } = {
+    'SITE': [
+      { field: 'siteName', label: 'Site Name', isHeader: true, icon: 'bi-geo-alt' },
+      { field: 'address', label: 'Address' },
+      { field: 'picFullName', label: 'PIC', isHeader: true },
+      { field: 'createdAt', label: 'Created Date' }
+    ]
+  };
+
+  // Column definitions for grid view
+  columnDefs: ColDef[] = [
+    {
+      headerName: 'Site Name',
+      field: 'siteName',
+      sortable: true,
+      filter: true,
+      resizable: true
+    },
+    {
+      headerName: 'Address',
+      field: 'address',
+      sortable: true,
+      filter: true,
+      resizable: true
+    },
+    {
+      headerName: 'PIC',
+      field: 'picFullName',
+      sortable: true,
+      filter: true,
+      resizable: true
+    },
+    {
+      headerName: 'Created Date',
+      field: 'createdAt',
+      sortable: true,
+      filter: true,
+      resizable: true,
+      valueFormatter: (params) => {
+        if (!params.value) return '';
+        return new Date(params.value).toLocaleDateString();
+      }
+    },
+    {
+      headerName: 'Actions',
+      cellRenderer: 'actionsRenderer',
+      sortable: false,
+      filter: false,
+      resizable: false,
+      width: 120
+    }
+  ];
+
+  // Sort options for filter panel
+  sortOptions: SortOption[] = [
+    { field: 'siteName', label: 'Site Name' },
+    { field: 'address', label: 'Address' },
+    { field: 'picFullName', label: 'PIC' },
+    { field: 'createdAt', label: 'Created Date' }
+  ];
 
   siteRequest: SiteCreateRequest = {
     siteName: '',
@@ -38,19 +110,26 @@ export class SitesIndexComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadSites();
+
+    // Subscribe to search filter changes
+    this.searchFilter.valueChanges.subscribe(() => {
+      this.applyFilters();
+    });
   }
 
   loadSites(): void {
     this.isLoading = true;
+    this.errorMessage = '';
+
     this.siteService.getSitesWithOverview()
       .pipe(finalize(() => this.isLoading = false))
       .subscribe({
         next: (response) => {
-          this.siteResponse = response;
           this.sites = response.sites;
+          this.filteredSites = [...this.sites];
+          this.applyFilters();
         },
         error: (error) => {
-          console.error('Error loading sites:', error);
           this.errorMessage = error.message || 'Failed to load sites';
         }
       });
@@ -82,6 +161,14 @@ export class SitesIndexComponent implements OnInit {
     this.isSiteFormValid = isValid;
   }
 
+  submitSiteForm(): void {
+    if (this.isEditMode) {
+      this.updateSite();
+    } else {
+      this.createSite();
+    }
+  }
+
   createSite(): void {
     if (!this.isSiteFormValid) {
       return;
@@ -93,11 +180,10 @@ export class SitesIndexComponent implements OnInit {
     this.siteService.createSite(this.siteRequest)
       .pipe(finalize(() => this.isLoading = false))
       .subscribe({
-        next: (message) => {
+        next: () => {
           this.modalRef?.hide();
           this.loadSites();
           this.resetSiteForm();
-          // You could show a success message here
         },
         error: (error) => {
           this.errorMessage = error.message || 'Failed to create site';
@@ -113,7 +199,7 @@ export class SitesIndexComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    const updateRequest = {
+    const updateRequest: SiteUpdateRequest = {
       siteId: this.selectedSite.siteId,
       ...this.siteRequest
     };
@@ -121,11 +207,10 @@ export class SitesIndexComponent implements OnInit {
     this.siteService.updateSite(updateRequest)
       .pipe(finalize(() => this.isLoading = false))
       .subscribe({
-        next: (message) => {
+        next: () => {
           this.modalRef?.hide();
           this.loadSites();
           this.resetSiteForm();
-          // You could show a success message here
         },
         error: (error) => {
           this.errorMessage = error.message || 'Failed to update site';
@@ -139,22 +224,13 @@ export class SitesIndexComponent implements OnInit {
       this.siteService.deleteSite(site.siteId)
         .pipe(finalize(() => this.isLoading = false))
         .subscribe({
-          next: (message) => {
+          next: () => {
             this.loadSites();
-            // You could show a success message here
           },
           error: (error) => {
             this.errorMessage = error.message || 'Failed to delete site';
           }
         });
-    }
-  }
-
-  submitSiteForm(): void {
-    if (this.isEditMode) {
-      this.updateSite();
-    } else {
-      this.createSite();
     }
   }
 
@@ -167,16 +243,82 @@ export class SitesIndexComponent implements OnInit {
     this.errorMessage = '';
   }
 
-  closeModal(): void {
-    this.modalRef?.hide();
+  // Navigation to detail
+  navigateToDetail(siteId: string): void {
+    this.router.navigate(['/site', siteId]);
   }
 
+  // Filter panel methods
+  toggleFilterPanel(): void {
+    this.showFilterPanel = !this.showFilterPanel;
+  }
+
+  applyFilters(): void {
+    let filtered = [...this.sites];
+
+    // Apply search filter
+    if (this.searchFilter.value) {
+      const searchTerm = this.searchFilter.value.toLowerCase();
+      filtered = filtered.filter(site =>
+        site.siteName.toLowerCase().includes(searchTerm) ||
+        site.address.toLowerCase().includes(searchTerm) ||
+        site.picFullName.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    // Apply sorting
+    if (this.sortField) {
+      filtered.sort((a, b) => {
+        const aValue = a[this.sortField as keyof SiteWithOverview];
+        const bValue = b[this.sortField as keyof SiteWithOverview];
+
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+          return this.sortDirection === 'asc'
+            ? aValue.localeCompare(bValue)
+            : bValue.localeCompare(aValue);
+        }
+
+        // Handle date comparison
+        if (this.sortField === 'createdAt' || this.sortField === 'changedOn') {
+          const dateA = new Date(aValue as string).getTime();
+          const dateB = new Date(bValue as string).getTime();
+          return this.sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
+        }
+
+        return 0;
+      });
+    }
+
+    this.filteredSites = filtered;
+  }
+
+  onSortChange(event: { field: string }): void {
+    if (this.sortField === event.field) {
+      // Toggle direction if clicking the same field
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      // Set new field and default to ascending
+      this.sortField = event.field;
+      this.sortDirection = 'asc';
+    }
+
+    this.applyFilters();
+  }
+
+  resetFilters(): void {
+    this.searchFilter.setValue('');
+    this.sortField = 'siteName';
+    this.sortDirection = 'asc';
+    this.filteredSites = [...this.sites];
+  }
+
+  // Handle action button clicks from the responsive-data-table
   handleSiteAction(event: {type: string, item: any}): void {
     const site = event.item;
 
     switch (event.type) {
       case 'view':
-        this.router.navigate(['/site', site.siteId]);
+        this.navigateToDetail(site.siteId);
         break;
       case 'edit':
         this.openEditSiteModal(site);

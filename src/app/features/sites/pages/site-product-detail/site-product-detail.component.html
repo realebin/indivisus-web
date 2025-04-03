@@ -45,12 +45,9 @@
             </div>
 
             <div class="col-md-4 text-md-end mt-3 mt-md-0">
-              <app-action-buttons
-                [actions]="[
-                  { type: 'custom', icon: 'bi-arrow-left', label: 'Back to Site', buttonClass: 'btn-outline-secondary' }
-                ]"
-                (actionClick)="goBackToSite()">
-              </app-action-buttons>
+              <button class="btn btn-outline-secondary" (click)="goBackToSite()">
+                <i class="bi bi-arrow-left me-2"></i>Back to Site
+              </button>
             </div>
           </div>
         </div>

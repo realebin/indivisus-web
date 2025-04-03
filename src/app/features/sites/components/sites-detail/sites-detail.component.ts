@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SiteDetail, SiteDetailResponse } from '@models/site.model';
+import { SiteDetail, SiteStockHeader } from '@models/site.model';
 import { SiteService } from '@services/site.service';
 import { finalize } from 'rxjs';
 import { ColDef } from 'ag-grid-community';
@@ -16,6 +16,7 @@ export class SitesDetailComponent implements OnInit {
   siteDetail?: SiteDetail;
   errorMessage = '';
   currentSiteId?: string;
+  stockHeaders: SiteStockHeader[] = [];
 
   // AG Grid properties
   defaultColDef: ColDef = {
@@ -50,32 +51,20 @@ export class SitesDetailComponent implements OnInit {
       width: 120
     },
     {
-      headerName: 'Sizes',
-      field: 'sizes',
-      autoHeight: true,
-      cellClass: 'vertical-center',
-      cellRenderer: (params: any) => {
-        if (!params.value || params.value.length === 0) return '';
-
-        const container = document.createElement('div');
-        container.className = 'sizes-container';
-
-        params.value.forEach((size: any) => {
-          const sizeDiv = document.createElement('div');
-          sizeDiv.className = 'size-item mb-1';
-          sizeDiv.textContent = `${size.sizeDescription}: ${size.sizeAmount}`;
-          container.appendChild(sizeDiv);
-        });
-
-        return container;
-      },
-      flex: 1
-    },
-    {
-      headerName: 'Packages',
-      field: 'remainingBigPackages',
+      headerName: 'Remaining Stock',
+      field: 'remainingStock',
       cellClass: 'vertical-center text-center',
       width: 120
+    },
+    {
+      headerName: 'Created',
+      field: 'createdAt',
+      cellClass: 'vertical-center',
+      valueFormatter: (params: any) => {
+        if (!params.value) return '';
+        return new Date(params.value).toLocaleDateString();
+      },
+      width: 130
     },
     {
       headerName: 'Actions',
@@ -102,109 +91,105 @@ export class SitesDetailComponent implements OnInit {
     }
   ];
 
-  rowData: any[] = [];
+ // Data for the grid
+ rowData: any[] = [];
 
-  constructor(
-    private route: ActivatedRoute,
-    private siteService: SiteService,
-    private router: Router
-  ) {}
+ constructor(
+   private route: ActivatedRoute,
+   private siteService: SiteService,
+   private router: Router,
+   private modalService: BsModalService
+ ) {}
 
-  ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
-      const siteId = params.get('id');
-      if (siteId) {
-        this.currentSiteId = siteId;
-        this.loadSiteDetail(siteId);
-      } else {
-        this.errorMessage = 'No site ID provided';
-        this.isLoading = false;
-      }
-    });
-  }
+ ngOnInit(): void {
+   this.route.paramMap.subscribe(params => {
+     const siteId = params.get('id');
+     if (siteId) {
+       this.currentSiteId = siteId;
+       this.loadSiteDetail(siteId);
+     } else {
+       this.errorMessage = 'No site ID provided';
+       this.isLoading = false;
+     }
+   });
+ }
 
-  loadSiteDetail(siteId: string): void {
-    this.isLoading = true;
-    this.siteService.getSiteDetail(siteId)
-      .pipe(finalize(() => this.isLoading = false))
-      .subscribe({
-        next: (response: SiteDetailResponse) => {
-          this.siteDetail = response.site;
-          this.processDataForGrid();
-        },
-        error: (error) => {
-          console.error('Error loading site details:', error);
-          this.errorMessage = error.message || 'Failed to load site details';
-        }
-      });
-  }
+ loadSiteDetail(siteId: string): void {
+   this.isLoading = true;
+   this.siteService.getSiteDetail(siteId)
+     .pipe(finalize(() => this.isLoading = false))
+     .subscribe({
+       next: (response) => {
+         this.siteDetail = response.site;
+         this.processDataForGrid();
+       },
+       error: (error) => {
+         console.error('Error loading site details:', error);
+         this.errorMessage = error.message || 'Failed to load site details';
+       }
+     });
+ }
 
-  processDataForGrid(): void {
-    if (!this.siteDetail?.items) {
-      this.rowData = [];
-      return;
-    }
+ processDataForGrid(): void {
+   if (!this.siteDetail?.items) {
+     this.rowData = [];
+     return;
+   }
 
-    const processed: any[] = [];
+   const processed: any[] = [];
 
-    this.siteDetail.items.forEach(item => {
-      if (!item.stocks) return;
+   this.siteDetail.items.forEach(item => {
+     if (!item.stocks) return;
 
-      item.stocks.forEach(stock => {
-        processed.push({
-          productId: stock.productId,
-          productName: stock.productName,
-          type: item.description,
-          sizes: stock.sizes || [],
-          remainingBigPackages: stock.remainingBigPackages,
-          bigPackages: stock.bigPackages || []
-        });
-      });
-    });
+     item.stocks.forEach(stock => {
+       processed.push({
+         productId: stock.productId,
+         productName: stock.productName,
+         type: item.description,
+         sizes: stock.sizes || [],
+         remainingStock: stock.remainingBigPackages,
+         bigPackages: stock.bigPackages || [],
+         createdAt: this.siteDetail?.createdAt
+       });
+     });
+   });
 
-    this.rowData = processed;
-  }
+   this.rowData = processed;
+ }
 
-  onGridCellClicked(event: any): void {
-    if (event.column.getColId() === 'productName' && event.value) {
-      this.navigateToProductDetail(event.data.productId);
-    } else if (event.colDef.cellRenderer && event.event.target.getAttribute('data-action') === 'view') {
-      const productId = event.event.target.getAttribute('data-product-id');
-      if (productId) {
-        this.navigateToProductDetail(productId);
-      }
-    }
-  }
+ onGridCellClicked(event: any): void {
+   if (event.column.getColId() === 'productName' && event.value) {
+     this.navigateToProductDetail(event.data.productId);
+   } else if (event.colDef.cellRenderer && event.event.target.getAttribute('data-action') === 'view') {
+     const productId = event.event.target.getAttribute('data-product-id');
+     if (productId) {
+       this.navigateToProductDetail(productId);
+     }
+   }
+ }
 
-  navigateToProductDetail(productId: string): void {
-    if (this.currentSiteId) {
-      this.router.navigate(['/site', this.currentSiteId, 'product', productId]);
-    }
-  }
+ navigateToProductDetail(productId: string): void {
+   if (this.currentSiteId) {
+     this.router.navigate(['/site', this.currentSiteId, 'product', productId]);
+   }
+ }
 
-  // This method is for handling clicks on product links from the template
-  // through event delegation (added to the host listener in the template)
-  onProductLinkClick(element: HTMLElement): void {
-    if (element.classList.contains('product-link') || element.getAttribute('data-action') === 'view') {
-      const productId = element.getAttribute('data-product-id');
-      if (productId) {
-        this.navigateToProductDetail(productId);
-      }
-    }
-  }
+ handleAction(event: {type: string, item: any, id?: string}): void {
+   switch (event.type) {
+     case 'edit':
+       // Open edit site modal
+       console.log('Edit site:', this.siteDetail);
+       break;
+     case 'custom':
+       // Back to sites action
+       this.router.navigate(['/site']);
+       break;
+     default:
+       break;
+   }
+ }
 
-  handleAction(event: {type: string, item: any, id?: string}): void {
-    switch (event.type) {
-      case 'edit':
-        // TODO: Implement edit site functionality
-        console.log('Edit site:', this.siteDetail);
-        break;
-      case 'custom':
-        // Back to sites action
-        this.router.navigate(['/site']);
-        break;
-      default:
-        break;
-    }
-  }
+ goBack(): void {
+   this.router.navigate(['/site']);
+ }
 }

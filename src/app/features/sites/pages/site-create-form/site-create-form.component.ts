@@ -2,7 +2,6 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FieldConfig } from '@models/_component-base.model';
 import { SiteCreateRequest } from '@models/site.model';
-import { UserManagementInquiryAppUserModelResponse } from '@models/user-management.model';
 import { UserManagementService } from '@services/user-management.service';
 import { finalize } from 'rxjs';
 
@@ -70,7 +69,6 @@ export class SiteCreateFormComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadUsers();
-    this.patchFormData();
 
     this.formGroup.valueChanges.subscribe((value) => {
       const updatedData = { ...this.data, ...value };
@@ -88,11 +86,10 @@ export class SiteCreateFormComponent implements OnInit {
       address: ['', Validators.required],
       picUserId: ['', Validators.required]
     });
-  }
 
-  private patchFormData(): void {
+    // If data is available, populate the form
     if (this.data) {
-      this.formGroup?.patchValue(this.data);
+      this.formGroup.patchValue(this.data);
     }
   }
 
@@ -101,8 +98,9 @@ export class SiteCreateFormComponent implements OnInit {
     this.userManagementService.inquiryAppUser()
       .pipe(finalize(() => this.isLoadingUsers = false))
       .subscribe({
-        next: (response: UserManagementInquiryAppUserModelResponse) => {
+        next: (response) => {
           this.users = response.appUsers;
+
           // Update the select options with the users
           const picUserField = this.fields.find(field => field.name === 'picUserId');
           if (picUserField) {
@@ -112,11 +110,12 @@ export class SiteCreateFormComponent implements OnInit {
             }));
           }
 
-          // Patch the form data again in case the users loaded after initial patching
-          this.patchFormData();
+          // Re-patch the form data now that we have the options
+          if (this.data) {
+            this.formGroup.patchValue(this.data);
+          }
         },
         error: (error) => {
-          console.error('Error loading users:', error);
           this.errorMessage = error.message || 'Failed to load users';
         }
       });
