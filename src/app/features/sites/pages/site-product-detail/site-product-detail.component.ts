@@ -15,6 +15,7 @@ export class SiteProductDetailComponent implements OnInit {
   productId?: string;
   siteDetail?: SiteDetail;
   productDetail?: any;
+  bigPackages?: any[] = [];
   errorMessage = '';
 
   constructor(
@@ -42,28 +43,45 @@ export class SiteProductDetailComponent implements OnInit {
 
     this.isLoading = true;
     this.siteService.getSiteDetail(this.siteId)
-      .pipe(finalize(() => this.isLoading = false))
+      .pipe(finalize(() => {
+        // After loading site details, load the product details
+        // We proceed to load product details regardless of site detail success or failure
+        this.loadProductDetail();
+      }))
       .subscribe({
         next: (response) => {
           this.siteDetail = response.site;
-          this.findProductInSite();
         },
         error: (error) => {
           console.error('Error loading site details:', error);
           this.errorMessage = error.message || 'Failed to load site details';
+
+          // As a fallback, try to get basic site info from sites list
+          this.siteService.getAllSites().subscribe({
+            next: (allSitesResponse) => {
+              const site = allSitesResponse.data.find(s => s.siteId === this.siteId);
+              if (site) {
+                this.siteDetail = site;
+                this.errorMessage = ''; // Clear error message if we found the site
+              }
+            },
+            error: () => {
+              // Keep original error if fallback fails
+            }
+          });
         }
       });
   }
 
-  findProductInSite(): void {
-    if (!this.productId) {
-      this.errorMessage = 'Product ID is missing';
+  loadProductDetail(): void {
+    if (!this.productId || !this.siteId) {
+      this.errorMessage = 'Product ID or Site ID is missing';
+      this.isLoading = false;
       return;
     }
 
-    this.isLoading = true;
-    this.siteService.getStockHeadersBySite(this.siteId!)
-      .pipe(finalize(() => this.isLoading = false))
+    // First get the stock headers to find the product details
+    this.siteService.getStockHeadersBySite(this.siteId)
       .subscribe({
         next: (response) => {
           const foundProduct = response.stockItems.find(
@@ -72,15 +90,53 @@ export class SiteProductDetailComponent implements OnInit {
 
           if (foundProduct) {
             this.productDetail = foundProduct;
+            // Now load the package details for this product
+            this.loadPackageDetails();
           } else {
             this.errorMessage = 'Product not found in this site';
+            this.isLoading = false;
           }
         },
         error: (error) => {
           console.error('Error loading stock items:', error);
           this.errorMessage = error.message || 'Failed to load product details';
+          this.isLoading = false;
         }
       });
+  }
+
+  loadPackageDetails(): void {
+    // This would be a separate API call to get package details
+    // For now, we'll simulate it with mock data
+    setTimeout(() => {
+      // Simulated package data - replace with actual API call when available
+      this.bigPackages = [
+        {
+          idBigPackages: 'BP001',
+          smallerPackages: [
+            { sizeDescription: 'Small', sizeAmount: 25 },
+            { sizeDescription: 'Medium', sizeAmount: 35 },
+            { sizeDescription: 'Large', sizeAmount: 15 }
+          ]
+        },
+        {
+          idBigPackages: 'BP002',
+          smallerPackages: [
+            { sizeDescription: 'Small', sizeAmount: 30 },
+            { sizeDescription: 'Medium', sizeAmount: 20 }
+          ]
+        }
+      ];
+      this.isLoading = false;
+    }, 500);
+  }
+
+  getTotalInPackage(pkg: any): number {
+    if (!pkg.smallerPackages || pkg.smallerPackages.length === 0) return 0;
+
+    return pkg.smallerPackages.reduce((total: number, smallPkg: any) => {
+      return total + (smallPkg.sizeAmount || 0);
+    }, 0);
   }
 
   goBackToSite(): void {
@@ -89,20 +145,5 @@ export class SiteProductDetailComponent implements OnInit {
     } else {
       this.router.navigate(['/site']);
     }
-  }
-
-  getPrimarySize(sizes: any[]): string {
-    if (!sizes || sizes.length === 0) return 'N/A';
-    return `${sizes[0].sizeAmount} ${sizes[0].sizeDescription}`;
-  }
-
-  getTotalPackages(productDetail: any): number {
-    if (!productDetail?.bigPackagesCount) return 0;
-    return productDetail.bigPackagesCount;
-  }
-
-  getSizeSummary(productDetail: any): string {
-    if (!productDetail) return 'No size information';
-    return `${productDetail.remainingTotalStock} ${productDetail.sizeDescription}`;
   }
 }

@@ -111,17 +111,16 @@ export class InvoiceListComponent implements OnInit {
         headerName: 'Actions',
         sortable: false,
         filter: false,
-        width: 140,
         cellRenderer: (params: any) => {
           return `
             <div class="d-flex">
-              <button class="btn btn-sm btn-outline-primary me-1 edit-btn" title="Edit">
+              <button class="btn btn-sm btn-primary me-1 edit-btn" title="Edit">
                 <i class="bi bi-pencil"></i>
               </button>
-              <button class="btn btn-sm btn-outline-danger me-1 delete-btn" title="Delete">
+              <button class="btn btn-sm btn-danger me-1 delete-btn" title="Delete">
                 <i class="bi bi-trash"></i>
               </button>
-              <button class="btn btn-sm btn-outline-secondary pdf-btn" title="Download PDF">
+              <button class="btn btn-sm btn-secondary pdf-btn" title="Download PDF">
                 <i class="bi bi-file-pdf"></i>
               </button>
             </div>

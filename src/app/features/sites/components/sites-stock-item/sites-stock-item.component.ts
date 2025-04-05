@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-sites-stock-item',
@@ -7,32 +8,27 @@ import { Component, Input } from '@angular/core';
 })
 export class SitesStockItemComponent {
   @Input() stocks!: any;
+  @Input() siteId!: string;
+  @Output() viewDetails = new EventEmitter<{productId: string, siteId: string}>();
 
-  getNestedPackageInfo(packages: any[] | undefined): string {
+  constructor(private router: Router) {}
+
+  viewStockDetails(): void {
+    if (this.stocks && this.stocks.productId && this.siteId) {
+      this.viewDetails.emit({
+        productId: this.stocks.productId,
+        siteId: this.siteId
+      });
+    }
+  }
+
+  getTotalInPackage(packages: any[] | undefined): number {
     if (!packages || packages.length === 0) {
-      return 'No packages available';
+      return 0;
     }
 
-    return packages
-      .map((pkg) => {
-        const sizeInfo = `${pkg.sizeDescription} - ${pkg.sizeAmount}`;
-        const quantityInfo = pkg.quantity ? ` (x${pkg.quantity})` : '';
-
-        // Recursively handle nested packages (smaller and smallest)
-        let nestedInfo = '';
-        if (pkg.smallerPackages && pkg.smallerPackages.length > 0) {
-          nestedInfo +=
-            '<br>&nbsp;&nbsp;&nbsp;<i>Smaller:</i><br>' +
-            this.getNestedPackageInfo(pkg.smallerPackages);
-        }
-        if (pkg.theSmallestPackages && pkg.theSmallestPackages.length > 0) {
-          nestedInfo +=
-            '<br>&nbsp;&nbsp;&nbsp;<i>Smallest:</i><br>' +
-            this.getNestedPackageInfo(pkg.theSmallestPackages);
-        }
-
-        return `${sizeInfo}${quantityInfo}${nestedInfo ? nestedInfo : ''}`;
-      })
-      .join('<br>');
+    return packages.reduce((total, pkg) => {
+      return total + (pkg.sizeAmount || 0);
+    }, 0);
   }
 }

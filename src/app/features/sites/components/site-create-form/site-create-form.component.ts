@@ -1,5 +1,3 @@
-// src/app/features/sites/pages/site-create-form/site-create-form.component.ts
-
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FieldConfig } from '@models/_component-base.model';
@@ -16,7 +14,8 @@ export class SiteCreateFormComponent implements OnInit {
   @Input() data: SiteCreateRequest = {
     siteName: '',
     address: '',
-    picUserId: ''
+    picUserId: '',
+    phone: ''
   };
 
   @Input() isEditMode = false;
@@ -49,6 +48,14 @@ export class SiteCreateFormComponent implements OnInit {
       validationMessages: {
         required: 'Address is required'
       }
+    },
+    {
+      name: 'phone',
+      label: 'Phone',
+      type: 'text',
+      placeholder: 'Enter phone number',
+      validators: [],
+      validationMessages: {}
     },
     {
       name: 'picUserId',
@@ -86,6 +93,7 @@ export class SiteCreateFormComponent implements OnInit {
     this.formGroup = this.fb.group({
       siteName: [this.data.siteName, Validators.required],
       address: [this.data.address, Validators.required],
+      phone: [this.data.phone],
       picUserId: [this.data.picUserId, Validators.required]
     });
   }

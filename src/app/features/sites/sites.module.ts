@@ -5,15 +5,17 @@ import { SharedComponentsModule } from 'src/app/shared-components/shared-compone
 import { ReactiveFormsModule } from '@angular/forms';
 import { AgGridModule } from 'ag-grid-angular';
 import {
-  SiteCreateFormComponent,
   SiteProductDetailComponent,
   SitesIndexComponent,
 } from './pages';
 import {
+  SiteCreateFormComponent,
   SitesDetailComponent,
   SitesInquiryComponent,
   SitesStockItemComponent,
 } from './components';
+import { SitesCreateBuilderComponent } from './pages/sites-create-builder/sites-create-builder.component';
+
 
 @NgModule({
   declarations: [
@@ -23,6 +25,7 @@ import {
     SiteProductDetailComponent,
     SitesInquiryComponent,
     SitesStockItemComponent,
+    SitesCreateBuilderComponent,
   ],
   imports: [
     CommonModule,

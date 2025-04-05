@@ -19,6 +19,7 @@ export interface SiteAllListOverviewHttpResponse {
     pic_user_id: string;
     pic_username: string;
     pic_full_name: string;
+    phone?: string;
     created_at: string;
     changed_on: string;
   }[];
@@ -34,6 +35,7 @@ export interface SiteInquiryHttpResponse {
     pic_user_id: string;
     pic_username: string;
     pic_full_name: string;
+    phone?: string;
     created_at: string;
     changed_on: string;
     type_overviews?: {
@@ -56,13 +58,14 @@ export interface SiteDetailInquiryHttpResponse {
     pic_user_id: string;
     pic_username: string;
     pic_full_name: string;
+    phone?: string;
     created_at: string;
     changed_on: string;
   };
 }
 
 // Response for stock headers by site endpoint
-export interface SiteStockHeadersResponse {
+export interface SiteStockHeadersHttpResponse {
   epoch: number;
   data: {
     site_id: string;
@@ -80,6 +83,24 @@ export interface SiteStockHeadersResponse {
   };
 }
 
+export interface SiteStockHeadersWithSpecificProductHttpResponse {
+  data : {
+    changed_by: string;
+    changed_on: string;
+    created_at: string;
+    created_by: string;
+    price: number;
+    product_id: string;
+    product_name: string;
+    remaining_stock: number;
+    size_description: string;
+    specs: string;
+    stock_id: string;
+    total_size_amount: number;
+    type: string;
+  }[]
+}
+
 /**
  * Request Schemas
  */
@@ -89,6 +110,7 @@ export interface SiteCreateHttpRequest {
   site_name: string;
   address: string;
   pic_user_id: string;
+  phone?: string;
 }
 
 // Request for update site endpoint
@@ -97,4 +119,5 @@ export interface SiteUpdateHttpRequest {
   site_name: string;
   address: string;
   pic_user_id: string;
+  phone?: string;
 }

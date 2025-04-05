@@ -13,6 +13,7 @@ export class NavbarComponent implements OnInit {
 
   navItems: any;
   isSidebarCollapsed = false;
+  name = localStorage.getItem('name');
 
   constructor(
     private router: Router,

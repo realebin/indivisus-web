@@ -1,25 +1,23 @@
-// src/app/data/services/site.service.ts
-
 import { Injectable } from '@angular/core';
 import { Observable, catchError, map, throwError } from 'rxjs';
 import { SiteHttpService } from '@http_services/site.http-service';
-import { ApiResponse } from '@schemas/_base.schema';
 import {
   SiteAllListResponse,
   SiteCreateRequest,
   SiteDetailResponse,
   SiteInquiryResponse,
   SiteStockHeadersResponseModel,
+  SiteStockHeadersWithSpecificProductModelResponse,
   SiteUpdateRequest,
   transformToSiteAllListResponse,
   transformToSiteCreateHttpRequest,
-  transformToSiteDetailResponse,
   transformToSiteInquiryResponse,
   transformToSiteStockHeadersResponse,
+  transformToSiteStockHeadersWithSpecificProductModelResponse,
   transformToSiteUpdateHttpRequest
 } from '@models/site.model';
 import { ErrorOutputWrapper } from '@models/_base.model';
-import { SiteAllListOverviewHttpResponse, SiteDetailInquiryHttpResponse, SiteInquiryHttpResponse, SiteStockHeadersResponse } from '@schemas/site.schema';
+import { SiteAllListOverviewHttpResponse, SiteInquiryHttpResponse, SiteStockHeadersHttpResponse, SiteStockHeadersWithSpecificProductHttpResponse } from '@schemas/site.schema';
 
 @Injectable({
   providedIn: 'root',
@@ -59,15 +57,33 @@ export class SiteService {
 
   /**
    * Get site detail by ID
+   * We need to get this from the list-all endpoint since there's no specific site detail endpoint
    */
   getSiteDetail(siteId: string): Observable<SiteDetailResponse> {
-    return this.siteHttpService.getSiteDetail(siteId).pipe(
-      map((response) => transformToSiteDetailResponse(response.output_schema)),
-      catchError((error: ErrorOutputWrapper<SiteDetailInquiryHttpResponse>) => {
-        return throwError({
-          ...error,
-          data: error?.data ? transformToSiteDetailResponse(error?.data) : null,
-        });
+    // First try from sites with overview as it has more data
+    return this.getSitesWithOverview().pipe(
+      map((response) => {
+        const site = response.sites.find(s => s.siteId === siteId);
+        if (!site) {
+          throw new Error('Site not found');
+        }
+
+        return { site };
+      }),
+      catchError((error) => {
+        // Fallback to getAllSites if getSitesWithOverview fails
+        if (error.message === 'Site not found') {
+          return this.getAllSites().pipe(
+            map((response) => {
+              const site = response.data.find(s => s.siteId === siteId);
+              if (!site) {
+                throw new Error('Site not found');
+              }
+              return { site };
+            })
+          );
+        }
+        return throwError(error);
       })
     );
   }
@@ -75,10 +91,10 @@ export class SiteService {
   /**
    * Get stock headers by site
    */
-  getStockHeadersBySite(siteId: string, productType?: string): Observable<SiteStockHeadersResponseModel> {
-    return this.siteHttpService.getStockHeadersBySite(siteId, productType).pipe(
+  getStockHeadersBySite(siteId: string): Observable<SiteStockHeadersResponseModel> {
+    return this.siteHttpService.getStockHeadersBySite(siteId).pipe(
       map((response) => transformToSiteStockHeadersResponse(response.output_schema)),
-      catchError((error: ErrorOutputWrapper<SiteStockHeadersResponse>) => {
+      catchError((error: ErrorOutputWrapper<SiteStockHeadersHttpResponse>) => {
         return throwError({
           ...error,
           data: error?.data ? transformToSiteStockHeadersResponse(error?.data) : null,
@@ -87,13 +103,28 @@ export class SiteService {
     );
   }
 
+    /**
+   * Get stock specificly by site
+   */
+    getSpecificStockBySite(siteId: string, productType?: string): Observable<SiteStockHeadersWithSpecificProductModelResponse> {
+      return this.siteHttpService.getSpecificStockBySite(siteId, productType).pipe(
+        map((response) => transformToSiteStockHeadersWithSpecificProductModelResponse(response.output_schema)),
+        catchError((error: ErrorOutputWrapper<SiteStockHeadersWithSpecificProductHttpResponse>) => {
+          return throwError({
+            ...error,
+            data: error?.data ? transformToSiteStockHeadersWithSpecificProductModelResponse(error?.data) : null,
+          });
+        })
+      );
+    }
+
   /**
    * Create new site
    */
   createSite(request: SiteCreateRequest): Observable<string> {
     return this.siteHttpService.createSite(transformToSiteCreateHttpRequest(request)).pipe(
       map((response) => {
-        // Extract the success message from the response like in user management service
+        // Extract the success message from the response
         const language = 'indonesian';
         const errorMessage = response.error_schema.error_message;
 
@@ -114,7 +145,7 @@ export class SiteService {
   updateSite(request: SiteUpdateRequest): Observable<string> {
     return this.siteHttpService.updateSite(transformToSiteUpdateHttpRequest(request)).pipe(
       map((response) => {
-        // Extract the success message from the response like in user management service
+        // Extract the success message from the response
         const language = 'indonesian';
         const errorMessage = response.error_schema.error_message;
 
@@ -135,7 +166,7 @@ export class SiteService {
   deleteSite(siteId: string): Observable<string> {
     return this.siteHttpService.deleteSite(siteId).pipe(
       map((response) => {
-        // Extract the success message from the response like in user management service
+        // Extract the success message from the response
         const language = 'indonesian';
         const errorMessage = response.error_schema.error_message;
 

@@ -21,7 +21,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   isPasswordVisible = false; // Tracks visibility of the password
 
   constructor(private authService: AuthService, private router: Router) {
-    if (localStorage.getItem('loggedUser')) {
+    if (localStorage.getItem('authToken')) {
       this.router.navigate(['/dashboard']);
     }
   }

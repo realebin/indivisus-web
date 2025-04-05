@@ -1,12 +1,10 @@
-// src/app/features/sites/components/sites-detail/sites-detail.component.ts
-
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SiteDetail, SiteStockHeader } from '@models/site.model';
+import { SiteDetail, SiteSpecificProduct, SiteStockHeader } from '@models/site.model';
 import { SiteService } from '@services/site.service';
 import { finalize } from 'rxjs';
 import { ColDef } from 'ag-grid-community';
-import { Action } from 'src/app/shared-components/action-buttons/action-buttons.component';
+
 
 @Component({
   selector: 'app-sites-detail',
@@ -15,11 +13,16 @@ import { Action } from 'src/app/shared-components/action-buttons/action-buttons.
 })
 export class SitesDetailComponent implements OnInit {
   isLoading = true;
+  isLoadingStocks = false;
   siteDetail?: SiteDetail;
   errorMessage = '';
+  stockErrorMessage = '';
+  specificStockErrorMessage = '';
   currentSiteId?: string;
   stockHeaders: SiteStockHeader[] = [];
+  specificStockItems: SiteSpecificProduct[] = [];
   rowData: any[] = [];
+  currentTab = 'Kain'; // Default to Kain tab
 
   // AG Grid properties
   defaultColDef: ColDef = {
@@ -48,22 +51,20 @@ export class SitesDetailComponent implements OnInit {
       flex: 2
     },
     {
-      headerName: 'Type',
-      field: 'type',
-      cellClass: 'vertical-center',
-      width: 120
+      headerName: 'Remaining Packages',
+      field: 'remainingTotalPackages',
+      cellClass: 'vertical-center text-center',
+      width: 180
     },
     {
       headerName: 'Remaining Stock',
       field: 'remainingTotalStock',
       cellClass: 'vertical-center text-center',
-      width: 140
-    },
-    {
-      headerName: 'Size Description',
-      field: 'sizeDescription',
-      cellClass: 'vertical-center',
-      width: 130
+      width: 160,
+      valueFormatter: (params: any) => {
+        if (params.value === null || params.value === undefined) return '';
+        return `${params.value} ${params.data.sizeDescription || ''}`;
+      }
     },
     {
       headerName: 'Actions',
@@ -111,10 +112,13 @@ export class SitesDetailComponent implements OnInit {
 
   loadSiteDetail(siteId: string): void {
     this.isLoading = true;
+    this.errorMessage = '';
+
     this.siteService.getSiteDetail(siteId)
       .pipe(finalize(() => {
-        // Load stock headers after site details
-        this.loadStockHeaders(siteId);
+        this.isLoading = false;
+        // Load stock headers separately
+        this.loadStockHeaders(siteId, this.currentTab);
       }))
       .subscribe({
         next: (response) => {
@@ -123,24 +127,52 @@ export class SitesDetailComponent implements OnInit {
         error: (error) => {
           console.error('Error loading site details:', error);
           this.errorMessage = error.message || 'Failed to load site details';
-          this.isLoading = false;
         }
       });
   }
 
-  loadStockHeaders(siteId: string): void {
-    this.siteService.getStockHeadersBySite(siteId)
-      .pipe(finalize(() => this.isLoading = false))
+  loadStockHeaders(siteId: string, productType?: string): void {
+    this.isLoadingStocks = true;
+    this.specificStockErrorMessage = '';
+    this.rowData = [];
+
+    if(productType) {
+    this.siteService.getSpecificStockBySite(siteId, productType)
+      .pipe(finalize(() => this.isLoadingStocks = false))
       .subscribe({
         next: (response) => {
-          this.stockHeaders = response.stockItems;
+          console.log(response)
+          this.specificStockItems = response.data || [];
+          this.rowData = this.specificStockItems;
+        },
+        error: (error) => {
+          console.error('Error loading stock headers:', error);
+          this.specificStockErrorMessage = 'Failed to load stock information';
+        }
+      });
+    }
+    else {
+      this.siteService.getStockHeadersBySite(siteId)
+      .pipe(finalize(() => this.isLoadingStocks = false))
+      .subscribe({
+        next: (response) => {
+          console.log(response)
+          this.stockHeaders = response.stockItems || [];
           this.rowData = this.stockHeaders;
         },
         error: (error) => {
           console.error('Error loading stock headers:', error);
-          this.errorMessage = error.message || 'Failed to load stock information';
+          this.stockErrorMessage = 'Failed to load stock information';
         }
       });
+    }
+  }
+
+  switchTab(tabName: string): void {
+    this.currentTab = tabName;
+    if (this.currentSiteId) {
+      this.loadStockHeaders(this.currentSiteId, tabName);
+    }
   }
 
   onGridCellClicked(event: any): void {
@@ -168,7 +200,7 @@ export class SitesDetailComponent implements OnInit {
         break;
       case 'custom':
         // Back to sites action
-        this.router.navigate(['/site']);
+        this.goBack();
         break;
       default:
         break;
@@ -177,5 +209,8 @@ export class SitesDetailComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/site']);
+  }
+  navigateToEdit(): void {
+    this.router.navigate(['/site/edit', this.currentSiteId]);
   }
 }

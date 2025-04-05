@@ -6,7 +6,8 @@ import {
   SiteUpdateHttpRequest,
   SiteDetailInquiryHttpResponse,
   SiteInquiryHttpResponse,
-  SiteStockHeadersResponse
+  SiteStockHeadersHttpResponse,
+  SiteStockHeadersWithSpecificProductHttpResponse,
 } from '@schemas/site.schema';
 
 /**
@@ -21,6 +22,7 @@ export interface Site {
   picUserId: string;
   picUsername: string;
   picFullName: string;
+  phone?: string;
   createdAt: string;
   changedOn: string;
 }
@@ -33,6 +35,7 @@ export interface SiteOverviewList {
   picUserId: string;
   picUsername: string;
   picFullName: string;
+  phone?: string;
   createdAt: string;
   changedOn: string;
 }
@@ -44,7 +47,7 @@ export interface SiteWithOverview extends Site {
       totalPackage: number;
       totalStock: number;
       sizeDescription: string;
-    }
+    };
   };
 }
 
@@ -65,6 +68,26 @@ export interface SiteStockHeader {
   bigPackagesCount: number;
 }
 
+export interface SiteSpecificProduct {
+  changedBy: string;
+  changedOn: string;
+  createdAt: string;
+  createdBy: string;
+  price: number;
+  productId: string;
+  productName: string;
+  remainingStock: number;
+  sizeDescription: string;
+  specs: string;
+  stockId: string;
+  totalSizeAmount: number;
+  type: string;
+}
+
+export interface SiteStockHeadersWithSpecificProductModelResponse {
+  data: SiteSpecificProduct[];
+}
+
 /**
  * Request Models
  */
@@ -73,6 +96,7 @@ export interface SiteCreateRequest {
   siteName: string;
   address: string;
   picUserId: string;
+  phone?: string;
 }
 
 export interface SiteUpdateRequest {
@@ -80,6 +104,7 @@ export interface SiteUpdateRequest {
   siteName: string;
   address: string;
   picUserId: string;
+  phone?: string;
 }
 
 /**
@@ -112,23 +137,24 @@ export function transformToSiteAllListResponse(
   response: SiteAllListOverviewHttpResponse
 ): SiteAllListResponse {
   return {
-    data: response.data.map(site => ({
+    data: response.data.map((site) => ({
       siteId: site.site_id,
       siteName: site.site_name,
       address: site.address,
       picUserId: site.pic_user_id,
       picUsername: site.pic_username,
       picFullName: site.pic_full_name,
+      phone: site.phone,
       createdAt: site.created_at,
-      changedOn: site.changed_on
-    }))
+      changedOn: site.changed_on,
+    })),
   };
 }
 
 export function transformToSiteInquiryResponse(
   response: SiteInquiryHttpResponse
 ): SiteInquiryResponse {
-  const sites = response.data.map(site => {
+  const sites = response.data.map((site) => {
     const siteWithOverview: SiteWithOverview = {
       siteId: site.site_id,
       siteName: site.site_name,
@@ -136,20 +162,21 @@ export function transformToSiteInquiryResponse(
       picUserId: site.pic_user_id,
       picUsername: site.pic_username,
       picFullName: site.pic_full_name,
+      phone: site.phone,
       createdAt: site.created_at,
       changedOn: site.changed_on,
-      typeOverviews: {}
+      typeOverviews: {},
     };
 
     // Add type overviews if available
     if (site.type_overviews) {
-      Object.keys(site.type_overviews).forEach(key => {
+      Object.keys(site.type_overviews).forEach((key) => {
         const typeOverview = site.type_overviews?.[key];
         if (siteWithOverview.typeOverviews && typeOverview) {
           siteWithOverview.typeOverviews[key] = {
             totalPackage: typeOverview.total_package,
             totalStock: typeOverview.total_stock,
-            sizeDescription: typeOverview.size_description
+            sizeDescription: typeOverview.size_description,
           };
         }
       });
@@ -171,20 +198,21 @@ export function transformToSiteDetailResponse(
     picUserId: response.data.pic_user_id,
     picUsername: response.data.pic_username,
     picFullName: response.data.pic_full_name,
+    phone: response.data.phone,
     createdAt: response.data.created_at,
-    changedOn: response.data.changed_on
+    changedOn: response.data.changed_on,
   };
 
   return { site };
 }
 
 export function transformToSiteStockHeadersResponse(
-  response: SiteStockHeadersResponse
+  response: SiteStockHeadersHttpResponse
 ): SiteStockHeadersResponseModel {
   return {
     siteId: response.data.site_id,
     siteName: response.data.site_name,
-    stockItems: response.data.stock_items.map(item => ({
+    stockItems: response.data.stock_items.map((item) => ({
       stockId: item.stock_id,
       productId: item.product_id,
       productName: item.product_name,
@@ -192,8 +220,30 @@ export function transformToSiteStockHeadersResponse(
       remainingTotalPackages: item.remaining_total_packages,
       remainingTotalStock: item.remaining_total_stock,
       sizeDescription: item.size_description,
-      bigPackagesCount: item.big_packages_count
-    }))
+      bigPackagesCount: item.big_packages_count,
+    })),
+  };
+}
+
+export function transformToSiteStockHeadersWithSpecificProductModelResponse(
+  response: SiteStockHeadersWithSpecificProductHttpResponse
+): SiteStockHeadersWithSpecificProductModelResponse {
+  return {
+    data: response.data.map((item) => ({
+      changedBy: item.changed_by,
+      changedOn: item.changed_on,
+      createdAt: item.created_at,
+      createdBy: item.created_by,
+      price: item.price,
+      productId: item.product_id,
+      productName: item.product_name,
+      remainingStock: item.remaining_stock,
+      sizeDescription: item.size_description,
+      specs: item.specs,
+      stockId: item.stock_id,
+      totalSizeAmount: item.total_size_amount,
+      type: item.type,
+    })),
   };
 }
 
@@ -207,7 +257,8 @@ export function transformToSiteCreateHttpRequest(
   return {
     site_name: request.siteName,
     address: request.address,
-    pic_user_id: request.picUserId
+    pic_user_id: request.picUserId,
+    phone: request.phone,
   };
 }
 
@@ -218,6 +269,7 @@ export function transformToSiteUpdateHttpRequest(
     site_id: request.siteId,
     site_name: request.siteName,
     address: request.address,
-    pic_user_id: request.picUserId
+    pic_user_id: request.picUserId,
+    phone: request.phone,
   };
 }

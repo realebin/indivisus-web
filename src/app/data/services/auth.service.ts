@@ -16,19 +16,28 @@ import { Router } from '@angular/router';
   providedIn: 'root',
 })
 export class AuthService {
-  constructor(private authHttpService: AuthHttpService, private router: Router) {}
+  constructor(
+    private authHttpService: AuthHttpService,
+    private router: Router
+  ) {}
 
   login(data: AuthLoginModelRequest): Observable<AuthLoginModelResponse> {
     const request = transformToAuthLoginHttpRequest(data);
     return this.authHttpService.login(request).pipe(
       map((response) => {
-        if(response?.output_schema?.data?.token) {
-          localStorage.setItem('authToken', JSON.stringify(response?.output_schema?.data?.token));
-          localStorage.setItem('loggedUser', JSON.stringify(response?.output_schema));
-        }
-        if(response?.output_schema?.data?.username) {
-          localStorage.setItem('username', JSON.stringify(response?.output_schema?.data?.username));
-          console.log(localStorage.getItem('username'))
+        if (response?.output_schema?.data?.token) {
+          localStorage.setItem(
+            'authToken',
+            response?.output_schema?.data?.token
+          );
+          localStorage.setItem(
+            'username',
+            response?.output_schema?.data?.username
+          );
+          localStorage.setItem(
+            'name',
+            response?.output_schema?.data?.full_name
+          );
         }
         return transformToAuthLoginModelResponse(response.output_schema);
       }),
@@ -45,7 +54,7 @@ export class AuthService {
 
   logout() {
     localStorage.removeItem('authToken');
-    localStorage.removeItem('loggedUser');
+    localStorage.removeItem('name');
     localStorage.removeItem('username');
     this.router.navigate(['/login']);
   }

@@ -221,13 +221,13 @@ export function transformToUserManagementCreateSupplierHttpRequest(
 ): UserManagementCreateSupplierHttpRequest {
   const result: UserManagementCreateSupplierHttpRequest = {
     supplier_id: request?.id,
-    name: request.name,
+    first_name: request.name,
     address: request.address,
     city: request.city,
     phone_number: request.phoneNumber,
     postal_code: request.postalCode,
     country: request.country,
-    description: request.description,
+    note: request.description,
   };
 
   return result;

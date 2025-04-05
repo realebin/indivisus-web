@@ -10,6 +10,7 @@ Chart.register(...registerables);
 export class DashboardInfoComponent {
   private revenueChart?: Chart;
   private profileChart?: Chart;
+  name = localStorage.getItem('name');
 
   ngOnInit(): void {
     this.initializeCharts();

@@ -11,7 +11,8 @@ import {
   SiteUpdateHttpRequest,
   SiteDetailInquiryHttpResponse,
   SiteInquiryHttpResponse,
-  SiteStockHeadersResponse
+  SiteStockHeadersHttpResponse,
+  SiteStockHeadersWithSpecificProductHttpResponse,
 } from '@schemas/site.schema';
 
 @Injectable({
@@ -41,24 +42,33 @@ export class SiteHttpService {
     );
   }
 
-  // GET site detail by ID
-  getSiteDetail(siteId: string): Observable<ApiResponse<SiteDetailInquiryHttpResponse>> {
-    return this.httpClient.get<ApiResponse<SiteDetailInquiryHttpResponse>>(
-      `${this.baseUrl}/site/${siteId}`
+  // Get site stocks - based on the API documentation
+  getStockHeadersBySite(
+    siteId: string
+  ): Observable<ApiResponse<SiteStockHeadersHttpResponse>> {
+    return this.httpClient.get<ApiResponse<SiteStockHeadersHttpResponse>>(
+      `${this.baseUrl}/site/${siteId}/stocks`
     );
   }
 
-  // GET stock headers by site
-  getStockHeadersBySite(siteId: string, productType?: string): Observable<ApiResponse<SiteStockHeadersResponse>> {
+  // Get specific site stocks - based on the API documentation
+  getSpecificStockBySite(
+    siteId: string,
+    productType?: string
+  ): Observable<ApiResponse<SiteStockHeadersWithSpecificProductHttpResponse>> {
     let url = `${this.baseUrl}/site/${siteId}/stocks`;
     if (productType) {
       url += `?productType=${productType}`;
     }
-    return this.httpClient.get<ApiResponse<SiteStockHeadersResponse>>(url);
+    return this.httpClient.get<
+      ApiResponse<SiteStockHeadersWithSpecificProductHttpResponse>
+    >(url);
   }
 
   // POST create new site
-  createSite(request: SiteCreateHttpRequest): Observable<ApiResponse<{ site_id: string }>> {
+  createSite(
+    request: SiteCreateHttpRequest
+  ): Observable<ApiResponse<{ site_id: string }>> {
     return this.httpClient.post<ApiResponse<{ site_id: string }>>(
       `${this.baseUrl}/site/create`,
       request
@@ -66,7 +76,9 @@ export class SiteHttpService {
   }
 
   // PUT update existing site
-  updateSite(request: SiteUpdateHttpRequest): Observable<ApiResponse<{ site_id: string }>> {
+  updateSite(
+    request: SiteUpdateHttpRequest
+  ): Observable<ApiResponse<{ site_id: string }>> {
     return this.httpClient.put<ApiResponse<{ site_id: string }>>(
       `${this.baseUrl}/site/update`,
       request

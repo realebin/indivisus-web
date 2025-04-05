@@ -1,4 +1,3 @@
-// src/app/features/sites/pages/sites-index/sites-index.component.ts
 
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
@@ -8,8 +7,6 @@ import { SiteService } from '@services/site.service';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { finalize } from 'rxjs';
 import { SortOption } from 'src/app/shared-components/filter-panel/filter-panel.component';
-import { ColumnConfig } from 'src/app/shared-components/expandable-card/expandable-card.component';
-import { ColDef } from 'ag-grid-community';
 
 @Component({
   selector: 'app-sites-index',
@@ -20,10 +17,12 @@ export class SitesIndexComponent implements OnInit {
   @ViewChild('createSiteModal') createSiteModal!: TemplateRef<any>;
 
   isLoading = false;
+  isSubmitting = false;
   sites: SiteWithOverview[] = [];
   filteredSites: SiteWithOverview[] = [];
   modalRef?: BsModalRef;
   errorMessage = '';
+  formErrorMessage = '';
 
   // Form related properties
   isSiteFormValid = false;
@@ -31,77 +30,15 @@ export class SitesIndexComponent implements OnInit {
   selectedSite?: SiteWithOverview;
 
   // Filter panel properties
-  showFilterPanel = false;
   searchFilter = new FormControl('');
   sortField = 'siteName';
   sortDirection: 'asc' | 'desc' = 'asc';
 
-  // CardConfigs for mobile view
-  cardConfigs: { [key: string]: ColumnConfig[] } = {
-    'SITE': [
-      { field: 'siteName', label: 'Site Name', isHeader: true, icon: 'bi-geo-alt' },
-      { field: 'address', label: 'Address' },
-      { field: 'picFullName', label: 'PIC', isHeader: true },
-      { field: 'createdAt', label: 'Created Date' }
-    ]
-  };
-
-  // Column definitions for grid view
-  columnDefs: ColDef[] = [
-    {
-      headerName: 'Site Name',
-      field: 'siteName',
-      sortable: true,
-      filter: true,
-      resizable: true
-    },
-    {
-      headerName: 'Address',
-      field: 'address',
-      sortable: true,
-      filter: true,
-      resizable: true
-    },
-    {
-      headerName: 'PIC',
-      field: 'picFullName',
-      sortable: true,
-      filter: true,
-      resizable: true
-    },
-    {
-      headerName: 'Created Date',
-      field: 'createdAt',
-      sortable: true,
-      filter: true,
-      resizable: true,
-      valueFormatter: (params) => {
-        if (!params.value) return '';
-        return new Date(params.value).toLocaleDateString();
-      }
-    },
-    {
-      headerName: 'Actions',
-      cellRenderer: 'actionsRenderer',
-      sortable: false,
-      filter: false,
-      resizable: false,
-      width: 120
-    }
-  ];
-
-  // Sort options for filter panel
-  sortOptions: SortOption[] = [
-    { field: 'siteName', label: 'Site Name' },
-    { field: 'address', label: 'Address' },
-    { field: 'picFullName', label: 'PIC' },
-    { field: 'createdAt', label: 'Created Date' }
-  ];
-
   siteRequest: SiteCreateRequest = {
     siteName: '',
     address: '',
-    picUserId: ''
+    picUserId: '',
+    phone: '' // Added phone field according to UI requirements
   };
 
   constructor(
@@ -138,21 +75,13 @@ export class SitesIndexComponent implements OnInit {
   }
 
   openCreateSiteModal(): void {
-    this.isEditMode = false;
-    this.selectedSite = undefined;
-    this.resetSiteForm();
-    this.modalRef = this.modalService.show(this.createSiteModal, { class: 'modal-lg' });
+    // Instead of showing the modal, navigate to the create page
+    this.router.navigate(['/site/create']);
   }
 
   openEditSiteModal(site: SiteWithOverview): void {
-    this.isEditMode = true;
-    this.selectedSite = site;
-    this.siteRequest = {
-      siteName: site.siteName,
-      address: site.address,
-      picUserId: site.picUserId
-    };
-    this.modalRef = this.modalService.show(this.createSiteModal, { class: 'modal-lg' });
+    // Instead of showing the modal, navigate to the edit page
+    this.router.navigate(['/site/edit', site.siteId]);
   }
 
   onSiteFormDataChange(data: SiteCreateRequest): void {
@@ -176,20 +105,19 @@ export class SitesIndexComponent implements OnInit {
       return;
     }
 
-    this.isLoading = true;
-    this.errorMessage = '';
+    this.isSubmitting = true;
+    this.formErrorMessage = '';
 
     this.siteService.createSite(this.siteRequest)
-      .pipe(finalize(() => this.isLoading = false))
+      .pipe(finalize(() => this.isSubmitting = false))
       .subscribe({
-        next: (message) => {
+        next: () => {
           this.modalRef?.hide();
           this.loadSites();
           this.resetSiteForm();
-          this.errorMessage = message;
         },
         error: (error) => {
-          this.errorMessage = error.message || 'Failed to create site';
+          this.formErrorMessage = error.message || 'Failed to create site';
         }
       });
   }
@@ -199,8 +127,8 @@ export class SitesIndexComponent implements OnInit {
       return;
     }
 
-    this.isLoading = true;
-    this.errorMessage = '';
+    this.isSubmitting = true;
+    this.formErrorMessage = '';
 
     const updateRequest: SiteUpdateRequest = {
       siteId: this.selectedSite.siteId,
@@ -208,16 +136,15 @@ export class SitesIndexComponent implements OnInit {
     };
 
     this.siteService.updateSite(updateRequest)
-      .pipe(finalize(() => this.isLoading = false))
+      .pipe(finalize(() => this.isSubmitting = false))
       .subscribe({
-        next: (message) => {
+        next: () => {
           this.modalRef?.hide();
           this.loadSites();
           this.resetSiteForm();
-          this.errorMessage = message;
         },
         error: (error) => {
-          this.errorMessage = error.message || 'Failed to update site';
+          this.formErrorMessage = error.message || 'Failed to update site';
         }
       });
   }
@@ -228,9 +155,8 @@ export class SitesIndexComponent implements OnInit {
       this.siteService.deleteSite(site.siteId)
         .pipe(finalize(() => this.isLoading = false))
         .subscribe({
-          next: (message) => {
+          next: () => {
             this.loadSites();
-            this.errorMessage = message;
           },
           error: (error) => {
             this.errorMessage = error.message || 'Failed to delete site';
@@ -243,21 +169,17 @@ export class SitesIndexComponent implements OnInit {
     this.siteRequest = {
       siteName: '',
       address: '',
-      picUserId: ''
+      picUserId: '',
+      phone: ''
     };
-    this.errorMessage = '';
   }
 
   // Navigation to detail
-  navigateToDetail(event:any): void {
-    this.router.navigate(['/site', event.siteId]);
+  navigateToDetail(siteId: string): void {
+    this.router.navigate(['/site', siteId]);
   }
 
-  // Filter panel methods
-  toggleFilterPanel(): void {
-    this.showFilterPanel = !this.showFilterPanel;
-  }
-
+  // Apply filters
   applyFilters(): void {
     let filtered = [...this.sites];
 
@@ -266,7 +188,7 @@ export class SitesIndexComponent implements OnInit {
       const searchTerm = this.searchFilter.value.toLowerCase();
       filtered = filtered.filter(site =>
         site.siteName.toLowerCase().includes(searchTerm) ||
-        site.address.toLowerCase().includes(searchTerm) ||
+        (site.address && site.address.toLowerCase().includes(searchTerm)) ||
         site.picFullName.toLowerCase().includes(searchTerm)
       );
     }
@@ -297,28 +219,9 @@ export class SitesIndexComponent implements OnInit {
     this.filteredSites = filtered;
   }
 
-  onSortChange(event: { field: string }): void {
-    if (this.sortField === event.field) {
-      // Toggle direction if clicking the same field
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      // Set new field and default to ascending
-      this.sortField = event.field;
-      this.sortDirection = 'asc';
-    }
-
-    this.applyFilters();
-  }
-
-  resetFilters(): void {
-    this.searchFilter.setValue('');
-    this.sortField = 'siteName';
-    this.sortDirection = 'asc';
-    this.filteredSites = [...this.sites];
-  }
-
-  // Handle action button clicks from the responsive-data-table
-  editSite(site: SiteWithOverview): void {
-    this.openEditSiteModal(site);
+  // Helper method to get object keys for typeOverviews
+  getTypeKeys(typeOverviews: any): string[] {
+    if (!typeOverviews) return [];
+    return Object.keys(typeOverviews);
   }
 }

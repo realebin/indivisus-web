@@ -5,8 +5,8 @@
         <h2 class="fw-bold text-primary mb-1">Site Management</h2>
         <p class="text-muted mb-0">Manage warehouse and storage locations</p>
       </div>
-      <button class="btn btn-primary" (click)="openCreateSiteModal()">
-        <i class="bi bi-plus-circle me-2"></i>Add New Site
+      <button class="btn btn-primary" [routerLink]="['/site/create']">
+        <i class="bi bi-plus-circle me-2"></i>Create Site
       </button>
     </div>
   </div>
@@ -21,8 +21,8 @@
   <app-loader *ngIf="isLoading" type="loading-relative"></app-loader>
 
   <!-- Site cards list -->
-  <div *ngIf="!isLoading && sites.length > 0" class="row">
-    <div *ngFor="let site of sites" class="col-12 col-md-6 col-lg-4 mb-4">
+  <div *ngIf="!isLoading && filteredSites.length > 0" class="row">
+    <div *ngFor="let site of filteredSites" class="col col-lg-6 mb-4">
       <div class="card h-100 shadow-sm border-0 hover-shadow">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-start mb-3">
@@ -48,45 +48,62 @@
 
           <div class="mb-3">
             <p class="text-muted mb-2">
-              <i class="bi bi-geo-alt me-2"></i>{{ site.address || 'No address specified' }}
+              <i class="bi bi-geo-alt me-2"></i><b>Address:</b> {{ site.address || 'No address specified' }}
             </p>
             <p class="text-muted mb-0">
-              <i class="bi bi-person me-2"></i>PIC: {{ site.picFullName }}
+              <i class="bi bi-person me-2"></i><b>PIC:</b> {{ site.picFullName }}
+            </p>
+            <p class="text-muted mb-0">
+              <i class="bi bi-telephone me-2"></i><b>Phone:</b> {{ site.phone || 'Not specified' }}
             </p>
           </div>
 
           <!-- Stock Overview -->
-          <div *ngIf="site.packageOverview?.length || site.sizeOverview?.length" class="mt-3">
-            <h6 class="text-secondary mb-2"><i class="bi bi-box-seam me-2"></i>Stock Overview</h6>
+          <div class="mt-3">
+            <h6 class="text-secondary mb-2"><i class="bi bi-box-seam me-2"></i>Stock Information</h6>
 
-            <div class="row g-2 mb-2">
-              <ng-container *ngFor="let pkg of site.packageOverview">
-                <div *ngIf="pkg.totalPackages" class="col-6">
-                  <div class="p-2 bg-light rounded">
-                    <small class="text-muted d-block">{{ pkg.type }}</small>
-                    <span class="fw-bold">{{ pkg.totalPackages }} packages</span>
+            <!-- Package Information -->
+            <div class="p-2 bg-light rounded mb-2">
+              <small class="text-muted mb-1"><b>Total Package:</b></small>
+              <div class="row g-2">
+                <ng-container *ngIf="site.typeOverviews">
+                  <div *ngFor="let type of getTypeKeys(site.typeOverviews)" class="col-6">
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-box me-2"></i>
+                      <span>{{ type }}: <b>{{ site.typeOverviews[type].totalPackage || 0 }}</b> Pack</span>
+                    </div>
                   </div>
+                </ng-container>
+                <div *ngIf="!site.typeOverviews || getTypeKeys(site.typeOverviews).length === 0" class="col-12">
+                  <span class="text-muted">No package information</span>
                 </div>
-              </ng-container>
+              </div>
             </div>
 
-            <div class="row g-2">
-              <ng-container *ngFor="let size of site.sizeOverview">
-                <div *ngIf="size.totalSize" class="col-6">
-                  <div class="p-2 bg-light rounded">
-                    <small class="text-muted d-block">{{ size.type }}</small>
-                    <span class="fw-bold">{{ size.totalSize }} units</span>
+            <!-- Stock Size Information -->
+            <div class="p-2 bg-light rounded">
+              <small class="text-muted mb-1"><b>Total Stock:</b></small>
+              <div class="row g-2">
+                <ng-container *ngIf="site.typeOverviews">
+                  <div *ngFor="let type of getTypeKeys(site.typeOverviews)" class="col-6">
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-rulers me-2"></i>
+                      <span>{{ type }}: <b>{{ site.typeOverviews[type].totalStock || 0 }}</b> {{ site.typeOverviews[type].sizeDescription }}</span>
+                    </div>
                   </div>
+                </ng-container>
+                <div *ngIf="!site.typeOverviews || getTypeKeys(site.typeOverviews).length === 0" class="col-12">
+                  <span class="text-muted">No stock information</span>
                 </div>
-              </ng-container>
+              </div>
             </div>
           </div>
 
           <!-- View Details Link -->
           <div class="mt-3">
-            <a [routerLink]="['/site', site.siteId]" class="btn btn-outline-primary btn-sm d-block w-100">
+            <button [routerLink]="['/site', site.siteId]" class="btn btn-outline-primary btn-sm w-100">
               <i class="bi bi-eye me-2"></i>View Site Details
-            </a>
+            </button>
           </div>
         </div>
       </div>
@@ -94,12 +111,12 @@
   </div>
 
   <!-- Empty state -->
-  <div *ngIf="!isLoading && sites.length === 0" class="text-center py-5">
-    <i class="bi bi-building text-muted" style="font-size: 3rem;"></i>
+  <div *ngIf="!isLoading && filteredSites.length === 0" class="text-center py-5">
+    <app-empty-data></app-empty-data>
     <h4 class="mt-3 text-muted">No Sites Found</h4>
     <p class="text-muted">Get started by adding your first site</p>
     <button class="btn btn-primary mt-2" (click)="openCreateSiteModal()">
-      <i class="bi bi-plus-circle me-2"></i>Add New Site
+      <i class="bi bi-plus-circle me-2"></i>Create Site
     </button>
   </div>
 
@@ -109,12 +126,12 @@
       [title]="isEditMode ? 'Edit Site' : 'Create New Site'"
       [confirmButtonText]="'Save'"
       [isFormValid]="isSiteFormValid"
-      [isLoading]="isLoading"
+      [isLoading]="isSubmitting"
       (confirm)="submitSiteForm()">
       <app-site-create-form
         [data]="siteRequest"
         [isEditMode]="isEditMode"
-        [errorMessage]="errorMessage"
+        [errorMessage]="formErrorMessage"
         (dataChange)="onSiteFormDataChange($event)"
         (formValidityChange)="onSiteFormValidityChange($event)">
       </app-site-create-form>

@@ -17,7 +17,7 @@ export class PublicViewComponent {
     private authService: AuthService,
     private navbarService: NavbarService
   ) {
-    if (!localStorage.getItem('loggedUser')) {
+    if (!localStorage.getItem('authToken')) {
       this.router.navigate(['/login']);
     }
 

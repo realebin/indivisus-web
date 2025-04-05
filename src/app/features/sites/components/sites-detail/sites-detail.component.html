@@ -1,5 +1,3 @@
-<!-- src/app/features/sites/components/sites-detail/sites-detail.component.html -->
-
 <div class="container px-4 py-4">
   <!-- Header with breadcrumbs -->
   <div class="row mb-4">
@@ -11,10 +9,10 @@
     </div>
   </div>
 
-  <!-- Loading State -->
+  <!-- Loading State for Site Info -->
   <app-loader *ngIf="isLoading" type="loading-relative"></app-loader>
 
-  <!-- Error Message -->
+  <!-- Error Message for Site Info -->
   <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
     <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}
     <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
@@ -26,7 +24,7 @@
       <div class="card shadow-sm border-0">
         <div class="card-body">
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-8">
               <h3 class="fw-bold text-primary mb-3">{{ siteDetail.siteName }}</h3>
 
               <div class="mb-3">
@@ -36,21 +34,19 @@
                 <p class="text-muted mb-2">
                   <i class="bi bi-person me-2"></i><strong>PIC:</strong> {{ siteDetail.picFullName }}
                 </p>
-                <p class="text-muted mb-0">
-                  <i class="bi bi-calendar me-2"></i><strong>Created:</strong>
-                  {{ siteDetail.createdAt | date:'medium' }}
+                <p class="text-muted mb-0" *ngIf="siteDetail.phone">
+                  <i class="bi bi-telephone me-2"></i><strong>Phone:</strong> {{ siteDetail.phone }}
                 </p>
               </div>
             </div>
 
-            <div class="col-md-6 text-md-end mt-3 mt-md-0">
-              <app-action-buttons
-                [actions]="[
-                  { type: 'edit', icon: 'bi-pencil', label: 'Edit Site', buttonClass: 'btn-outline-primary' },
-                  { type: 'custom', icon: 'bi-arrow-left', label: 'Back to Sites', buttonClass: 'btn-outline-secondary' }
-                ]"
-                (actionClick)="handleAction($event)">
-              </app-action-buttons>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+              <button class="btn btn-outline-primary me-2" (click)="navigateToEdit()">
+                <i class="bi bi-pencil me-2"></i>Edit Site
+              </button>
+              <button class="btn btn-outline-secondary" (click)="goBack()">
+                <i class="bi bi-arrow-left me-2"></i>Back
+              </button>
             </div>
           </div>
         </div>
@@ -58,38 +54,80 @@
     </div>
   </div>
 
-  <!-- Product Stock Table -->
-  <div *ngIf="!isLoading && siteDetail && rowData.length > 0" class="row mb-4">
+  <!-- Stock Items Section -->
+  <div *ngIf="!isLoading && siteDetail" class="row mb-4">
     <div class="col-12">
       <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3">
           <h5 class="mb-0"><i class="bi bi-box-seam me-2"></i>Stock Items</h5>
         </div>
+
+        <!-- Error Message for Stocks -->
+        <div *ngIf="specificStockErrorMessage" class="alert alert-danger m-3" role="alert">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ specificStockErrorMessage }}
+        </div>
+
         <div class="card-body p-0">
-          <ag-grid-angular
-            class="ag-theme-alpine"
-            style="width: 100%; height: 500px;"
-            [rowData]="rowData"
-            [columnDefs]="colDefs"
-            [defaultColDef]="defaultColDef"
-            (cellClicked)="onGridCellClicked($event)"
-            domLayout="autoHeight"
-            [suppressRowTransform]="true"
-            [pagination]="true"
-            [paginationPageSize]="10"
-          ></ag-grid-angular>
+          <!-- Tabs navigation -->
+          <ul class="nav nav-tabs" id="productTypeTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" [class.active]="currentTab === 'Kain'" id="kain-tab" data-bs-toggle="tab" data-bs-target="#kain" type="button" role="tab" aria-controls="kain" aria-selected="true" (click)="switchTab('Kain')">
+                Kain (Fabric)
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" [class.active]="currentTab === 'Tali'" id="tali-tab" data-bs-toggle="tab" data-bs-target="#tali" type="button" role="tab" aria-controls="tali" aria-selected="false" (click)="switchTab('Tali')">
+                Tali (Rope)
+              </button>
+            </li>
+          </ul>
+
+          <!-- Loading State for Stocks -->
+          <div *ngIf="isLoadingStocks" class="p-5 text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2">Loading stock information...</p>
+          </div>
+
+          <!-- Tab content when data is loaded -->
+          <div *ngIf="!isLoadingStocks && !specificStockErrorMessage" class="tab-content" id="productTypeTabsContent">
+            <!-- Empty State -->
+            <div *ngIf="rowData.length === 0" class="tab-pane fade show active p-5 text-center" role="tabpanel">
+              <div class="py-5">
+                <img src="assets/images/empty-data.svg" alt="No stock items" class="mb-3" style="max-width: 150px;">
+                <p class="text-muted">No stock items found for this product type.</p>
+              </div>
+            </div>
+
+            <!-- Data Table -->
+            <div *ngIf="rowData.length > 0" class="tab-pane fade show active" role="tabpanel">
+              <ag-grid-angular
+                class="ag-theme-alpine"
+                style="width: 100%;"
+                [rowData]="rowData"
+                [columnDefs]="colDefs"
+                [defaultColDef]="defaultColDef"
+                (cellClicked)="onGridCellClicked($event)"
+                domLayout="autoHeight"
+                [pagination]="true"
+                [paginationPageSize]="10"
+              ></ag-grid-angular>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Empty Stock State -->
-  <div *ngIf="!isLoading && siteDetail && rowData.length === 0" class="row mb-4">
+  <!-- Empty Site State -->
+  <div *ngIf="!isLoading && !siteDetail && !errorMessage" class="row mb-4">
     <div class="col-12">
       <div class="card shadow-sm border-0">
         <div class="card-body py-5 text-center">
-          <app-empty-data></app-empty-data>
-          <p class="text-muted">This site doesn't have any stock items yet.</p>
+          <img src="assets/images/empty-data.svg" alt="No site found" class="mb-3" style="max-width: 150px;">
+          <p class="text-muted">Site information not found</p>
+          <button class="btn btn-outline-primary mt-3" (click)="goBack()">
+            <i class="bi bi-arrow-left me-2"></i>Back to Sites
+          </button>
         </div>
       </div>
     </div>
