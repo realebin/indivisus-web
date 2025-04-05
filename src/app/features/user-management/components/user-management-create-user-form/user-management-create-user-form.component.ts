@@ -193,7 +193,6 @@ export class UserManagementCreateUserFormComponent implements OnInit {
 
   updateSiteOptions() {
     const siteField = this.fields.find((field) => field.name === 'site');
-    console.log(siteField, this.sites);
     if (siteField) {
       siteField.options = this.sites.map((site) => ({
         label: site.siteName,

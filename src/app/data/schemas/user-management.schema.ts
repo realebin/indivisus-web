@@ -71,12 +71,12 @@ export interface UserManagementCreateCustomerHttpRequest {
 
 export interface UserManagementCreateSupplierHttpRequest {
   supplier_id?: number;
-  first_name: string;
+  name: string;
   address: string;
   phone_number: string;
   city: string;
   postal_code: string;
-  note: string;
+  description: string;
   country: string;
 }
 

@@ -34,6 +34,7 @@ export class UserManagementIndexComponent implements OnInit, OnDestroy {
   inquiryAppUser$: Subscription;
   inquirySupplier$: Subscription;
   inquiryCustomer$: Subscription;
+  inquirySites$: Subscription;
   errorMessage: string;
   errorMessageCreateAppUser: string;
   errorMessageCreateCustomer: string;
@@ -96,6 +97,8 @@ export class UserManagementIndexComponent implements OnInit, OnDestroy {
     this.inquiryAppUser$?.unsubscribe();
     this.inquirySupplier$?.unsubscribe();
     this.inquiryCustomer$?.unsubscribe();
+    this.inquirySites$?.unsubscribe();
+    this.modalRef?.hide();
   }
 
   createNew(template: TemplateRef<any>): void {
@@ -182,7 +185,7 @@ export class UserManagementIndexComponent implements OnInit, OnDestroy {
   }
 
   inquirySiteForFilter() {
-    this.siteService.getSiteForFilter().subscribe({
+    this.inquirySites$ = this.siteService.getSiteForFilter().subscribe({
       next: (response) => {
         this.isLoading = false;
         this.siteList = response;
