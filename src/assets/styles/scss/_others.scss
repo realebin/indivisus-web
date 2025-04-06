@@ -1,0 +1,36 @@
+/* Modal z-index fix */
+.modal {
+  z-index: 1050 !important;
+}
+
+.modal-backdrop {
+  z-index: 1040 !important;
+}
+
+/* Fix for Bootstrap modal display */
+.modal-dialog {
+  display: flex !important;
+  align-items: center;
+  min-height: calc(100% - 3.5rem);
+}
+
+/* Ensure modal content has proper max-height */
+.modal-content {
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
+}
+
+/* Force display when modal is shown */
+.modal.show .modal-dialog {
+  transform: none !important;
+  display: flex !important;
+}
+
+/* Fix for IE11 and Edge browser modal issues */
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  .modal-dialog {
+    display: flex;
+    align-items: center;
+    min-height: calc(100vh - 3.5rem);
+  }
+}
