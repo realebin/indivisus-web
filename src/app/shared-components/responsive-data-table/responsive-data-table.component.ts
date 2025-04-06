@@ -174,30 +174,61 @@ export class ResponsiveDataTableComponent implements OnInit, OnChanges, OnDestro
     }
   };
 
+  // onGridReady(params: GridReadyEvent) {
+  //   this.gridApi = params.api;
+  //   this.gridReady.emit(this.gridApi);
+
+  //   // Initial column sizing
+  //   setTimeout(() => {
+  //     params.api.sizeColumnsToFit();
+  //   });
+
+  //   // Set up window resize listener
+  //   window.addEventListener('resize', this.onWindowResize);
+
+  //   // Set up ResizeObserver for container
+  //   const gridElement = document.querySelector('.ag-theme-alpine');
+  //   if (gridElement && window.ResizeObserver) {
+  //     this.resizeObserver = new ResizeObserver(() => {
+  //       setTimeout(() => {
+  //         if (this.gridApi) {
+  //           this.gridApi.sizeColumnsToFit();
+  //         }
+  //       }, 100);
+  //     });
+
+  //     this.resizeObserver.observe(gridElement);
+  //   }
+  // }
+
   onGridReady(params: GridReadyEvent) {
     this.gridApi = params.api;
     this.gridReady.emit(this.gridApi);
 
-    // Initial column sizing
+    // Delay the initial sizing to ensure the container is rendered
     setTimeout(() => {
-      params.api.sizeColumnsToFit();
-    });
+      if (this.gridApi) {
+        this.gridApi.sizeColumnsToFit();
+
+        // Force a refresh of the grid
+        this.gridApi.redrawRows();
+      }
+    }, 100);
 
     // Set up window resize listener
     window.addEventListener('resize', this.onWindowResize);
+  }
 
-    // Set up ResizeObserver for container
-    const gridElement = document.querySelector('.ag-theme-alpine');
-    if (gridElement && window.ResizeObserver) {
-      this.resizeObserver = new ResizeObserver(() => {
-        setTimeout(() => {
-          if (this.gridApi) {
-            this.gridApi.sizeColumnsToFit();
-          }
-        }, 100);
-      });
+  public refreshGrid(): void {
+    if (this.gridApi) {
+      // First update row data
+      this.gridApi.setGridOption('rowData', this.data);
 
-      this.resizeObserver.observe(gridElement);
+      // Then manually trigger column resize
+      setTimeout(() => {
+        this.gridApi.sizeColumnsToFit();
+        this.gridApi.redrawRows();
+      }, 50);
     }
   }
 

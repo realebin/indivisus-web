@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   OnDestroy,
   OnInit,
@@ -85,7 +86,8 @@ export class UserManagementIndexComponent implements OnInit, OnDestroy {
   constructor(
     private userManagementService: UserManagementService,
     private siteService: SiteService,
-    private modalService: BsModalService
+    private modalService: BsModalService,
+    private changeDetectorRef: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -107,23 +109,80 @@ export class UserManagementIndexComponent implements OnInit, OnDestroy {
     this.openModal(template);
   }
 
-  openModal(template: TemplateRef<any>) {
+  // openModal(template: TemplateRef<any>) {
+  //   if (!this.isEditMode) {
+  //     // Reset form data when creating new
+  //     this.resetForm();
+  //   }
+  //   this.modalRef = this.modalService.show(template);
+  // }
+
+  // openModal(template: TemplateRef<any>) {
+  //   if (!this.isEditMode) {
+  //     // Reset form data when creating new
+  //     this.resetForm();
+  //   }
+
+  //   // Use a config object with proper class for modals
+  //   this.modalRef = this.modalService.show(template, {
+  //     class: 'modal-dialog-centered',
+  //     animated: true,
+  //     ignoreBackdropClick: false
+  //   });
+
+  //   // Force change detection after modal is shown
+  //   setTimeout(() => {
+  //     // This triggers a check for changes
+  //     this.changeDetectorRef.detectChanges();
+  //   }, 100);
+  // }
+
+  openModal(template: TemplateRef<any>): void {
+
+    // First, ensure any previous modal is completely closed
+    if (this.modalRef) {
+      this.modalRef.hide();
+      this.modalRef = undefined;
+    }
+
+    setTimeout(() => { // ensure modal is fully open before triggering detectChanges
+      this.changeDetectorRef.detectChanges();
+    }, 0);
+
+    // Reset form for new entries
     if (!this.isEditMode) {
-      // Reset form data when creating new
       this.resetForm();
     }
-    this.modalRef = this.modalService.show(template);
+
+    // Configure the modal with explicit settings
+    const config = {
+      class: 'modal-dialog modal-lg',
+      backdrop: true,
+      ignoreBackdropClick: false,
+      animated: true
+    };
+
+    // Create a new modal reference
+    this.modalRef = this.modalService.show(template, config);
+
+    // Ensure the modal is added to document body, not some nested container
+    document.body.classList.add('modal-open');
   }
 
   closeModal(): void {
     if (this.modalRef) {
       this.modalRef.hide();
-      this.resetForm();
+      this.modalRef = undefined;
+      // Ensure modal classes are properly removed
+      document.body.classList.remove('modal-open');
     }
+    this.resetForm();
   }
 
   setActiveTab(tab: UserManagementDictionaryEnum) {
     this.activeTab = tab;
+
+    // Load data based on tab
     if (tab === UserManagementDictionaryEnum.Customer) {
       this.inquiryCustomer();
     } else if (tab === UserManagementDictionaryEnum.AppUser) {
@@ -131,6 +190,12 @@ export class UserManagementIndexComponent implements OnInit, OnDestroy {
     } else if (tab === UserManagementDictionaryEnum.Supplier) {
       this.inquirySupplier();
     }
+
+    // Force change detection after tab switch
+    setTimeout(() => {
+      // This triggers a check for changes
+      this.changeDetectorRef.detectChanges();
+    }, 100);
   }
 
   inquiryAppUser() {
@@ -142,6 +207,15 @@ export class UserManagementIndexComponent implements OnInit, OnDestroy {
         next: (data) => {
           this.isLoading = false;
           this.appUsers = data.appUsers;
+
+          // Force grid refresh after data is loaded
+          setTimeout(() => {
+            const gridComponent = document.querySelector('app-user-management-table-inquiry');
+            if (gridComponent) {
+              // Force re-render of the component
+              this.changeDetectorRef.detectChanges();
+            }
+          }, 100);
         },
         error: ({ message }) => {
           this.isLoading = false;
@@ -390,7 +464,7 @@ export class UserManagementIndexComponent implements OnInit, OnDestroy {
     updatedData: UserManagementCreateCustomerModelRequest
   ) {
     this.requestDataCustomer = { ...this.requestDataCustomer, ...updatedData };
-  }
+}
 
   onSupplierFormDataChange(
     updatedData: UserManagementCreateSupplierModelRequest

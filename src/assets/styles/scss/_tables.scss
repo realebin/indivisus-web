@@ -201,6 +201,9 @@
   --ag-header-foreground-color: #{$gray-700};
   --ag-header-column-separator-color: #{$gray-200};
   --ag-header-column-separator-height: 75%;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 400px;
 
   .ag-header-cell {
     font-weight: 600;
@@ -219,4 +222,9 @@
   .ag-row-selected {
     background-color: rgba($primary, 0.05);
   }
+}
+
+/* Allow AG Grid to display properly inside tabs */
+.tab-content .ag-root-wrapper {
+  min-height: 400px;
 }
