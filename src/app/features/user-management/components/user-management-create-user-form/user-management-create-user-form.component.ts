@@ -121,9 +121,6 @@ export class UserManagementCreateUserFormComponent implements OnInit {
       if (usernameField) {
         usernameField.isDisabled = true;
       }
-
-      this.formGroup.get('password')?.clearValidators();
-      this.formGroup.get('password')?.updateValueAndValidity();
     }
 
     this.patchFormData();
@@ -143,12 +140,6 @@ export class UserManagementCreateUserFormComponent implements OnInit {
     // this.formGroup.statusChanges.subscribe((status) => {
     //   this.formValidityChange.emit(status === 'VALID');
     // });
-    this.formGroup.statusChanges.subscribe((status) => {
-      let isValid = status === 'VALID';
-      
-      // In edit mode without password showing, consider form valid if other fields are valid
-      if (this.isEditMode && !this.showPasswordFields) {
-        // Only check non-password fields
         isValid = true;
         Object.keys(this.formGroup.controls)
           .filter(key => key !== 'password')
@@ -161,7 +152,7 @@ export class UserManagementCreateUserFormComponent implements OnInit {
           this.formValidityChange.emit(isValid);
         });
   }
-  
+
 
   private initForm(): void {
     this.formGroup = this.fb.group({
@@ -196,20 +187,8 @@ ngOnChanges(changes: SimpleChanges): void {
     if (usernameControl) {
       if (this.isEditMode) {
         usernameControl.disable();
-        
-        // In edit mode, clear password validators until toggled
-        this.formGroup.get('password')?.clearValidators();
-        this.formGroup.get('password')?.updateValueAndValidity();
       } else {
         usernameControl.enable();
-        
-        // In create mode, password is required
-        this.formGroup.get('password')?.setValidators([
-          Validators.required, 
-          Validators.minLength(8),
-          Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)
-        ]);
-        this.formGroup.get('password')?.updateValueAndValidity();
       }
     }
   }
@@ -226,7 +205,7 @@ private patchFormData(): void {
       firstName: this.data.firstName || '',
       lastName: this.data.lastName || '',
       site: this.data.site || '',
-      password: this.isEditMode ? '' : (this.data.password || '')
+      password: ''
     });
   }
 }
@@ -234,24 +213,15 @@ private patchFormData(): void {
 getPasswordField(): FieldConfig | undefined {
   // Always return the password field when in create mode
   // In edit mode, return only when the toggle is active
-  // if (!this.isEditMode || this.showPasswordFields) {
-  //   // Return the password field with the appropriate validators
-  //   return {
-  //     ...this.passwordField,
-  //     validators: this.isEditMode && this.showPasswordFields
-  //       ? [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)]
-  //       : this.isEditMode && !this.showPasswordFields
-  //         ? []
-  //         : [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)]
-  //   };
-  // }
-  // return undefined;
   if (!this.isEditMode || this.showPasswordFields) {
+    // Return the password field with the appropriate validators
     return {
       ...this.passwordField,
       validators: this.isEditMode && this.showPasswordFields
         ? [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)]
-        : this.passwordField.validators
+        : this.isEditMode && !this.showPasswordFields
+          ? []
+          : [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)]
     };
   }
   return undefined;
@@ -270,32 +240,22 @@ togglePasswordFields() {
   if (passwordControl) {
     if (this.showPasswordFields) {
       passwordControl.setValidators([
-        Validators.required, 
+        Validators.required,
         Validators.minLength(8),
         Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)
       ]);
+      passwordControl.updateValueAndValidity();
     } else {
       passwordControl.clearValidators();
-      passwordControl.setValue('');
       passwordControl.updateValueAndValidity();
+      // Reset the password field when hiding
+      passwordControl.setValue('');
     }
-    passwordControl.updateValueAndValidity();
   }
 
+  // Emit form validity change after toggling
   setTimeout(() => {
-    let isValid = this.formGroup.valid;
-    if (this.isEditMode && !this.showPasswordFields) {
-      // Only check non-password fields
-      isValid = true;
-      Object.keys(this.formGroup.controls)
-        .filter(key => key !== 'password')
-        .forEach(key => {
-          if (this.formGroup.get(key)?.invalid) {
-            isValid = false;
-          }
-        });
-    }
-    this.formValidityChange.emit(isValid);
+    this.formValidityChange.emit(this.formGroup.valid);
   });
 }
 
