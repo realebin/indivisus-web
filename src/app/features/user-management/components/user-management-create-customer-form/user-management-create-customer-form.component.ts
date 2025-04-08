@@ -78,12 +78,12 @@ export class UserManagementCreateCustomerFormComponent implements OnInit {
       label: 'Postal Code',
       type: 'text',
       placeholder: 'Enter Postal Code',
-      // validators: [Validators.required], //TODO : jangan lupa dibuka lagi nanti
-      validators: [],
-      // validationMessages: {
-      //   required: 'Postal Code is required',
-      // },
-      validationMessages: {},
+      validators: [Validators.required],
+
+      validationMessages: {
+        required: 'Postal Code is required',
+      },
+
     },
     {
       name: 'notes',
@@ -96,13 +96,14 @@ export class UserManagementCreateCustomerFormComponent implements OnInit {
   ];
 
   constructor(private fb: FormBuilder) {}
-
   ngOnInit(): void {
     this.initForm();
     this.patchFormData();
+    this.resetFormState(); // Add this line
+
     this.formGroup.valueChanges.subscribe((value) => {
       const updatedData = { ...this.data, ...value };
-      this.dataChange.emit(updatedData); // Emit on every change
+      this.dataChange.emit(updatedData);
     });
 
     this.formGroup.statusChanges.subscribe((status) => {
@@ -117,9 +118,17 @@ export class UserManagementCreateCustomerFormComponent implements OnInit {
       address: ['', Validators.required],
       city: ['', Validators.required],
       phoneNumber: ['', Validators.required],
-      postalCode: [''],
-      // postalCode: ['', Validators.required], //TODO : jangan lupa dibuka nanti
+      postalCode: ['', Validators.required],
       notes: [''],
+    });
+  }
+
+  private resetFormState(): void {
+    // Reset the form's state without changing values
+    Object.keys(this.formGroup.controls).forEach(key => {
+      const control = this.formGroup.get(key);
+      control?.markAsPristine();
+      control?.markAsUntouched();
     });
   }
 
@@ -137,8 +146,8 @@ export class UserManagementCreateCustomerFormComponent implements OnInit {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
-      // Check if the 'data' input changed
       this.patchFormData();
+      this.resetFormState();
     }
   }
 

@@ -11,7 +11,6 @@
       [formControlName]="config.name"
       [placeholder]="config.placeholder"
       [ngClass]="{ 'is-invalid': isFieldInvalid() }"
-      [disabled]="!!config.isDisabled"
     />
 
     <!-- Password Input -->
@@ -23,7 +22,6 @@
       [formControlName]="config.name"
       [placeholder]="config.placeholder"
       [ngClass]="{ 'is-invalid': isFieldInvalid() }"
-      [disabled]="!!config.isDisabled"
     />
 
     <!-- Select Input -->
@@ -33,7 +31,6 @@
       class="form-select"
       [formControlName]="config.name"
       [ngClass]="{ 'is-invalid': isFieldInvalid() }"
-      [disabled]="!!config.isDisabled"
     >
       <option value="">Select an option</option>
       <option *ngFor="let option of config.options" [value]="option.value">
@@ -49,7 +46,6 @@
       class="form-control"
       [formControlName]="config.name"
       [ngClass]="{ 'is-invalid': isFieldInvalid() }"
-      [disabled]="!!config.isDisabled"
     />
 
     <input
@@ -58,7 +54,6 @@
       type="checkbox"
       class="form-check-input"
       [formControlName]="config.name"
-      [disabled]="!!config.isDisabled"
     />
   </ng-container>
 

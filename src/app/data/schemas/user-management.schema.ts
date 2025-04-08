@@ -40,7 +40,7 @@ export interface UserManagementInquirySupplierHttpResponse {
     city: string;
     country: string;
     postal_code: string;
-    description: string;
+    notes: string
   }[];
 }
 
@@ -67,16 +67,18 @@ export interface UserManagementCreateCustomerHttpRequest {
   phone_number: string;
   city: string;
   postal_code: string;
+  notes?: string;
 }
 
 export interface UserManagementCreateSupplierHttpRequest {
   supplier_id?: number;
-  name: string;
+  first_name: string;
+  last_name?: string; //TODO : nanti apus
   address: string;
   phone_number: string;
   city: string;
   postal_code: string;
-  description: string;
+  notes: string;
   country: string;
 }
 
@@ -84,7 +86,6 @@ export interface UserManagementDeleteHttpRequest {
   type: string;
   id: number;
 }
-
 
 export interface UpdatePasswordUserHttpRequest {
   user_id?: number;

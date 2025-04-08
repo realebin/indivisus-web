@@ -1,20 +1,24 @@
 import { Injectable } from '@angular/core';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class NavbarService {
-  constructor() {}
+  constructor(private authService: AuthService) {}
 
   getNavbarItems() {
-    return [
+    const navItems = [
       { label: 'Dashboard', icon: 'bi-house', href: 'dashboard' },
       { label: 'Stock', icon: 'bi-box2', href: 'stock' },
-      { label: 'User Management', icon: 'bi-person', href: 'user-management' },
       { label: 'Site', icon: 'bi-geo-alt', href: 'site' },
       { label: 'Invoice', icon: 'bi-receipt', href: 'invoice' },
-      // { label: 'Settings', icon: 'bi-gear', href: 'settings' },
-      // { label: 'Help', icon: 'bi-question-circle', href: 'help' },
     ];
+
+    if (this.authService.getRole() === 'Admin') {
+      navItems.splice(2, 0, { label: 'User Management', icon: 'bi-person', href: 'user-management' });
+    }
+
+    return navItems;
   }
 }

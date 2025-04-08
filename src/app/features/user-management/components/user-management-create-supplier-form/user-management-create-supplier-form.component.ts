@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FieldConfig } from '@models/_component-base.model';
 import { UserManagementCreateSupplierModelRequest } from '@models/user-management.model';
@@ -33,8 +40,7 @@ export class UserManagementCreateSupplierFormComponent implements OnInit {
       label: 'Country',
       type: 'text',
       placeholder: 'Enter Country',
-      // validators: [Validators.required],
-      validators: [], //TODO : Nanti dibuka lagi
+      validators: [Validators.required],
       validationMessages: {},
     },
     {
@@ -45,16 +51,6 @@ export class UserManagementCreateSupplierFormComponent implements OnInit {
       validators: [Validators.required],
       validationMessages: {
         required: 'Address is required',
-      },
-    },
-    {
-      name: 'description',
-      label: 'Description',
-      type: 'text',
-      placeholder: 'Enter Description',
-      validators: [Validators.required],
-      validationMessages: {
-        required: 'Description is required',
       },
     },
     {
@@ -72,11 +68,9 @@ export class UserManagementCreateSupplierFormComponent implements OnInit {
       label: 'Phone Number',
       type: 'text',
       placeholder: 'Enter Phone Number',
-      validators: [
-        Validators.required,
-      ],
+      validators: [Validators.required],
       validationMessages: {
-        required: 'Phone Number is required'
+        required: 'Phone Number is required',
       },
     },
     {
@@ -84,12 +78,17 @@ export class UserManagementCreateSupplierFormComponent implements OnInit {
       label: 'Postal Code',
       type: 'text',
       placeholder: 'Enter Postal Code',
-      validators: [
-        Validators.required,
-      ],
+      validators: [Validators.required],
       validationMessages: {
-        required: 'Postal Code is required'
+        required: 'Postal Code is required',
       },
+    },
+    {
+      name: 'description',
+      label: 'Notes',
+      type: 'text',
+      placeholder: 'Enter Notes',
+      validators: [],
     },
   ];
 
@@ -98,23 +97,37 @@ export class UserManagementCreateSupplierFormComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.patchFormData();
+    this.resetFormState();
+
     this.formGroup.valueChanges.subscribe((value) => {
       const updatedData = { ...this.data, ...value };
-      this.dataChange.emit(updatedData); // Emit on every change
+      this.dataChange.emit(updatedData);
     });
-    this.formGroup.statusChanges.subscribe(status => {
+
+    this.formGroup.statusChanges.subscribe((status) => {
       this.formValidityChange.emit(status === 'VALID');
     });
   }
+
   private initForm(): void {
     this.formGroup = this.fb.group({
       name: ['', Validators.required],
       country: ['', Validators.required],
-      description: ['', Validators.required],
+      description: [''],
       address: ['', Validators.required],
       city: ['', Validators.required],
       phoneNumber: ['', Validators.required],
       postalCode: ['', Validators.required],
+
+    });
+  }
+
+  private resetFormState(): void {
+    // Reset the form's state without changing values
+    Object.keys(this.formGroup.controls).forEach((key) => {
+      const control = this.formGroup.get(key);
+      control?.markAsPristine();
+      control?.markAsUntouched();
     });
   }
 
@@ -131,8 +144,9 @@ export class UserManagementCreateSupplierFormComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['data']) { // Check if the 'data' input changed
+    if (changes['data']) {
       this.patchFormData();
+      this.resetFormState();
     }
   }
 
