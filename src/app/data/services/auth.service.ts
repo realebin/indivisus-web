@@ -19,7 +19,7 @@ export class AuthService {
   constructor(
     private authHttpService: AuthHttpService,
     private router: Router
-  ) {}
+  ) { }
 
   login(data: AuthLoginModelRequest): Observable<AuthLoginModelResponse> {
     const request = transformToAuthLoginHttpRequest(data);
@@ -37,6 +37,10 @@ export class AuthService {
           localStorage.setItem(
             'name',
             response?.output_schema?.data?.full_name
+          );
+          localStorage.setItem(
+            'role',
+            response?.output_schema?.data?.role
           );
         }
         return transformToAuthLoginModelResponse(response.output_schema);
@@ -56,6 +60,7 @@ export class AuthService {
     localStorage.removeItem('authToken');
     localStorage.removeItem('name');
     localStorage.removeItem('username');
+    localStorage.removeItem('role');
     this.router.navigate(['/login']);
   }
 
@@ -65,6 +70,10 @@ export class AuthService {
 
   getUsername(): string | null {
     return localStorage.getItem('username');
+  }
+
+  getRole(): string | null {
+    return localStorage.getItem('role');
   }
 
   isAuthenticated(): boolean {

@@ -1,310 +1,401 @@
+// user-management-index.component.ts
 import {
-  ChangeDetectorRef,
   Component,
-  OnDestroy,
   OnInit,
-  TemplateRef,
-  ViewChild,
+  AfterViewInit,
+  OnDestroy,
+  ChangeDetectorRef,
 } from '@angular/core';
-import {
-  AppUser,
-  Customer,
-  Supplier,
-  UserManagementCreateAppUserModelRequest,
-  UserManagementCreateCustomerModelRequest,
-  UserManagementCreateSupplierModelRequest,
-} from '@models/user-management.model';
-import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
-import { Subscription } from '@node_modules/rxjs/dist/types';
 import { UserManagementService } from '@services/user-management.service';
 import { SiteService } from '@services/site.service';
-import { SiteAllListResponse } from '@models/site.model';
 import { UserManagementDictionaryEnum } from '@cores/enums/custom-variable.enum';
+
+// Declare Bootstrap for TypeScript
+declare var bootstrap: any;
+
 @Component({
   selector: 'app-user-management-index',
   templateUrl: './user-management-index.component.html',
-  styleUrl: './user-management-index.component.scss',
+  styleUrls: ['./user-management-index.component.scss'],
 })
-export class UserManagementIndexComponent implements OnInit, OnDestroy {
-  activeTab = UserManagementDictionaryEnum.AppUser; // Default active tab
-  _enumCustomer = UserManagementDictionaryEnum.Customer;
+export class UserManagementIndexComponent
+  implements OnInit, AfterViewInit, OnDestroy
+{
+  // Tab management
+  activeTab = UserManagementDictionaryEnum.AppUser;
   _enumAppUser = UserManagementDictionaryEnum.AppUser;
+  _enumCustomer = UserManagementDictionaryEnum.Customer;
   _enumSupplier = UserManagementDictionaryEnum.Supplier;
-  previousType: string;
-  isLoading: boolean;
-  inquiryAppUser$: Subscription;
-  inquirySupplier$: Subscription;
-  inquiryCustomer$: Subscription;
-  inquirySites$: Subscription;
-  errorMessage: string;
-  errorMessageCreateAppUser: string;
-  errorMessageCreateCustomer: string;
-  errorMessageCreateSupplier: string;
-  appUsers: AppUser[];
-  modalRef?: BsModalRef;
-  suppliers: Supplier[];
-  customers: Customer[];
+
+  // Modal instances
+  private userModal: any;
+  private customerModal: any;
+  private supplierModal: any;
+
+  // Data states
+  isLoading = false;
+  isEditMode = false;
+  errorMessage = '';
+  errorMessageCreateAppUser = '';
+  errorMessageCreateCustomer = '';
+  errorMessageCreateSupplier = '';
+
+  // Form validation states
   isUserFormValid = false;
   isCustomerFormValid = false;
   isSupplierFormValid = false;
-  isEditMode = false;
-  selectedUser: any;
-  @ViewChild('createUserModal') createUserModal!: TemplateRef<any>;
-  @ViewChild('createCustomerModal') createCustomerModal!: TemplateRef<any>;
-  @ViewChild('createSupplierModal') createSupplierModal!: TemplateRef<any>;
-  requestDataUser: UserManagementCreateAppUserModelRequest = {
-    role: '',
-    firstName: '',
-    lastName: '',
-    username: '',
-    password: '',
-    fullName: '',
-    site: '',
-  };
-  requestDataCustomer: UserManagementCreateCustomerModelRequest = {
-    firstName: '',
-    lastName: '',
-    fullName: '',
-    address: '',
-    city: '',
-    phoneNumber: '',
-    postalCode: '',
-    notes: '',
-  };
-  requestDataSupplier: UserManagementCreateSupplierModelRequest = {
-    name: '',
-    description: '',
-    country: '',
-    address: '',
-    city: '',
-    phoneNumber: '',
-    postalCode: '',
-  };
 
-  siteList: SiteAllListResponse;
+  // Data lists
+  appUsers: any[] = [];
+  customers: any[] = [];
+  suppliers: any[] = [];
+
+  // Request data objects
+  requestDataUser: any = {};
+  requestDataCustomer: any = {};
+  requestDataSupplier: any = {};
 
   constructor(
     private userManagementService: UserManagementService,
     private siteService: SiteService,
-    private modalService: BsModalService,
     private changeDetectorRef: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    this.loadInitialData();
+  }
+
+  ngAfterViewInit(): void {
+    this.initModals();
+  }
+
+  private loadInitialData(): void {
     this.inquiryAppUser();
-    this.errorMessage = '';
   }
 
-  ngOnDestroy(): void {
-    this.inquiryAppUser$?.unsubscribe();
-    this.inquirySupplier$?.unsubscribe();
-    this.inquiryCustomer$?.unsubscribe();
-    this.inquirySites$?.unsubscribe();
-    this.modalRef?.hide();
-  }
+  private initModals(): void {
+    // Initialize Bootstrap modals
+    const userModalEl = document.getElementById('userFormModal');
+    const customerModalEl = document.getElementById('customerFormModal');
+    const supplierModalEl = document.getElementById('supplierFormModal');
 
-  createNew(template: TemplateRef<any>): void {
-    this.isEditMode = false;
-    this.selectedUser = null;
-    this.openModal(template);
-  }
-
-  // openModal(template: TemplateRef<any>) {
-  //   if (!this.isEditMode) {
-  //     // Reset form data when creating new
-  //     this.resetForm();
-  //   }
-  //   this.modalRef = this.modalService.show(template);
-  // }
-
-  // openModal(template: TemplateRef<any>) {
-  //   if (!this.isEditMode) {
-  //     // Reset form data when creating new
-  //     this.resetForm();
-  //   }
-
-  //   // Use a config object with proper class for modals
-  //   this.modalRef = this.modalService.show(template, {
-  //     class: 'modal-dialog-centered',
-  //     animated: true,
-  //     ignoreBackdropClick: false
-  //   });
-
-  //   // Force change detection after modal is shown
-  //   setTimeout(() => {
-  //     // This triggers a check for changes
-  //     this.changeDetectorRef.detectChanges();
-  //   }, 100);
-  // }
-
-  openModal(template: TemplateRef<any>): void {
-
-    // First, ensure any previous modal is completely closed
-    if (this.modalRef) {
-      this.modalRef.hide();
-      this.modalRef = undefined;
+    if (userModalEl) {
+      this.userModal = new bootstrap.Modal(userModalEl);
     }
 
-    setTimeout(() => { // ensure modal is fully open before triggering detectChanges
-      this.changeDetectorRef.detectChanges();
-    }, 0);
-
-    // Reset form for new entries
-    if (!this.isEditMode) {
-      this.resetForm();
+    if (customerModalEl) {
+      this.customerModal = new bootstrap.Modal(customerModalEl);
     }
 
-    // Configure the modal with explicit settings
-    const config = {
-      class: 'modal-dialog modal-lg',
-      backdrop: true,
-      ignoreBackdropClick: false,
-      animated: true
-    };
-
-    // Create a new modal reference
-    this.modalRef = this.modalService.show(template, config);
-
-    // Ensure the modal is added to document body, not some nested container
-    document.body.classList.add('modal-open');
-  }
-
-  closeModal(): void {
-    if (this.modalRef) {
-      this.modalRef.hide();
-      this.modalRef = undefined;
-      // Ensure modal classes are properly removed
-      document.body.classList.remove('modal-open');
+    if (supplierModalEl) {
+      this.supplierModal = new bootstrap.Modal(supplierModalEl);
     }
-    this.resetForm();
   }
 
-  setActiveTab(tab: UserManagementDictionaryEnum) {
+  // TAB MANAGEMENT
+  setActiveTab(tab: UserManagementDictionaryEnum): void {
     this.activeTab = tab;
 
-    // Load data based on tab
-    if (tab === UserManagementDictionaryEnum.Customer) {
-      this.inquiryCustomer();
-    } else if (tab === UserManagementDictionaryEnum.AppUser) {
+    // Load data based on active tab
+    if (tab === UserManagementDictionaryEnum.AppUser) {
       this.inquiryAppUser();
+    } else if (tab === UserManagementDictionaryEnum.Customer) {
+      this.inquiryCustomer();
     } else if (tab === UserManagementDictionaryEnum.Supplier) {
       this.inquirySupplier();
     }
-
-    // Force change detection after tab switch
-    setTimeout(() => {
-      // This triggers a check for changes
-      this.changeDetectorRef.detectChanges();
-    }, 100);
   }
 
-  inquiryAppUser() {
-    this.errorMessage = '';
+  // DATA LOADING METHODS
+  inquiryAppUser(): void {
     this.isLoading = true;
-    this.inquiryAppUser$ = this.userManagementService
-      .inquiryAppUser()
-      .subscribe({
-        next: (data) => {
-          this.isLoading = false;
-          this.appUsers = data.appUsers;
-
-          // Force grid refresh after data is loaded
-          setTimeout(() => {
-            const gridComponent = document.querySelector('app-user-management-table-inquiry');
-            if (gridComponent) {
-              // Force re-render of the component
-              this.changeDetectorRef.detectChanges();
-            }
-          }, 100);
-        },
-        error: ({ message }) => {
-          this.isLoading = false;
-          this.errorMessage = message;
-        },
-      });
-  }
-
-  inquirySupplier() {
     this.errorMessage = '';
-    this.isLoading = true;
-    this.inquirySupplier$ = this.userManagementService
-      .inquirySupplier()
-      .subscribe({
-        next: (data) => {
-          this.isLoading = false;
-          this.suppliers = data.suppliers;
-        },
-        error: ({ message }) => {
-          this.isLoading = false;
-          this.errorMessage = message;
-        },
-      });
-  }
 
-  inquiryCustomer() {
-    this.errorMessage = '';
-    this.isLoading = true;
-    this.inquiryCustomer$ = this.userManagementService
-      .inquiryCustomer()
-      .subscribe({
-        next: (data) => {
-          this.isLoading = false;
-          this.customers = data.customers;
-        },
-        error: ({ message }) => {
-          this.isLoading = false;
-          this.errorMessage = message;
-        },
-      });
-  }
-
-  inquirySiteForFilter() {
-    this.inquirySites$ = this.siteService.getSiteForFilter().subscribe({
+    this.userManagementService.inquiryAppUser().subscribe({
       next: (response) => {
+        this.appUsers = response.appUsers;
         this.isLoading = false;
-        this.siteList = response;
       },
-      error: ({ message }) => {
+      error: (error) => {
+        this.errorMessage = error.message || 'Failed to load users';
         this.isLoading = false;
-        this.errorMessage = message;
       },
     });
   }
 
-  refreshTable(): void {
+  inquiryCustomer(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.userManagementService.inquiryCustomer().subscribe({
+      next: (response) => {
+        this.customers = response.customers;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.errorMessage = error.message || 'Failed to load customers';
+        this.isLoading = false;
+      },
+    });
+  }
+
+  inquirySupplier(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.userManagementService.inquirySupplier().subscribe({
+      next: (response) => {
+        this.suppliers = response.suppliers;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.errorMessage = error.message || 'Failed to load suppliers';
+        this.isLoading = false;
+      },
+    });
+  }
+
+  // FORM HANDLING METHODS
+  resetForm(): void {
+    // Reset user form data
+    this.requestDataUser = {
+      role: '',
+      firstName: '',
+      lastName: '',
+      username: '',
+      password: '',
+      fullName: '',
+      site: '',
+    };
+
+    // Reset customer form data
+    this.requestDataCustomer = {
+      firstName: '',
+      lastName: '',
+      fullName: '',
+      address: '',
+      city: '',
+      phoneNumber: '',
+      postalCode: '',
+      notes: '',
+    };
+
+    // Reset supplier form data
+    this.requestDataSupplier = {
+      name: '',
+      description: '',
+      country: '',
+      address: '',
+      city: '',
+      phoneNumber: '',
+      postalCode: '',
+    };
+
+    // Reset form states
+    this.isUserFormValid = false;
+    this.isCustomerFormValid = false;
+    this.isSupplierFormValid = false;
+
+    // Reset errors
+    this.errorMessageCreateAppUser = '';
+    this.errorMessageCreateCustomer = '';
+    this.errorMessageCreateSupplier = '';
+  }
+
+  // MODAL ACTIONS
+  createNew(): void {
+    this.isEditMode = false;
+    this.resetForm();
+
+    // Force a clean state and change detection before showing modal
+    this.changeDetectorRef.detectChanges();
+
     if (this.activeTab === UserManagementDictionaryEnum.AppUser) {
-      this.inquiryAppUser();
+      setTimeout(() => this.userModal?.show(), 0);
     } else if (this.activeTab === UserManagementDictionaryEnum.Customer) {
-      this.inquiryCustomer();
+      setTimeout(() => this.customerModal?.show(), 0);
     } else if (this.activeTab === UserManagementDictionaryEnum.Supplier) {
-      this.inquirySupplier();
+      setTimeout(() => this.supplierModal?.show(), 0);
     }
   }
 
+  createModalUser(user: any): void {
+    if (this.userModal) {
+      this.userModal.hide();
+    }
+    this.isEditMode = true;
+    this.errorMessageCreateAppUser = '';
+
+    if (this.activeTab === UserManagementDictionaryEnum.AppUser) {
+      this.requestDataUser = {
+        id: user.id,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        username: user.username,
+        password: '',
+        fullName: user.fullName,
+        site: user.site,
+      };
+
+      // Force change detection to update bindings
+      this.changeDetectorRef.detectChanges();
+
+      // Force data binding to complete
+      setTimeout(() => {
+        this.userModal?.show();
+      }, 0);
+    } else if (this.activeTab === UserManagementDictionaryEnum.Customer) {
+      // Set customer data
+      this.requestDataCustomer = {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        fullName: user.fullName,
+        address: user.address,
+        city: user.city,
+        phoneNumber: user.phoneNumber,
+        postalCode: user.postalCode,
+        notes: user.notes,
+      };
+
+      // Force change detection to update bindings
+      this.changeDetectorRef.detectChanges();
+
+      setTimeout(() => {
+        this.customerModal?.show();
+      }, 0);
+    } else if (this.activeTab === UserManagementDictionaryEnum.Supplier) {
+      // Set supplier data
+      this.requestDataSupplier = {
+        id: user.id,
+        name: user.name,
+        description: user.description,
+        country: user.country,
+        address: user.address,
+        city: user.city,
+        phoneNumber: user.phoneNumber,
+        postalCode: user.postalCode,
+      };
+
+      // Force change detection to update bindings
+      this.changeDetectorRef.detectChanges();
+
+      setTimeout(() => {
+        this.supplierModal?.show();
+      }, 0);
+    }
+  }
+
+  // FORM DATA CHANGE HANDLERS
+  onUserFormDataChange(data: any): void {
+    this.requestDataUser = data;
+  }
+
+  onCustomerFormDataChange(data: any): void {
+    this.requestDataCustomer = data;
+  }
+
+  onSupplierFormDataChange(data: any): void {
+    this.requestDataSupplier = data;
+  }
+
+  // FORM VALIDITY CHANGE HANDLERS
+  onUserFormValidityChange(isValid: boolean): void {
+    console.log('Form validity changed:', isValid);
+    this.isUserFormValid = isValid;
+
+    // If in edit mode without password field showing, consider it valid
+    if (this.isEditMode) {
+      const userFormComponent = document.querySelector(
+        'app-user-management-create-user-form'
+      );
+      if (userFormComponent) {
+        const passwordField = userFormComponent.querySelector(
+          'input[type="password"]'
+        );
+        if (!passwordField) {
+          // No password field is visible, so form should be valid if other fields are
+          this.isUserFormValid = true;
+        }
+      }
+    }
+  }
+  onCustomerFormValidityChange(isValid: boolean): void {
+    this.isCustomerFormValid = isValid;
+  }
+
+  onSupplierFormValidityChange(isValid: boolean): void {
+    this.isSupplierFormValid = isValid;
+  }
+
+  // SAVE OPERATIONS
+  saveUser(): void {
+    this.createEditUser();
+  }
+
+  saveCustomer(): void {
+    this.createEditCustomer();
+  }
+
+  saveSupplier(): void {
+    this.createEditSupplier();
+  }
+
+  // CREATE/EDIT OPERATIONS
   createEditUser(): void {
     this.errorMessageCreateAppUser = '';
     this.errorMessage = '';
     this.isLoading = true;
-    if (!this.isEditMode) {
+
+    // If in edit mode and password field is not visible or empty, remove it from request
+    if (this.isEditMode) {
+      // Only include password if it has a value
+      if (!this.requestDataUser.password) {
+        const requestWithoutPassword = { ...this.requestDataUser };
+        delete requestWithoutPassword.password;
+
+        this.userManagementService
+          .editAppUser(requestWithoutPassword)
+          .subscribe({
+            next: (data) => {
+              this.isLoading = false;
+              // Use the proper method to refresh data
+              this.inquiryAppUser();
+              this.userModal?.hide();
+              this.resetForm();
+              this.errorMessage = data;
+            },
+            error: (error) => {
+              this.isLoading = false;
+              this.errorMessageCreateAppUser =
+                error.message || 'An error occurred';
+            },
+          });
+      } else {
+        // If password is provided, use the full request
+        this.userManagementService.editAppUser(this.requestDataUser).subscribe({
+          next: (data) => {
+            this.isLoading = false;
+            this.inquiryAppUser();
+            this.userModal?.hide();
+            this.resetForm();
+            this.errorMessage = data;
+          },
+          error: (error) => {
+            this.isLoading = false;
+            this.errorMessageCreateAppUser =
+              error.message || 'An error occurred';
+          },
+        });
+      }
+    } else {
+      // Create new user with full request
       this.userManagementService.createAppUser(this.requestDataUser).subscribe({
         next: (data) => {
           this.isLoading = false;
-          this.refreshTable();
-          this.closeModal();
-          this.resetForm();
-          this.errorMessage = data;
-        },
-        error: (error) => {
-          this.isLoading = false;
-          this.errorMessageCreateAppUser = error.message || 'An error occurred';
-        },
-      });
-    } else {
-      this.userManagementService.editAppUser(this.requestDataUser).subscribe({
-        next: (data) => {
-          this.isLoading = false;
-          this.refreshTable();
-          this.closeModal();
+          this.inquiryAppUser();
+          this.userModal?.hide();
           this.resetForm();
           this.errorMessage = data;
         },
@@ -317,255 +408,108 @@ export class UserManagementIndexComponent implements OnInit, OnDestroy {
   }
 
   createEditCustomer(): void {
-    this.errorMessage = '';
+    this.isLoading = true;
     this.errorMessageCreateCustomer = '';
-    this.isLoading = true;
-
-    if (!this.isEditMode) {
-      this.userManagementService
-        .createCustomer(this.requestDataCustomer)
-        .subscribe({
-          next: (data) => {
-            this.isLoading = false;
-            this.refreshTable();
-            this.closeModal();
-            this.resetForm();
-            this.errorMessage = data;
-          },
-          error: (error) => {
-            this.isLoading = false;
-            this.errorMessageCreateCustomer = error.message || 'An error occurred';
-          },
-        });
-    } else {
-      this.userManagementService
-        .editCustomer(this.requestDataCustomer)
-        .subscribe({
-          next: (data) => {
-            this.isLoading = false;
-            this.refreshTable();
-            this.closeModal();
-            this.resetForm();
-            this.errorMessage = data;
-          },
-          error: (error) => {
-            this.isLoading = false;
-            this.errorMessageCreateCustomer = error.message || 'An error occurred';
-          },
-        });
-    }
-  }
-
-  createEditSupplier(): void {
-    this.errorMessageCreateSupplier = '';
     this.errorMessage = '';
-    this.isLoading = true;
 
-    if (!this.isEditMode) {
-      this.userManagementService
-        .createSupplier(this.requestDataSupplier)
-        .subscribe({
-          next: (data) => {
-            this.isLoading = false;
-            this.refreshTable();
-            this.closeModal();
-            this.resetForm();
-            this.errorMessage = data;
-          },
-          error: (error) => {
-            this.isLoading = false;
-            this.errorMessageCreateSupplier = error.message || 'An error occurred';
-          },
-        });
-    } else {
-      this.userManagementService
-        .editSupplier(this.requestDataSupplier)
-        .subscribe({
-          next: (data) => {
-            this.isLoading = false;
-            this.refreshTable();
-            this.closeModal();
-            this.resetForm();
-            this.errorMessage = data;
-          },
-          error: (error) => {
-            this.isLoading = false;
-            this.errorMessageCreateSupplier = error.message || 'An error occurred';
-          },
-        });
-    }
-  }
+    const operation = this.isEditMode
+      ? this.userManagementService.editCustomer(this.requestDataCustomer)
+      : this.userManagementService.createCustomer(this.requestDataCustomer);
 
-  editUser(): void {
-    this.errorMessage = '';
-    this.isLoading = true;
-    this.userManagementService.editAppUser(this.requestDataUser).subscribe({
-      next: (data) => {
+    operation.subscribe({
+      next: (response) => {
+        // Success handling
         this.isLoading = false;
-        this.refreshTable();
-        this.closeModal();
+        this.customerModal?.hide();
         this.resetForm();
-        this.errorMessage = data;
+        this.inquiryCustomer();
+
+        // Display success message
+        this.errorMessage = response; // This should be the success message from API
+
+        // You can also add a temporary success alert
+        const alertContainer = document.querySelector('.alert-container');
+        if (alertContainer) {
+          const successAlert = document.createElement('div');
+          successAlert.className = 'alert alert-success alert-dismissible fade show';
+          successAlert.innerHTML = `
+            <i class="bi bi-check-circle me-2"></i>
+            ${this.isEditMode ? 'Customer updated successfully!' : 'New customer created successfully!'}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          `;
+          alertContainer.appendChild(successAlert);
+
+          // Auto-remove after 5 seconds
+          setTimeout(() => {
+            successAlert.remove();
+          }, 5000);
+        }
       },
       error: (error) => {
         this.isLoading = false;
-        this.errorMessage = error.message || 'An error occurred';
+        this.errorMessageCreateCustomer = error.message || 'An error occurred';
       },
     });
   }
 
-  editCustomer(): void {
-    this.errorMessage = '';
+  createEditSupplier(): void {
     this.isLoading = true;
-
-    this.userManagementService
-      .editCustomer(this.requestDataCustomer)
-      .subscribe({
-        next: (data) => {
-          this.isLoading = false;
-          this.refreshTable();
-          this.closeModal();
-          this.resetForm();
-          this.errorMessage = data;
-        },
-        error: (error) => {
-          this.isLoading = false;
-          this.errorMessage = error.message || 'An error occurred';
-        },
-      });
-  }
-
-  editSupplier(): void {
+    this.errorMessageCreateSupplier = '';
     this.errorMessage = '';
-    this.isLoading = true;
 
-    this.userManagementService
-      .editSupplier(this.requestDataSupplier)
-      .subscribe({
-        next: (data) => {
-          this.isLoading = false;
-          this.refreshTable();
-          this.closeModal();
-          this.resetForm();
-          this.errorMessage = data;
-        },
-        error: (error) => {
-          this.isLoading = false;
-          this.errorMessage = error.message || 'An error occurred';
-        },
-      });
+    const operation = this.isEditMode
+      ? this.userManagementService.editSupplier(this.requestDataSupplier)
+      : this.userManagementService.createSupplier(this.requestDataSupplier);
+
+    operation.subscribe({
+      next: (response) => {
+        // Success handling
+        this.isLoading = false;
+        this.supplierModal?.hide();
+        this.resetForm();
+        this.inquirySupplier();
+
+        // Display success message
+        this.errorMessage = response; // This should be the success message from API
+
+        // You can also add a temporary success alert
+        const alertContainer = document.querySelector('.alert-container');
+        if (alertContainer) {
+          const successAlert = document.createElement('div');
+          successAlert.className = 'alert alert-success alert-dismissible fade show';
+          successAlert.innerHTML = `
+            <i class="bi bi-check-circle me-2"></i>
+            ${this.isEditMode ? 'Supplier updated successfully!' : 'New supplier created successfully!'}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          `;
+          alertContainer.appendChild(successAlert);
+
+          // Auto-remove after 5 seconds
+          setTimeout(() => {
+            successAlert.remove();
+          }, 5000);
+        }
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.errorMessageCreateSupplier = error.message || 'An error occurred';
+      },
+    });
   }
 
-  onUserFormDataChange(updatedData: UserManagementCreateAppUserModelRequest) {
-    this.requestDataUser = { ...this.requestDataUser, ...updatedData };
-  }
-
-  onCustomerFormDataChange(
-    updatedData: UserManagementCreateCustomerModelRequest
-  ) {
-    this.requestDataCustomer = { ...this.requestDataCustomer, ...updatedData };
-}
-
-  onSupplierFormDataChange(
-    updatedData: UserManagementCreateSupplierModelRequest
-  ) {
-    this.requestDataSupplier = { ...this.requestDataSupplier, ...updatedData };
-  }
-
-  onUserFormValidityChange(isValid: boolean) {
-    this.isUserFormValid = isValid;
-  }
-
-  onCustomerFormValidityChange(isValid: boolean) {
-    this.isCustomerFormValid = isValid;
-  }
-
-  onSupplierFormValidityChange(isValid: boolean) {
-    this.isSupplierFormValid = isValid;
-  }
-
-  createModalUser(user: any): void {
-    this.isEditMode = true;
-    this.selectedUser = user;
-
+  // DELETE OPERATIONS
+  deleteUser(): void {
+    // Refresh data after delete
     if (this.activeTab === UserManagementDictionaryEnum.AppUser) {
-      this.requestDataUser = {
-        id: user.id,
-        role: user.role,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        username: user.username,
-        password: user.password,
-        fullName: user.fullName,
-        site: user.site,
-      };
-      this.openModal(this.createUserModal);
+      this.inquiryAppUser();
     } else if (this.activeTab === UserManagementDictionaryEnum.Customer) {
-      this.requestDataCustomer = {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        fullName: user.fullName,
-        address: user.address,
-        city: user.city,
-        phoneNumber: user.phoneNumber,
-        postalCode: user.postalCode,
-        notes: user.notes,
-      };
-      this.openModal(this.createCustomerModal);
+      this.inquiryCustomer();
     } else if (this.activeTab === UserManagementDictionaryEnum.Supplier) {
-      this.requestDataSupplier = {
-        id: user.id,
-        name: user.name,
-        description: user.description,
-        country: user.country,
-        address: user.address,
-        city: user.city,
-        phoneNumber: user.phoneNumber,
-        postalCode: user.postalCode,
-      };
-      this.openModal(this.createSupplierModal);
+      this.inquirySupplier();
     }
   }
 
-  deleteUser() {
-    this.refreshTable();
-  }
-
-  resetForm(): void {
-    this.isEditMode = false;
-    this.selectedUser = null;
-
-    // Reset form data
-    this.requestDataUser = {
-      role: '',
-      firstName: '',
-      lastName: '',
-      username: '',
-      password: '',
-      fullName: '',
-      site: '',
-    };
-
-    this.requestDataCustomer = {
-      firstName: '',
-      lastName: '',
-      fullName: '',
-      address: '',
-      city: '',
-      phoneNumber: '',
-      postalCode: '',
-      notes: '',
-    };
-
-    this.requestDataSupplier = {
-      name: '',
-      description: '',
-      country: '',
-      address: '',
-      city: '',
-      phoneNumber: '',
-      postalCode: '',
-    };
+  ngOnDestroy(): void {
+    // Clean up resources
   }
 }

@@ -53,6 +53,7 @@ export class UserManagementTableInquiryComponent implements OnInit, OnChanges, O
       { field: 'address', label: 'Address' },
       { field: 'city', label: 'City' },
       { field: 'postalCode', label: 'Postal Code' },
+      { field: 'description', label: 'Notes' },
     ]
   };
 

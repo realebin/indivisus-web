@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // user-management-create-user-form.component.ts
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FieldConfig } from '@models/_component-base.model';
 import { SiteOverviewList } from '@models/site.model';
@@ -114,24 +114,29 @@ export class UserManagementCreateUserFormComponent implements OnInit {
   ngOnInit(): void {
     this.inquirySitesDropdown();
     this.initForm();
+
+    // Handle disabled fields differently
     if (this.isEditMode) {
       const usernameField = this.fields.find(field => field.name === 'username');
       if (usernameField) {
         usernameField.isDisabled = true;
       }
-
-      // Also disable the control in the form
-      this.formGroup.get('username')?.disable();
     }
+
     this.patchFormData();
+    this.resetFormState();
+
     this.formGroup.valueChanges.subscribe((value) => {
+      // Use a clean approach to emit data changes
+      const formValue = this.formGroup.getRawValue(); // Get values including disabled controls
       const updatedData = {
         ...this.data,
-        ...value,
-        fullName: `${value.firstName} ${value.lastName}`.trim(),
+        ...formValue,
+        fullName: `${formValue.firstName || ''} ${formValue.lastName || ''}`.trim(),
       };
       this.dataChange.emit(updatedData);
     });
+
     this.formGroup.statusChanges.subscribe((status) => {
       this.formValidityChange.emit(status === 'VALID');
     });
@@ -149,28 +154,108 @@ export class UserManagementCreateUserFormComponent implements OnInit {
         this.isEditMode ? [] : [Validators.required, Validators.minLength(8)],
       ],
     });
-  }
 
-  private patchFormData(): void {
-    if (this.data) {
-      this.formGroup?.patchValue(this.data);
+    // Disable username field if in edit mode
+    if (this.isEditMode) {
+      this.formGroup.get('username')?.disable();
     }
   }
 
-  togglePasswordFields() {
-    this.showPasswordFields = !this.showPasswordFields;
-    this.btnPasswordText = this.showPasswordFields
-      ? 'Cancel Update Password'
-      : 'Update Password'; // Toggle text
+
+
+// In user-management-create-user-form.component.ts
+ngOnChanges(changes: SimpleChanges): void {
+  if (changes['data'] && this.formGroup) {
+    this.patchFormData();
+    this.resetFormState();
   }
 
-  getPasswordField(): FieldConfig | undefined {
-    if (!this.isEditMode || this.showPasswordFields) {
-      // Show in create mode or when toggle is clicked
-      return this.passwordField;
+  if (changes['isEditMode'] && this.formGroup) {
+    const usernameControl = this.formGroup.get('username');
+    if (usernameControl) {
+      if (this.isEditMode) {
+        usernameControl.disable();
+      } else {
+        usernameControl.enable();
+      }
     }
-    return undefined;
   }
+}
+
+private patchFormData(): void {
+  if (this.data && this.formGroup) {
+    console.log('Patching form data:', this.data);
+
+    // Patch the form with data
+    this.formGroup.patchValue({
+      role: this.data.role || '',
+      username: this.data.username || '',
+      firstName: this.data.firstName || '',
+      lastName: this.data.lastName || '',
+      site: this.data.site || '',
+      password: ''
+    });
+  }
+}
+
+getPasswordField(): FieldConfig | undefined {
+  // Always return the password field when in create mode
+  // In edit mode, return only when the toggle is active
+  if (!this.isEditMode || this.showPasswordFields) {
+    // Return the password field with the appropriate validators
+    return {
+      ...this.passwordField,
+      validators: this.isEditMode && this.showPasswordFields
+        ? [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)]
+        : this.isEditMode && !this.showPasswordFields
+          ? []
+          : [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)]
+    };
+  }
+  return undefined;
+}
+
+// Fix the togglePasswordFields method to properly update the password control
+togglePasswordFields() {
+  this.showPasswordFields = !this.showPasswordFields;
+  this.btnPasswordText = this.showPasswordFields
+    ? 'Cancel Update Password'
+    : 'Update Password';
+
+  // When showing password fields, make password required
+  // When hiding, remove the requirement
+  const passwordControl = this.formGroup.get('password');
+  if (passwordControl) {
+    if (this.showPasswordFields) {
+      passwordControl.setValidators([
+        Validators.required, 
+        Validators.minLength(8),
+        Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)
+      ]);
+      passwordControl.updateValueAndValidity();
+    } else {
+      passwordControl.clearValidators();
+      passwordControl.updateValueAndValidity();
+      // Reset the password field when hiding
+      passwordControl.setValue('');
+    }
+  }
+
+  // Emit form validity change after toggling
+  setTimeout(() => {
+    this.formValidityChange.emit(this.formGroup.valid);
+  });
+}
+
+private resetFormState(): void {
+  // Reset the form's state without changing values
+  Object.keys(this.formGroup.controls).forEach(key => {
+    const control = this.formGroup.get(key);
+    control?.markAsPristine();
+    control?.markAsUntouched();
+  });
+}
+
 
   isFieldConfig(field: FieldConfig | any): field is FieldConfig {
     return (field as FieldConfig).name !== undefined;

@@ -260,6 +260,7 @@ export class UserManagementHttpService {
   createSupplier(
     request: UserManagementCreateSupplierHttpRequest
   ): Observable<ApiResponse<{ epoch: number }>> {
+    request.last_name="nanti apus tunggu andre bikin jadi optional";
     // return of({
     //   error_schema: {
     //     error_code: 'UMA-1-000',
@@ -284,6 +285,7 @@ export class UserManagementHttpService {
   editSupplier(
     request: UserManagementCreateSupplierHttpRequest
   ): Observable<ApiResponse<{ epoch: number }>> {
+    request.last_name="nanti apus tunggu andre bikin jadi optional";
     // return of({
     //   error_schema: {
     //     error_code: 'UMA-1-000',

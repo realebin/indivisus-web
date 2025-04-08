@@ -15,6 +15,10 @@ export class InputBuilderComponent {
     return this.formGroup.get(this.config.name);
   }
 
+  isDisabled(): boolean {
+    return this.control?.disabled || !!this.config.isDisabled;
+  }
+
   getErrorMessage(): string {
     if (!this.control?.errors || (!this.control.touched && !this.control.dirty)) {
       return '';

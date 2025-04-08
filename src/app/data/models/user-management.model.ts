@@ -170,7 +170,7 @@ export function transformToUserManagementInquirySupplierModelResponse(
         phoneNumber: d.phone_number,
         postalCode: d.postal_code,
         country: d.country,
-        description: d.description,
+        description: d.notes,
       };
     }),
   };
@@ -211,6 +211,7 @@ export function transformToUserManagementCreateCustomerHttpRequest(
     city: request.city,
     phone_number: request.phoneNumber,
     postal_code: request.postalCode,
+    notes: request.notes,
   };
 
   return result;
@@ -221,13 +222,13 @@ export function transformToUserManagementCreateSupplierHttpRequest(
 ): UserManagementCreateSupplierHttpRequest {
   const result: UserManagementCreateSupplierHttpRequest = {
     supplier_id: request?.id,
-    name: request.name,
+    first_name: request.name,
     address: request.address,
     city: request.city,
     phone_number: request.phoneNumber,
     postal_code: request.postalCode,
     country: request.country,
-    description: request.description,
+    notes: request.description,
   };
 
   return result;
