@@ -73,7 +73,6 @@ export interface UserManagementCreateCustomerHttpRequest {
 export interface UserManagementCreateSupplierHttpRequest {
   supplier_id?: number;
   first_name: string;
-  last_name?: string; //TODO : nanti apus
   address: string;
   phone_number: string;
   city: string;

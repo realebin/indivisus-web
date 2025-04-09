@@ -81,14 +81,27 @@ export class UserManagementIndexComponent
 
     if (userModalEl) {
       this.userModal = new bootstrap.Modal(userModalEl);
+      // Add event listener for modal closing
+      userModalEl.addEventListener('hidden.bs.modal', () => {
+        this.resetForm();
+        this.changeDetectorRef.detectChanges();
+      });
     }
 
     if (customerModalEl) {
       this.customerModal = new bootstrap.Modal(customerModalEl);
+      customerModalEl.addEventListener('hidden.bs.modal', () => {
+        this.resetForm();
+        this.changeDetectorRef.detectChanges();
+      });
     }
 
     if (supplierModalEl) {
       this.supplierModal = new bootstrap.Modal(supplierModalEl);
+      supplierModalEl.addEventListener('hidden.bs.modal', () => {
+        this.resetForm();
+        this.changeDetectorRef.detectChanges();
+      });
     }
   }
 
@@ -300,26 +313,9 @@ export class UserManagementIndexComponent
     this.requestDataSupplier = data;
   }
 
-  // FORM VALIDITY CHANGE HANDLERS
   onUserFormValidityChange(isValid: boolean): void {
     console.log('Form validity changed:', isValid);
     this.isUserFormValid = isValid;
-
-    // If in edit mode without password field showing, consider it valid
-    if (this.isEditMode) {
-      const userFormComponent = document.querySelector(
-        'app-user-management-create-user-form'
-      );
-      if (userFormComponent) {
-        const passwordField = userFormComponent.querySelector(
-          'input[type="password"]'
-        );
-        if (!passwordField) {
-          // No password field is visible, so form should be valid if other fields are
-          this.isUserFormValid = true;
-        }
-      }
-    }
   }
   onCustomerFormValidityChange(isValid: boolean): void {
     this.isCustomerFormValid = isValid;
@@ -511,5 +507,18 @@ export class UserManagementIndexComponent
 
   ngOnDestroy(): void {
     // Clean up resources
+  }
+
+  closeAndResetModal(): void {
+    // Hide all modals
+    this.userModal?.hide();
+    this.customerModal?.hide();
+    this.supplierModal?.hide();
+
+    // Reset form data
+    this.resetForm();
+
+    // Force change detection
+    this.changeDetectorRef.detectChanges();
   }
 }
