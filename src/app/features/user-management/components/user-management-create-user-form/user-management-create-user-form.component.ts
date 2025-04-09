@@ -281,12 +281,14 @@ togglePasswordFields(): void {
   }
 }
 
+// In user-management-create-user-form.component.ts
+
 resetForm(): void {
   if (this.formGroup) {
     // Reset the form values
     this.formGroup.reset();
 
-    // Explicitly set default values if needed
+    // Set default values
     const defaultValues = {
       role: '',
       username: '',
@@ -298,16 +300,23 @@ resetForm(): void {
 
     this.formGroup.patchValue(defaultValues);
 
-    // Mark all controls as pristine and untouched to hide validation errors
+    // Important: Mark all controls as pristine and untouched
     Object.keys(this.formGroup.controls).forEach(key => {
       const control = this.formGroup.get(key);
       control?.markAsPristine();
       control?.markAsUntouched();
     });
 
-    // Reset the password toggle state
+    // Reset password toggle state
     this.showPasswordFields = false;
     this.btnPasswordText = 'Update Password';
+
+    // Disable username field if in edit mode
+    if (this.isEditMode && this.formGroup.get('username')) {
+      this.formGroup.get('username')?.disable();
+    } else if (this.formGroup.get('username')) {
+      this.formGroup.get('username')?.enable();
+    }
 
     // Update form validity
     this.updateFormValidity();

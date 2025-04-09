@@ -5,10 +5,12 @@ import {
   AfterViewInit,
   OnDestroy,
   ChangeDetectorRef,
+  ViewChild,
 } from '@angular/core';
 import { UserManagementService } from '@services/user-management.service';
 import { SiteService } from '@services/site.service';
 import { UserManagementDictionaryEnum } from '@cores/enums/custom-variable.enum';
+import { UserManagementCreateCustomerFormComponent, UserManagementCreateSupplierFormComponent, UserManagementCreateUserFormComponent } from '@features/user-management/components';
 
 // Declare Bootstrap for TypeScript
 declare var bootstrap: any;
@@ -54,6 +56,9 @@ export class UserManagementIndexComponent
   requestDataUser: any = {};
   requestDataCustomer: any = {};
   requestDataSupplier: any = {};
+  @ViewChild('userForm') userFormComponent: UserManagementCreateUserFormComponent;
+  @ViewChild('supplierForm') supplierFormComponent: UserManagementCreateSupplierFormComponent;
+  @ViewChild('customerForm') customerFormComponent: UserManagementCreateCustomerFormComponent;
 
   constructor(
     private userManagementService: UserManagementService,
@@ -81,17 +86,26 @@ export class UserManagementIndexComponent
 
     if (userModalEl) {
       this.userModal = new bootstrap.Modal(userModalEl);
-      // Add event listener for modal closing
+      // Update the modal hidden event handler
       userModalEl.addEventListener('hidden.bs.modal', () => {
+        // Call reset on both component and local data
+        if (this.userFormComponent) {
+          this.userFormComponent.resetForm();
+        }
         this.resetForm();
+        this.isEditMode = false;
         this.changeDetectorRef.detectChanges();
       });
     }
-
     if (customerModalEl) {
       this.customerModal = new bootstrap.Modal(customerModalEl);
       customerModalEl.addEventListener('hidden.bs.modal', () => {
+
+        if (this.customerFormComponent) {
+          this.customerFormComponent.resetForm();
+        }
         this.resetForm();
+        this.isEditMode = false;
         this.changeDetectorRef.detectChanges();
       });
     }
@@ -99,7 +113,12 @@ export class UserManagementIndexComponent
     if (supplierModalEl) {
       this.supplierModal = new bootstrap.Modal(supplierModalEl);
       supplierModalEl.addEventListener('hidden.bs.modal', () => {
+
+        if (this.supplierFormComponent) {
+          this.supplierFormComponent.resetForm();
+        }
         this.resetForm();
+        this.isEditMode = false;
         this.changeDetectorRef.detectChanges();
       });
     }
@@ -510,13 +529,19 @@ export class UserManagementIndexComponent
   }
 
   closeAndResetModal(): void {
+    // Explicitly call resetForm on component if available
+    if (this.activeTab === UserManagementDictionaryEnum.AppUser && this.userFormComponent) {
+      this.userFormComponent.resetForm();
+    }
+
     // Hide all modals
     this.userModal?.hide();
     this.customerModal?.hide();
     this.supplierModal?.hide();
 
-    // Reset form data
+    // Reset form data and state
     this.resetForm();
+    this.isEditMode = false;
 
     // Force change detection
     this.changeDetectorRef.detectChanges();
