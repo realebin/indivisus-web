@@ -11,23 +11,20 @@
   <div class="mb-4">
     <ul class="nav nav-tabs tabs">
       <li class="nav-item">
-        <a class="nav-link" href="javascript:void(0)"
-           [class.active]="activeTab === _enumAppUser"
-           (click)="setActiveTab(_enumAppUser)">
+        <a class="nav-link" href="javascript:void(0)" [class.active]="activeTab === _enumAppUser"
+          (click)="setActiveTab(_enumAppUser)">
           <i class="bi bi-person me-2"></i>App Users
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="javascript:void(0)"
-           [class.active]="activeTab === _enumCustomer"
-           (click)="setActiveTab(_enumCustomer)">
+        <a class="nav-link" href="javascript:void(0)" [class.active]="activeTab === _enumCustomer"
+          (click)="setActiveTab(_enumCustomer)">
           <i class="bi bi-people me-2"></i>Customers
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="javascript:void(0)"
-           [class.active]="activeTab === _enumSupplier"
-           (click)="setActiveTab(_enumSupplier)">
+        <a class="nav-link" href="javascript:void(0)" [class.active]="activeTab === _enumSupplier"
+          (click)="setActiveTab(_enumSupplier)">
           <i class="bi bi-building me-2"></i>Suppliers
         </a>
       </li>
@@ -57,12 +54,9 @@
               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
 
-            <app-user-management-table-inquiry
-              [data]="appUsers"
-              [type]="_enumAppUser"
+            <app-user-management-table-inquiry [data]="appUsers" [type]="_enumAppUser"
               (editUserEvent)="createModalUser($event)"
-              (deleteUserEvent)="deleteUser()"
-            ></app-user-management-table-inquiry>
+              (deleteUserEvent)="deleteUser()"></app-user-management-table-inquiry>
           </ng-template>
         </div>
 
@@ -85,12 +79,9 @@
               <i class="bi bi-info-circle me-2"></i> {{ errorMessage }}
               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <app-user-management-table-inquiry
-              [data]="customers"
-              [type]="_enumCustomer"
+            <app-user-management-table-inquiry [data]="customers" [type]="_enumCustomer"
               (editUserEvent)="createModalUser($event)"
-              (deleteUserEvent)="deleteUser()"
-            ></app-user-management-table-inquiry>
+              (deleteUserEvent)="deleteUser()"></app-user-management-table-inquiry>
           </ng-template>
         </div>
 
@@ -113,12 +104,9 @@
               <i class="bi bi-info-circle me-2"></i> {{ errorMessage }}
               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <app-user-management-table-inquiry
-              [data]="suppliers"
-              [type]="_enumSupplier"
+            <app-user-management-table-inquiry [data]="suppliers" [type]="_enumSupplier"
               (editUserEvent)="createModalUser($event)"
-              (deleteUserEvent)="deleteUser()"
-            ></app-user-management-table-inquiry>
+              (deleteUserEvent)="deleteUser()"></app-user-management-table-inquiry>
           </ng-template>
         </div>
       </div>
@@ -135,22 +123,13 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <app-user-management-create-user-form
-            #userForm
-            [(data)]="requestDataUser"
-            [isEditMode]="isEditMode"
-            [errorMessageCreate]="errorMessageCreateAppUser"
-            (dataChange)="onUserFormDataChange($event)"
-            (formValidityChange)="onUserFormValidityChange($event)"
-          ></app-user-management-create-user-form>
+          <app-user-management-create-user-form #userForm [(data)]="requestDataUser" [isEditMode]="isEditMode"
+            [errorMessageCreate]="errorMessageCreateAppUser" (dataChange)="onUserFormDataChange($event)"
+            (formValidityChange)="onUserFormValidityChange($event)"></app-user-management-create-user-form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" (click)="closeAndResetModal()">Cancel</button>
-          <button
-            type="button"
-            class="btn btn-primary"
-            [disabled]="!isUserFormValid || isLoading"
-            (click)="saveUser()">
+          <button type="button" class="btn btn-primary" [disabled]="!isUserFormValid || isLoading" (click)="saveUser()">
             <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1"></span>
             Save
           </button>
@@ -168,20 +147,14 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <app-user-management-create-customer-form
-            [(data)]="requestDataCustomer"
-            [isEditMode]="isEditMode"
-            [errorMessageCreate]="errorMessageCreateCustomer"
+          <app-user-management-create-customer-form #customerForm [(data)]="requestDataCustomer"
+            [isEditMode]="isEditMode" [errorMessageCreate]="errorMessageCreateCustomer"
             (dataChange)="onCustomerFormDataChange($event)"
-            (formValidityChange)="onCustomerFormValidityChange($event)"
-          ></app-user-management-create-customer-form>
+            (formValidityChange)="onCustomerFormValidityChange($event)"></app-user-management-create-customer-form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button
-            type="button"
-            class="btn btn-primary"
-            [disabled]="!isCustomerFormValid || isLoading"
+          <button type="button" class="btn btn-secondary" (click)="closeAndResetModal()">Cancel</button>
+          <button type="button" class="btn btn-primary" [disabled]="!isCustomerFormValid || isLoading"
             (click)="saveCustomer()">
             <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1"></span>
             Save
@@ -200,20 +173,14 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <app-user-management-create-supplier-form
-            [(data)]="requestDataSupplier"
-            [isEditMode]="isEditMode"
-            [errorMessageCreate]="errorMessageCreateSupplier"
+          <app-user-management-create-supplier-form #supplierForm [(data)]="requestDataSupplier"
+            [isEditMode]="isEditMode" [errorMessageCreate]="errorMessageCreateSupplier"
             (dataChange)="onSupplierFormDataChange($event)"
-            (formValidityChange)="onSupplierFormValidityChange($event)"
-          ></app-user-management-create-supplier-form>
+            (formValidityChange)="onSupplierFormValidityChange($event)"></app-user-management-create-supplier-form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button
-            type="button"
-            class="btn btn-primary"
-            [disabled]="!isSupplierFormValid || isLoading"
+          <button type="button" class="btn btn-secondary" (click)="closeAndResetModal()">Cancel</button>
+          <button type="button" class="btn btn-primary" [disabled]="!isSupplierFormValid || isLoading"
             (click)="saveSupplier()">
             <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1"></span>
             Save

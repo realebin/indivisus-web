@@ -1,12 +1,47 @@
-<div class="container">
-  <div class="alert alert-danger" role="alert" *ngIf="errorMessageCreate">
-    {{ errorMessageCreate }}
-  </div>
-  <form [formGroup]="formGroup" class="needs-validation" #form="ngForm">
-    <app-input-builder
-      *ngFor="let field of fields"
-      [formGroup]="formGroup"
-      [config]="field"
-    ></app-input-builder>
-  </form>
-</div>
+<!-- user-management-create-customer-form.component.html and 
+     user-management-create-supplier-form.component.html -->
+
+     <div class="container">
+      <div class="alert alert-danger" role="alert" *ngIf="errorMessageCreate">
+        {{ errorMessageCreate }}
+      </div>
+      
+      <form [formGroup]="formGroup" class="needs-validation">
+        <!-- Modified version with direct validation display -->
+        <div class="mb-3" *ngFor="let field of fields">
+          <label [for]="field.name" class="form-label">{{ field.label }}</label>
+          
+          <ng-container [ngSwitch]="field.type">
+            <!-- Text Input -->
+            <input 
+              *ngSwitchCase="'text'"
+              [type]="field.type"
+              [formControlName]="field.name"
+              [id]="field.name"
+              class="form-control"
+              [placeholder]="field.placeholder"
+              [ngClass]="{'is-invalid': isFieldInvalid(field.name)}"
+            >
+            
+            <!-- Select Input -->
+            <select 
+              *ngSwitchCase="'select'"
+              [formControlName]="field.name"
+              [id]="field.name"
+              class="form-select"
+              [ngClass]="{'is-invalid': isFieldInvalid(field.name)}"
+            >
+              <option value="">Select an option</option>
+              <option *ngFor="let option of field.options" [value]="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+          </ng-container>
+          
+          <!-- Error Messages -->
+          <div *ngIf="isFieldInvalid(field.name)" class="invalid-feedback">
+            {{ getErrorMessage(field.name, field) }}
+          </div>
+        </div>
+      </form>
+    </div>

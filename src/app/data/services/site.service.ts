@@ -23,7 +23,7 @@ import { SiteAllListOverviewHttpResponse, SiteInquiryHttpResponse, SiteStockHead
   providedIn: 'root',
 })
 export class SiteService {
-  constructor(private siteHttpService: SiteHttpService) {}
+  constructor(private siteHttpService: SiteHttpService) { }
 
   /**
    * Get all sites (basic list)
@@ -103,20 +103,20 @@ export class SiteService {
     );
   }
 
-    /**
-   * Get stock specificly by site
-   */
-    getSpecificStockBySite(siteId: string, productType?: string): Observable<SiteStockHeadersWithSpecificProductModelResponse> {
-      return this.siteHttpService.getSpecificStockBySite(siteId, productType).pipe(
-        map((response) => transformToSiteStockHeadersWithSpecificProductModelResponse(response.output_schema)),
-        catchError((error: ErrorOutputWrapper<SiteStockHeadersWithSpecificProductHttpResponse>) => {
-          return throwError({
-            ...error,
-            data: error?.data ? transformToSiteStockHeadersWithSpecificProductModelResponse(error?.data) : null,
-          });
-        })
-      );
-    }
+  /**
+ * Get stock specificly by site
+ */
+  getSpecificStockBySite(siteId: string, productType?: string): Observable<SiteStockHeadersWithSpecificProductModelResponse> {
+    return this.siteHttpService.getSpecificStockBySite(siteId, productType).pipe(
+      map((response) => transformToSiteStockHeadersWithSpecificProductModelResponse(response.output_schema)),
+      catchError((error: ErrorOutputWrapper<SiteStockHeadersWithSpecificProductHttpResponse>) => {
+        return throwError({
+          ...error,
+          data: error?.data ? transformToSiteStockHeadersWithSpecificProductModelResponse(error?.data) : null,
+        });
+      })
+    );
+  }
 
   /**
    * Create new site

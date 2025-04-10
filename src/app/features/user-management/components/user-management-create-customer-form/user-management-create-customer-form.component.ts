@@ -12,8 +12,25 @@ import { UserManagementCreateCustomerModelRequest } from '@models/user-managemen
 
 @Component({
   selector: 'app-user-management-create-customer-form',
-  templateUrl: './user-management-create-customer-form.component.html',
-  styleUrl: './user-management-create-customer-form.component.scss',
+  template: `
+    <div class="container" *ngIf="!isLoading">
+      <div class="alert alert-danger" role="alert" *ngIf="errorMessageCreate">
+        {{ errorMessageCreate }}
+      </div>
+      <div class="alert alert-danger" role="alert" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+      <form [formGroup]="formGroup" class="needs-validation">
+        <app-input-builder
+          *ngFor="let field of fields"
+          [formGroup]="formGroup"
+          [config]="field"
+        ></app-input-builder>
+      </form>
+    </div>
+    <app-loader *ngIf="isLoading"></app-loader>
+  `,
+  styleUrls: ['./user-management-create-customer-form.component.scss']
 })
 export class UserManagementCreateCustomerFormComponent implements OnInit {
   @Input() data!: UserManagementCreateCustomerModelRequest;
@@ -21,9 +38,12 @@ export class UserManagementCreateCustomerFormComponent implements OnInit {
   @Input() isEditMode = false;
   @Input() errorMessageCreate: string;
   @Output() formValidityChange = new EventEmitter<boolean>();
-  @Output() dataChange =
-    new EventEmitter<UserManagementCreateCustomerModelRequest>();
+  @Output() dataChange = new EventEmitter<UserManagementCreateCustomerModelRequest>();
+  
   formGroup!: FormGroup;
+  errorMessage = '';
+  isLoading = false;
+  
   fields: FieldConfig[] = [
     {
       name: 'firstName',
@@ -79,11 +99,9 @@ export class UserManagementCreateCustomerFormComponent implements OnInit {
       type: 'text',
       placeholder: 'Enter Postal Code',
       validators: [Validators.required],
-
       validationMessages: {
         required: 'Postal Code is required',
       },
-
     },
     {
       name: 'notes',
@@ -96,25 +114,17 @@ export class UserManagementCreateCustomerFormComponent implements OnInit {
   ];
 
   constructor(private fb: FormBuilder) {}
+
   ngOnInit(): void {
     this.initForm();
     this.patchFormData();
-    this.resetFormState(); // Add this line
-
-    this.formGroup.valueChanges.subscribe((value) => {
-      const updatedData = { ...this.data, ...value };
-      this.dataChange.emit(updatedData);
-    });
-
-    this.formGroup.statusChanges.subscribe((status) => {
-      this.formValidityChange.emit(status === 'VALID');
-    });
+    this.setupFormListeners();
   }
 
   private initForm(): void {
     this.formGroup = this.fb.group({
       firstName: ['', Validators.required],
-      lastName: ['', Validators.required],
+      lastName: [''],
       address: ['', Validators.required],
       city: ['', Validators.required],
       phoneNumber: ['', Validators.required],
@@ -123,13 +133,39 @@ export class UserManagementCreateCustomerFormComponent implements OnInit {
     });
   }
 
-  private resetFormState(): void {
-    // Reset the form's state without changing values
-    Object.keys(this.formGroup.controls).forEach(key => {
-      const control = this.formGroup.get(key);
-      control?.markAsPristine();
-      control?.markAsUntouched();
-    });
+// In user-management-create-customer-form.component.ts
+private setupFormListeners(): void {
+  // Listen for form changes
+  this.formGroup.valueChanges.subscribe(value => {
+    const updatedData = { ...this.data, ...value };
+    this.dataChange.emit(updatedData);
+  });
+
+  // Listen for form status changes
+  this.formGroup.statusChanges.subscribe(status => {
+    console.log('Customer form status:', status);
+    this.formValidityChange.emit(status === 'VALID');
+  });
+}
+
+// Add this method to check validity before saving
+validateForm(): boolean {
+  this.markFormAsTouched();
+  return this.formGroup.valid;
+}
+
+  private updateFormValidity(): void {
+    this.formValidityChange.emit(this.formGroup.valid);
+  }
+
+  markFormAsTouched(): void {
+    if (this.formGroup) {
+      Object.keys(this.formGroup.controls).forEach(key => {
+        const control = this.formGroup.get(key);
+        control?.markAsTouched();
+        control?.updateValueAndValidity();
+      });
+    }
   }
 
   private patchFormData(): void {
@@ -141,28 +177,39 @@ export class UserManagementCreateCustomerFormComponent implements OnInit {
   resetForm(): void {
     if (this.formGroup) {
       this.formGroup.reset();
+      
+      // Set default values
+      const defaultValues = {
+        firstName: '',
+        lastName: '',
+        address: '',
+        city: '',
+        phoneNumber: '',
+        postalCode: '',
+        notes: ''
+      };
+      
+      this.formGroup.patchValue(defaultValues);
+      
+      // Mark all controls as pristine and untouched
+      Object.keys(this.formGroup.controls).forEach(key => {
+        const control = this.formGroup.get(key);
+        control?.markAsPristine();
+        control?.markAsUntouched();
+      });
+      
+      // Update form validity
+      this.updateFormValidity();
     }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['data']) {
+    if (changes['data'] && this.formGroup) {
       this.patchFormData();
-      this.resetFormState();
     }
   }
 
-  get requestData(): UserManagementCreateCustomerModelRequest {
-    const formValue = this.formGroup?.value;
-    return {
-      id: this.data?.id,
-      firstName: formValue?.firstName,
-      lastName: formValue?.lastName,
-      fullName: `${formValue?.firstName} ${formValue?.lastName}`.trim(),
-      address: formValue?.address,
-      city: formValue?.city,
-      phoneNumber: formValue?.phoneNumber,
-      postalCode: formValue?.postalCode,
-      notes: formValue?.notes,
-    };
+  isFieldConfig(field: FieldConfig | any): boolean {
+    return (field as FieldConfig).name !== undefined;
   }
 }

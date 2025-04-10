@@ -12,8 +12,25 @@ import { UserManagementCreateSupplierModelRequest } from '@models/user-managemen
 
 @Component({
   selector: 'app-user-management-create-supplier-form',
-  templateUrl: './user-management-create-supplier-form.component.html',
-  styleUrl: './user-management-create-supplier-form.component.scss',
+  template: `
+    <div class="container" *ngIf="!isLoading">
+      <div class="alert alert-danger" role="alert" *ngIf="errorMessageCreate">
+        {{ errorMessageCreate }}
+      </div>
+      <div class="alert alert-danger" role="alert" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+      <form [formGroup]="formGroup" class="needs-validation">
+        <app-input-builder
+          *ngFor="let field of fields"
+          [formGroup]="formGroup"
+          [config]="field"
+        ></app-input-builder>
+      </form>
+    </div>
+    <app-loader *ngIf="isLoading"></app-loader>
+  `,
+  styleUrls: ['./user-management-create-supplier-form.component.scss']
 })
 export class UserManagementCreateSupplierFormComponent implements OnInit {
   @Input() data!: UserManagementCreateSupplierModelRequest;
@@ -21,9 +38,12 @@ export class UserManagementCreateSupplierFormComponent implements OnInit {
   @Input() isEditMode = false;
   @Input() errorMessageCreate: string;
   @Output() formValidityChange = new EventEmitter<boolean>();
-  @Output() dataChange =
-    new EventEmitter<UserManagementCreateSupplierModelRequest>();
+  @Output() dataChange = new EventEmitter<UserManagementCreateSupplierModelRequest>();
+  
   formGroup!: FormGroup;
+  errorMessage = '';
+  isLoading = false;
+  
   fields: FieldConfig[] = [
     {
       name: 'name',
@@ -41,7 +61,9 @@ export class UserManagementCreateSupplierFormComponent implements OnInit {
       type: 'text',
       placeholder: 'Enter Country',
       validators: [Validators.required],
-      validationMessages: {},
+      validationMessages: {
+        required: 'Country is required',
+      },
     },
     {
       name: 'address',
@@ -89,6 +111,7 @@ export class UserManagementCreateSupplierFormComponent implements OnInit {
       type: 'text',
       placeholder: 'Enter Notes',
       validators: [],
+      validationMessages: {},
     },
   ];
 
@@ -97,38 +120,54 @@ export class UserManagementCreateSupplierFormComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.patchFormData();
-    this.resetFormState();
-
-    this.formGroup.valueChanges.subscribe((value) => {
-      const updatedData = { ...this.data, ...value };
-      this.dataChange.emit(updatedData);
-    });
-
-    this.formGroup.statusChanges.subscribe((status) => {
-      this.formValidityChange.emit(status === 'VALID');
-    });
+    this.setupFormListeners();
   }
 
   private initForm(): void {
     this.formGroup = this.fb.group({
       name: ['', Validators.required],
       country: ['', Validators.required],
-      description: [''],
       address: ['', Validators.required],
       city: ['', Validators.required],
       phoneNumber: ['', Validators.required],
       postalCode: ['', Validators.required],
-
+      description: [''],
     });
   }
 
-  private resetFormState(): void {
-    // Reset the form's state without changing values
-    Object.keys(this.formGroup.controls).forEach((key) => {
-      const control = this.formGroup.get(key);
-      control?.markAsPristine();
-      control?.markAsUntouched();
-    });
+// In user-management-create-supplier-form.component.ts
+private setupFormListeners(): void {
+  // Listen for form changes
+  this.formGroup.valueChanges.subscribe(value => {
+    const updatedData = { ...this.data, ...value };
+    this.dataChange.emit(updatedData);
+  });
+
+  // Listen for form status changes
+  this.formGroup.statusChanges.subscribe(status => {
+    console.log('Supplier form status:', status);
+    this.formValidityChange.emit(status === 'VALID');
+  });
+}
+
+// Add this method to check validity before saving
+validateForm(): boolean {
+  this.markFormAsTouched();
+  return this.formGroup.valid;
+}
+
+  private updateFormValidity(): void {
+    this.formValidityChange.emit(this.formGroup.valid);
+  }
+
+  markFormAsTouched(): void {
+    if (this.formGroup) {
+      Object.keys(this.formGroup.controls).forEach(key => {
+        const control = this.formGroup.get(key);
+        control?.markAsTouched();
+        control?.updateValueAndValidity();
+      });
+    }
   }
 
   private patchFormData(): void {
@@ -140,26 +179,39 @@ export class UserManagementCreateSupplierFormComponent implements OnInit {
   resetForm(): void {
     if (this.formGroup) {
       this.formGroup.reset();
+      
+      // Set default values
+      const defaultValues = {
+        name: '',
+        country: '',
+        address: '',
+        city: '',
+        phoneNumber: '',
+        postalCode: '',
+        description: ''
+      };
+      
+      this.formGroup.patchValue(defaultValues);
+      
+      // Mark all controls as pristine and untouched
+      Object.keys(this.formGroup.controls).forEach(key => {
+        const control = this.formGroup.get(key);
+        control?.markAsPristine();
+        control?.markAsUntouched();
+      });
+      
+      // Update form validity
+      this.updateFormValidity();
     }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['data']) {
+    if (changes['data'] && this.formGroup) {
       this.patchFormData();
-      this.resetFormState();
     }
   }
 
-  get requestData(): UserManagementCreateSupplierModelRequest {
-    const formValue = this.formGroup?.value;
-    return {
-      name: formValue?.name,
-      country: formValue?.name,
-      description: formValue?.decription,
-      address: formValue?.address,
-      city: formValue?.city,
-      phoneNumber: formValue?.phoneNumber,
-      postalCode: formValue?.postalCode,
-    };
+  isFieldConfig(field: FieldConfig | any): boolean {
+    return (field as FieldConfig).name !== undefined;
   }
 }

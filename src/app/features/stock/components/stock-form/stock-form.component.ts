@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-inferrable-types */
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -22,9 +23,7 @@ export class StockFormComponent implements OnInit {
   sites: { value: string, label: string }[] = [];
   stockTypes = [
     { value: 'FABRIC', label: 'Fabric' },
-    { value: 'BUTTON', label: 'Button' },
-    { value: 'ZIPPER', label: 'Zipper' },
-    { value: 'THREAD', label: 'Thread' },
+    { value: 'ROPE', label: 'Rope' },
     { value: 'OTHER', label: 'Other' }
   ];
 
@@ -32,6 +31,7 @@ export class StockFormComponent implements OnInit {
     { label: 'Stock', url: '/stock' },
     { label: 'Add Stock' }
   ];
+
 
   constructor(
     private fb: FormBuilder,
@@ -54,6 +54,39 @@ export class StockFormComponent implements OnInit {
         this.loadStockData();
       }
     });
+
+    // Only affect main stock size description
+    this.stockForm.get('type')?.valueChanges.subscribe(type => {
+      const mainSizeDescriptionControl = this.stockForm.get('sizeDescription');
+      let sizeDescValue = '';
+
+      if (type === 'FABRIC') {
+        sizeDescValue = 'Yard/Meter';
+        mainSizeDescriptionControl?.setValue(sizeDescValue);
+        mainSizeDescriptionControl?.disable();
+      } else if (type === 'ROPE') {
+        sizeDescValue = 'Kg';
+        mainSizeDescriptionControl?.setValue(sizeDescValue);
+        mainSizeDescriptionControl?.disable();
+      } else {
+        mainSizeDescriptionControl?.enable();
+        if (mainSizeDescriptionControl?.value === 'Yard/Meter' || mainSizeDescriptionControl?.value === 'Kg') {
+          mainSizeDescriptionControl?.setValue('');
+        }
+        return; // Don't update children for 'OTHER' type
+      }
+
+      // Update all big packages size descriptions
+      this.bigPackagesArray.controls.forEach(bigPackage => {
+        bigPackage.get('sizeDescription')?.setValue(sizeDescValue);
+
+        // Update all small packages within this big package
+        const smallPackages = bigPackage.get('smallPackages') as FormArray;
+        smallPackages.controls.forEach(smallPackage => {
+          smallPackage.get('sizeDescription')?.setValue(sizeDescValue);
+        });
+      });
+    });
   }
 
   initForm(): void {
@@ -63,30 +96,39 @@ export class StockFormComponent implements OnInit {
       type: ['', [Validators.required]],
       specs: [''],
       price: [0, [Validators.required, Validators.min(0)]],
-      sizeDescription: ['', [Validators.required]],
+      sizeDescription: [{ value: '', disabled: false }, Validators.required], // Main stock size description
       siteId: ['', [Validators.required]],
       bigPackages: this.fb.array([
         this.createBigPackageGroup()
       ]),
-      createdBy: [localStorage.getItem('username') || 'admin']
+      createdBy: [localStorage.getItem('username')]
     });
   }
 
   createBigPackageGroup(): FormGroup {
+    const currentType = this.stockForm?.get('type')?.value;
+    let sizeDesc = '';
+
+    if (currentType === 'FABRIC') {
+      sizeDesc = 'Yard/Meter';
+    } else if (currentType === 'ROPE') {
+      sizeDesc = 'Kg';
+    }
+
     return this.fb.group({
-      packageNumber: [''], // Auto-generated if empty
-      sizeDescription: ['', [Validators.required]],
+      packageNumber: [''],
+      sizeDescription: [sizeDesc, [Validators.required]],
       smallPackages: this.fb.array([
-        this.createSmallPackageGroup()
+        this.createSmallPackageGroup(sizeDesc)
       ]),
       createdBy: [localStorage.getItem('username') || 'admin']
     });
   }
 
-  createSmallPackageGroup(): FormGroup {
+  createSmallPackageGroup(initialSizeDesc: string = ''): FormGroup {
     return this.fb.group({
       sizeAmount: [null, [Validators.required, Validators.min(0.1)]],
-      sizeDescription: ['', [Validators.required]],
+      sizeDescription: [initialSizeDesc, [Validators.required]],
       createdBy: [localStorage.getItem('username') || 'admin']
     });
   }
@@ -111,7 +153,16 @@ export class StockFormComponent implements OnInit {
 
   addSmallPackage(bigPackageIndex: number): void {
     const smallPackages = this.getSmallPackagesArray(bigPackageIndex);
-    smallPackages.push(this.createSmallPackageGroup());
+    const currentType = this.stockForm.get('type')?.value;
+    let sizeDesc = '';
+
+    if (currentType === 'FABRIC') {
+      sizeDesc = 'Yard/Meter';
+    } else if (currentType === 'ROPE') {
+      sizeDesc = 'Kg';
+    }
+
+    smallPackages.push(this.createSmallPackageGroup(sizeDesc));
   }
 
   removeSmallPackage(bigPackageIndex: number, smallPackageIndex: number): void {
@@ -167,6 +218,10 @@ export class StockFormComponent implements OnInit {
   }
 
   onSubmit(): void {
+    const sizeDescriptionControl = this.stockForm.get('sizeDescription');
+    if (sizeDescriptionControl?.disabled) {
+      sizeDescriptionControl.enable();
+    }
     if (this.stockForm.invalid) {
       // Mark all fields as touched to trigger validation
       this.markFormGroupTouched(this.stockForm);
