@@ -68,26 +68,40 @@
             </div>
           </div>
           <div class="card-footer bg-white">
-            <div class="d-flex gap-2 justify-content-end">
-              <div class="dropdown" *ngIf="invoice.status !== 'CANCELLED'">
-                <button class="btn btn-outline-primary dropdown-toggle" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="bi bi-check-circle me-1"></i>Update Status
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="statusDropdown">
-                  <li><a class="dropdown-item" (click)="updateStatus('PENDING')" *ngIf="invoice.status !== 'PENDING'">Mark as Pending</a></li>
-                  <li><a class="dropdown-item" (click)="updateStatus('PAID')" *ngIf="invoice.status !== 'PAID'">Mark as Paid</a></li>
-                  <li><a class="dropdown-item" (click)="updateStatus('CANCELLED')">Cancel Invoice</a></li>
-                </ul>
+            <div class="row g-2">
+              <div class="col-4" *ngIf="invoice.status !== 'CANCELLED'">
+                <!-- TODO : update status still ugly when resizing -->
+                <div class="dropdown w-100">
+                  <button class="btn btn-outline-primary dropdown-toggle w-100" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-check-circle me-1"></i>Update Status
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="statusDropdown">
+                    <li><a class="dropdown-item" (click)="updateStatus('PENDING')" *ngIf="invoice.status !== 'PENDING'">Mark as Pending</a></li>
+                    <li><a class="dropdown-item" (click)="updateStatus('PAID')" *ngIf="invoice.status !== 'PAID'">Mark as Paid</a></li>
+                    <li><a class="dropdown-item" (click)="updateStatus('CANCELLED')">Cancel Invoice</a></li>
+                  </ul>
+                </div>
               </div>
-              <button class="btn btn-outline-primary" (click)="navigateToEdit()">
-                <i class="bi bi-pencil me-1"></i>Edit
-              </button>
-              <button class="btn btn-outline-danger" (click)="deleteInvoice()">
-                <i class="bi bi-trash me-1"></i>Delete
-              </button>
-              <button class="btn btn-primary" (click)="downloadPdf()">
-                <i class="bi bi-file-pdf me-1"></i>Download PDF
-              </button>
+              <div class="col-4">
+                <button class="btn btn-outline-primary w-100" (click)="navigateToEdit()">
+                  <i class="bi bi-pencil me-1"></i>Edit
+                </button>
+              </div>
+              <div class="col-4">
+                <button class="btn btn-outline-danger w-100" (click)="deleteInvoice()">
+                  <i class="bi bi-trash me-1"></i>Delete
+                </button>
+              </div>
+              <div class="col-6">
+                <button class="btn btn-primary w-100" (click)="downloadPdf()">
+                  <i class="bi bi-file-pdf me-1"></i>Download PDF
+                </button>
+              </div>
+              <div class="col-6">
+                <button class="btn btn-primary w-100" (click)="downloadPackingListPdf()">
+                  <i class="bi bi-file-pdf me-1"></i>Download Packing List PDF
+                </button>
+              </div>
             </div>
           </div>
         </div>

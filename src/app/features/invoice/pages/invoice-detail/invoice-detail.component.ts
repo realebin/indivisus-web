@@ -123,6 +123,29 @@ export class InvoiceDetailComponent implements OnInit {
     });
   }
 
+
+  downloadPackingListPdf(): void {
+    this.isLoading = true;
+    this.invoiceService.generatePackListInvoicePdf(this.invoiceNumber).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Invoice-packing-list-${this.invoiceNumber}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.error = error.message || 'Failed to download PDF';
+        this.isLoading = false;
+      }
+    });
+  }
+
   // Helper methods for formatting and data display
   getStatusBadgeClass(status: string): string {
     switch (status) {

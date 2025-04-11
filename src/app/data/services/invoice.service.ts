@@ -203,6 +203,10 @@ export class InvoiceService {
     return this.invoiceHttpService.generateInvoicePdf(invoiceNumber);
   }
 
+  generatePackListInvoicePdf(invoiceNumber: string): Observable<Blob> {
+    return this.invoiceHttpService.generatePackListInvoicePdf(invoiceNumber);
+  }
+
   generateMultipleInvoicePdfs(
     data: MultipleInvoicePdfModelRequest
   ): Observable<{ [key: string]: string }> {

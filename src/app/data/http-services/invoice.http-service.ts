@@ -91,6 +91,13 @@ export class InvoiceHttpService {
     );
   }
 
+  generatePackListInvoicePdf(invoiceNumber: string): Observable<Blob> {
+    return this.httpClient.get(
+      `${this.baseUrl}/sales-invoice/single-pdf/${invoiceNumber}`,
+      { responseType: 'blob' }
+    );
+  }
+
   generateMultipleInvoicePdfs(request: MultipleInvoicePdfRequest): Observable<ApiResponse<{ [key: string]: string }>> {
     return this.httpClient.post<ApiResponse<{ [key: string]: string }>>(
       `${this.baseUrl}/invoice/multi-pdf`,
