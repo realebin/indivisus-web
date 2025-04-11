@@ -249,20 +249,20 @@
                           </div>
                         </div>
 
-                        <!-- Update the size description input field -->
-                        <div class="mb-3">
-                          <label for="sizeDescription" class="form-label"
-                            >Size Description*</label
-                          >
+                        <div class="col-md-6">
+                          <label class="form-label">Size Description*</label>
                           <input
                             type="text"
                             class="form-control"
-                            id="sizeDescription"
                             formControlName="sizeDescription"
                             [ngClass]="{
                               'is-invalid':
-                                stockForm.get('sizeDescription')?.invalid &&
-                                stockForm.get('sizeDescription')?.touched
+                                getSmallPackagesArray(i)
+                                  .at(j)
+                                  ?.get('sizeDescription')?.invalid &&
+                                getSmallPackagesArray(i)
+                                  .at(j)
+                                  ?.get('sizeDescription')?.touched
                             }"
                             [readonly]="
                               stockForm.get('type')?.value === 'FABRIC' ||
@@ -271,6 +271,36 @@
                           />
                           <div class="invalid-feedback">
                             Size description is required
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Multiplier field -->
+                      <div class="row g-2 mt-2">
+                        <div class="col-md-6">
+                          <label class="form-label">Quantity Multiplier</label>
+                          <div class="input-group">
+                            <input
+                              type="number"
+                              class="form-control"
+                              formControlName="multiplier"
+                              [ngClass]="{
+                                'is-invalid':
+                                  getSmallPackagesArray(i)
+                                    .at(j)
+                                    ?.get('multiplier')?.invalid &&
+                                  getSmallPackagesArray(i)
+                                    .at(j)
+                                    ?.get('multiplier')?.touched
+                              }"
+                              min="1"
+                              max="100"
+                            />
+                            <span class="input-group-text">package(s)</span>
+                          </div>
+                          <small class="text-muted">Creates multiple identical packages</small>
+                          <div class="invalid-feedback">
+                            Multiplier must be between 1 and 100
                           </div>
                         </div>
                       </div>

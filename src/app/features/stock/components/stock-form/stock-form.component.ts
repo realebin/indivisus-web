@@ -129,6 +129,7 @@ export class StockFormComponent implements OnInit {
     return this.fb.group({
       sizeAmount: [null, [Validators.required, Validators.min(0.1)]],
       sizeDescription: [initialSizeDesc, [Validators.required]],
+      multiplier: [1, [Validators.required, Validators.min(1), Validators.max(100)]],
       createdBy: [localStorage.getItem('username') || 'admin']
     });
   }
@@ -217,6 +218,30 @@ export class StockFormComponent implements OnInit {
     });
   }
 
+  // Process small packages with multiplier
+  processSmallPackagesWithMultiplier(bigPackages: any[]): any[] {
+    return bigPackages.map(bigPackage => {
+      // Process small packages in this big package
+      const expandedSmallPackages: any[] = [];
+
+      bigPackage.smallPackages.forEach((smallPackage: any) => {
+        const { multiplier, ...packageData } = smallPackage;
+        const count = parseInt(multiplier) || 1;
+
+        // Create 'count' copies of this package
+        for (let i = 0; i < count; i++) {
+          expandedSmallPackages.push({...packageData});
+        }
+      });
+
+      // Return the big package with expanded small packages
+      return {
+        ...bigPackage,
+        smallPackages: expandedSmallPackages
+      };
+    });
+  }
+
   onSubmit(): void {
     const sizeDescriptionControl = this.stockForm.get('sizeDescription');
     if (sizeDescriptionControl?.disabled) {
@@ -254,7 +279,10 @@ export class StockFormComponent implements OnInit {
         }
       });
     } else {
-      // Create new stock
+      // Process big packages with multiplier
+      const processedBigPackages = this.processSmallPackagesWithMultiplier(formValue.bigPackages);
+
+      // Create new stock with processed big packages
       this.stockService.createStock({
         productId: formValue.productId,
         productName: formValue.productName,
@@ -263,7 +291,7 @@ export class StockFormComponent implements OnInit {
         price: formValue.price,
         sizeDescription: formValue.sizeDescription,
         siteId: formValue.siteId,
-        bigPackages: formValue.bigPackages,
+        bigPackages: processedBigPackages,
         createdBy: formValue.createdBy
       }).subscribe({
         next: (stock) => {

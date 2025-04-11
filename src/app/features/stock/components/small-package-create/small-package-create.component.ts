@@ -1,7 +1,9 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { StockManagementService } from '@services/stock.service';
 import { BsModalRef } from 'ngx-bootstrap/modal';
+import { Observable } from 'rxjs';
+import { SmallPackageModel } from '@models/stock.model';
 
 
 @Component({
@@ -10,8 +12,8 @@ import { BsModalRef } from 'ngx-bootstrap/modal';
   styleUrls: ['./small-package-create.component.scss']
 })
 export class SmallPackageCreateComponent implements OnInit {
-  // Will be set by the parent component when opening the modal
-  packageNumber: string;
+  // Will be set through initialState when opening the modal
+  @Input() packageNumber: string;
 
   @Output() onSaved = new EventEmitter<void>();
 
@@ -33,6 +35,7 @@ export class SmallPackageCreateComponent implements OnInit {
     this.form = this.fb.group({
       sizeAmount: [null, [Validators.required, Validators.min(0.1)]],
       sizeDescription: ['', Validators.required],
+      multiplier: [1, [Validators.required, Validators.min(1), Validators.max(100)]],
       createdBy: [localStorage.getItem('username') || 'admin', Validators.required]
     });
   }
@@ -54,21 +57,45 @@ export class SmallPackageCreateComponent implements OnInit {
 
     const formValue = this.form.value;
 
-    this.stockService.createSmallPackage(this.packageNumber, {
-      sizeAmount: formValue.sizeAmount,
-      sizeDescription: formValue.sizeDescription,
-      createdBy: formValue.createdBy
-    }).subscribe({
-      next: () => {
+    // Process multiple small packages based on multiplier
+    const multiplier = parseInt(formValue.multiplier) || 1;
+    const smallPackageRequests: Observable<SmallPackageModel>[] = [];
+
+    // Create requests based on multiplier
+    for (let i = 0; i < multiplier; i++) {
+      smallPackageRequests.push(
+        this.stockService.createSmallPackage(this.packageNumber, {
+          sizeAmount: formValue.sizeAmount,
+          sizeDescription: formValue.sizeDescription,
+          createdBy: formValue.createdBy
+        })
+      );
+    }
+
+    // Handle all requests sequentially
+    const processRequests = (index = 0) => {
+      if (index >= smallPackageRequests.length) {
+        // All requests completed successfully
         this.isLoading = false;
         this.onSaved.emit();
         this.modalRef.hide();
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.errorMessage = error.message || 'Error creating small package';
+        return;
       }
-    });
+
+      smallPackageRequests[index].subscribe({
+        next: () => {
+          // Process next request
+          processRequests(index + 1);
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.errorMessage = error.message || `Error creating small package ${index + 1}`;
+        }
+      });
+    };
+
+    // Start processing requests
+    processRequests();
   }
 
   close(): void {

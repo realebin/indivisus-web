@@ -30,7 +30,7 @@
             </button>
           </div>
 
-          <div class="row g-2">
+          <div class="row g-2 mb-2">
             <div class="col-md-6">
               <label class="form-label">Size Amount</label>
               <input type="number" class="form-control" formControlName="sizeAmount" min="0.1" step="0.1" required>
@@ -44,6 +44,20 @@
               <input type="text" class="form-control" formControlName="sizeDescription" required>
               <div class="invalid-feedback" *ngIf="smallPackagesFormArray.at(i).get('sizeDescription')?.touched && smallPackagesFormArray.at(i).get('sizeDescription')?.invalid">
                 Size description is required
+              </div>
+            </div>
+          </div>
+          <!-- New Multiplier Field -->
+          <div class="row g-2">
+            <div class="col-md-6">
+              <label class="form-label">Quantity Multiplier</label>
+              <div class="input-group">
+                <input type="number" class="form-control" formControlName="multiplier" min="1" max="100" required>
+                <span class="input-group-text">package(s)</span>
+              </div>
+              <small class="text-muted">Creates multiple identical packages</small>
+              <div class="invalid-feedback" *ngIf="smallPackagesFormArray.at(i).get('multiplier')?.touched && smallPackagesFormArray.at(i).get('multiplier')?.invalid">
+                Multiplier must be between 1 and 100
               </div>
             </div>
           </div>

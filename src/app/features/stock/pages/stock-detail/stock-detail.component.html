@@ -44,7 +44,7 @@
     <div class="card shadow-sm mb-4">
       <div class="card-header bg-light d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Big Packages</h5>
-        <button class="btn btn-primary" (click)="openCreateBigPackageModal(createBigPackageModal)">
+        <button class="btn btn-primary" (click)="openCreateBigPackageModal()">
           <i class="bi bi-plus-circle me-2"></i> Add Big Package
         </button>
       </div>
@@ -72,7 +72,7 @@
                 </td>
                 <td>
                   <div class="btn-group">
-                    <button class="btn btn-sm btn-primary me-1" (click)="openCreateSmallPackageModal(bigPackage.packageNumber, createSmallPackageModal)">
+                    <button class="btn btn-sm btn-primary me-1" (click)="openCreateSmallPackageModal(bigPackage.packageNumber)">
                       <i class="bi bi-plus-circle"></i>
                     </button>
                     <button class="btn btn-sm btn-warning me-1" *ngIf="!bigPackage.isOpen" (click)="markBigPackageAsOpen(bigPackage.packageNumber)">
@@ -149,15 +149,5 @@
 
   <ng-template #loading>
     <app-loader *ngIf="isLoading" type="loading-absolute"></app-loader>
-  </ng-template>
-
-  <!-- Create Big Package Modal -->
-  <ng-template #createBigPackageModal>
-    <app-big-package-create [stockId]="stockId" (onSaved)="loadStockDetail()"></app-big-package-create>
-  </ng-template>
-
-  <!-- Create Small Package Modal -->
-  <ng-template #createSmallPackageModal>
-    <app-small-package-create (onSaved)="loadStockDetail()"></app-small-package-create>
   </ng-template>
 </div>
