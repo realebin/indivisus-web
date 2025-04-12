@@ -173,7 +173,7 @@ export class StockManagementService {
       }[];
       createdBy: string;
     }
-  ): Observable<BigPackageModel> {
+  ): Observable<string> {
     return this.stockManagementHttpService
       .createBigPackage(stockId, {
         package_number: bigPackageData.packageNumber,
@@ -186,9 +186,19 @@ export class StockManagementService {
         created_by: bigPackageData.createdBy,
       })
       .pipe(
-        map((response) => transformToBigPackageModel(response.output_schema)),
-        catchError((error: ErrorOutputWrapper<BigPackage>) => {
-          return throwError(() => error);
+        map((response) => {
+          const language = 'indonesian';
+          const errorMessage = response.error_schema.error_message;
+          // const language =
+          // this.translocoService.getActiveLang() === LanguageEnum.EN ? 'english' : 'indonesian';
+          // return response.error_schema.error_message[language];
+
+          // Check if errorMessage is an object with language properties
+          if (typeof errorMessage === 'object' && errorMessage !== null) {
+            return errorMessage[language];
+          }
+          // If it's a string, return it directly
+          return errorMessage;
         })
       );
   }
@@ -198,7 +208,7 @@ export class StockManagementService {
     sizeDescription: string;
     isOpen: boolean;
     changedBy: string;
-  }): Observable<BigPackageModel> {
+  }): Observable<string> {
     return this.stockManagementHttpService
       .updateBigPackage({
         package_number: bigPackageData.packageNumber,
@@ -207,10 +217,21 @@ export class StockManagementService {
         changed_by: bigPackageData.changedBy,
       })
       .pipe(
-        map((response) => transformToBigPackageModel(response.output_schema)),
-        catchError((error: ErrorOutputWrapper<BigPackage>) => {
-          return throwError(() => error);
-        })
+        map((response) =>
+        {
+          const language = 'indonesian';
+        const errorMessage = response.error_schema.error_message;
+        // const language =
+        // this.translocoService.getActiveLang() === LanguageEnum.EN ? 'english' : 'indonesian';
+        // return response.error_schema.error_message[language];
+
+        // Check if errorMessage is an object with language properties
+        if (typeof errorMessage === 'object' && errorMessage !== null) {
+          return errorMessage[language];
+        }
+        // If it's a string, return it directly
+        return errorMessage;
+        }),
       );
   }
 

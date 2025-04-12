@@ -1,4 +1,10 @@
-import { BigPackage, SmallPackage, StockCreateRequest, StockHeader, StockUpdateRequest } from "@schemas/stock.schema";
+import {
+  BigPackage,
+  SmallPackage,
+  StockCreateRequest,
+  StockHeader,
+  StockUpdateRequest,
+} from '@schemas/stock.schema';
 
 export interface StockHeaderModel {
   stockId: string;
@@ -45,7 +51,9 @@ export interface SmallPackageModel {
 }
 
 // Transform functions for HTTP response to model
-export function transformToStockHeaderModel(stock: StockHeader): StockHeaderModel {
+export function transformToStockHeaderModel(
+  stock: StockHeader
+): StockHeaderModel {
   return {
     stockId: stock.stock_id,
     productId: stock.product_id,
@@ -62,11 +70,13 @@ export function transformToStockHeaderModel(stock: StockHeader): StockHeaderMode
     createdAt: stock.created_at,
     createdBy: stock.created_by,
     changedOn: stock.changed_on,
-    changedBy: stock.changed_by
+    changedBy: stock.changed_by,
   };
 }
 
-export function transformToBigPackageModel(bigPackage: BigPackage): BigPackageModel {
+export function transformToBigPackageModel(
+  bigPackage: BigPackage
+): BigPackageModel {
   return {
     packageNumber: bigPackage.package_number,
     totalQuantity: bigPackage.total_quantity,
@@ -77,11 +87,13 @@ export function transformToBigPackageModel(bigPackage: BigPackage): BigPackageMo
     createdAt: bigPackage.created_at,
     createdBy: bigPackage.created_by,
     changedOn: bigPackage.changed_on,
-    changedBy: bigPackage.changed_by
+    changedBy: bigPackage.changed_by,
   };
 }
 
-export function transformToSmallPackageModel(smallPackage: SmallPackage): SmallPackageModel {
+export function transformToSmallPackageModel(
+  smallPackage: SmallPackage
+): SmallPackageModel {
   return {
     packageId: smallPackage.package_id,
     quantity: smallPackage.quantity,
@@ -91,7 +103,7 @@ export function transformToSmallPackageModel(smallPackage: SmallPackage): SmallP
     createdAt: smallPackage.created_at,
     createdBy: smallPackage.created_by,
     changedOn: smallPackage.changed_on,
-    changedBy: smallPackage.changed_by
+    changedBy: smallPackage.changed_by,
   };
 }
 
@@ -124,17 +136,17 @@ export function transformToStockCreateRequest(model: {
     price: model.price,
     size_description: model.sizeDescription,
     site_id: model.siteId,
-    big_packages: model.bigPackages.map(bp => ({
+    big_packages: model.bigPackages.map((bp) => ({
       package_number: bp.packageNumber,
       size_description: bp.sizeDescription,
-      small_packages: bp.smallPackages.map(sp => ({
+      small_packages: bp.smallPackages.map((sp) => ({
         size_amount: sp.sizeAmount,
         size_description: sp.sizeDescription,
-        created_by: sp.createdBy
+        created_by: sp.createdBy,
       })),
-      created_by: bp.createdBy
+      created_by: bp.createdBy,
     })),
-    created_by: model.createdBy
+    created_by: model.createdBy,
   };
 }
 
@@ -156,6 +168,6 @@ export function transformToStockUpdateRequest(model: {
     price: model.price,
     size_description: model.sizeDescription,
     site_id: model.siteId,
-    changed_by: model.changedBy
+    changed_by: model.changedBy,
   };
 }

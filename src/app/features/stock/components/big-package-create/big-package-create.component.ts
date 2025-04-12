@@ -71,39 +71,68 @@ export class BigPackageCreateComponent implements OnInit {
 
     const formValue = this.form.value;
 
-    // Process small packages with multiplier
-    const expandedSmallPackages = this.processSmallPackagesWithMultiplier(formValue.smallPackages);
+    // Add logging to debug
+    console.log('Form value:', formValue);
+    console.log('Small packages:', formValue.smallPackages);
 
-    // Create a copy of the form value with expanded small packages
-    const requestPayload = {
-      packageNumber: formValue.packageNumber,
-      sizeDescription: formValue.sizeDescription,
-      smallPackages: expandedSmallPackages,
-      createdBy: formValue.createdBy
-    };
+    try {
+      // Process small packages with multiplier - Add defensive coding
+      const smallPackages = formValue.smallPackages || [];
+      const expandedSmallPackages = this.processSmallPackagesWithMultiplier(smallPackages);
 
-    this.stockService.createBigPackage(this.stockId, requestPayload).subscribe({
-      next: () => {
-        this.isLoading = false;
-        this.onSaved.emit();
-        this.modalRef.hide();
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.errorMessage = error.message || 'Error creating big package';
-      }
-    });
+      console.log('Expanded small packages:', expandedSmallPackages);
+
+      // Create a copy of the form value with expanded small packages
+      const requestPayload = {
+        packageNumber: formValue.packageNumber || '',
+        sizeDescription: formValue.sizeDescription || '',
+        smallPackages: expandedSmallPackages,
+        createdBy: formValue.createdBy || localStorage.getItem('username') || 'admin'
+      };
+
+      console.log('Request payload:', requestPayload);
+
+      this.stockService.createBigPackage(this.stockId, requestPayload).subscribe({
+        next: (response) => {
+          console.log('Big package created successfully:', response);
+          this.isLoading = false;
+          this.onSaved.emit();
+          this.modalRef.hide();
+        },
+        error: (error) => {
+          console.error('Error creating big package:', error);
+          this.isLoading = false;
+          this.errorMessage = error.message || 'Error creating big package';
+        }
+      });
+    } catch (err) {
+      console.error('Exception in onSubmit:', err);
+      this.isLoading = false;
+      this.errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+    }
   }
 
   /**
    * Processes small packages with multiplier and returns expanded array
    */
   private processSmallPackagesWithMultiplier(smallPackages: any[]): any[] {
+    if (!smallPackages || !Array.isArray(smallPackages)) {
+      console.error('Small packages is not an array:', smallPackages);
+      return [];
+    }
+
     const expandedPackages: any[] = [];
 
     smallPackages.forEach(pkg => {
+      if (!pkg) {
+        console.warn('Undefined package found in smallPackages array');
+        return;
+      }
+
       const { multiplier, ...packageData } = pkg;
-      const count = parseInt(multiplier) || 1;
+      const count = parseInt(multiplier as string) || 1;
+
+      console.log(`Processing package with multiplier ${count}:`, packageData);
 
       // Create 'count' copies of this package
       for (let i = 0; i < count; i++) {
