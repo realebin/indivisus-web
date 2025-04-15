@@ -51,50 +51,40 @@
           </div>
         </div>
 
-        <!-- Small Package Selection -->
+        <!-- Small Package Multi-Selection -->
         <div class="col-md-6">
-          <label for="smallPackageId-{{ index }}" class="form-label">Small Package</label>
-          <select
-            class="form-select"
-            id="smallPackageId-{{ index }}"
-            formControlName="smallPackageId"
-            (change)="onSmallPackageSelected()"
-            [ngClass]="{'is-invalid': formControls['smallPackageId'].invalid && formControls['smallPackageId'].touched}"
-            [disabled]="!selectedBigPackage"
-          >
-            <option value="">-- Select Small Package --</option>
-            <option *ngFor="let pkg of availableSmallPackages" [value]="pkg.packageId">
-              {{ pkg.packageId }} - {{ pkg.sizeAmount }} {{ pkg.sizeDescription }}
-            </option>
-          </select>
-          <div class="invalid-feedback" *ngIf="formControls['smallPackageId'].errors?.['required']">
-            Small Package is required
-          </div>
-        </div>
+          <label for="smallPackages-{{ index }}" class="form-label">Small Packages</label>
 
-        <!-- Unit Amount -->
-        <div class="col-md-3">
-          <label for="unitAmount-{{ index }}" class="form-label">Unit Amount</label>
-          <input
-            type="number"
-            class="form-control"
-            id="unitAmount-{{ index }}"
-            formControlName="unitAmount"
-            [ngClass]="{'is-invalid': formControls['unitAmount'].invalid && formControls['unitAmount'].touched}"
-            min="0.01"
-            step="0.01"
-            [disabled]="!selectedSmallPackage"
-          >
-          <div class="invalid-feedback" *ngIf="formControls['unitAmount'].errors?.['required']">
-            Unit Amount is required
+          <!-- Hidden form control for compatibility -->
+          <input type="hidden" formControlName="smallPackageId">
+
+          <!-- Multi-select dropdown -->
+          <app-multi-select-dropdown
+            [options]="smallPackageOptions"
+            [placeholder]="'Select Small Packages'"
+            [isInvalid]="formControls['smallPackageId'].invalid && formControls['smallPackageId'].touched"
+            [invalidMessage]="'At least one small package is required'"
+            [disabled]="!selectedBigPackage"
+            (selectionChange)="onSmallPackagesSelected($event)"
+          ></app-multi-select-dropdown>
+
+          <div class="invalid-feedback" *ngIf="formControls['smallPackageId'].errors?.['required']">
+            At least one small package is required
           </div>
-          <div class="invalid-feedback" *ngIf="formControls['unitAmount'].errors?.['min']">
-            Unit Amount must be greater than 0
+
+          <!-- Selected packages summary -->
+          <div class="text-muted mt-1" *ngIf="smallPackageOptions.length > 0">
+            <small>
+              Total selected: {{ totalSelectedAmount | number:'1.2-2' }} {{ getSelectedSizeDescription() }}
+              <span *ngIf="selectedSmallPackages.length > 0" class="ms-1">
+                ({{ selectedSmallPackages.length }} packages)
+              </span>
+            </small>
           </div>
         </div>
 
         <!-- Unit Price -->
-        <div class="col-md-3">
+        <div class="col-md-6">
           <label for="unitPrice-{{ index }}" class="form-label">Unit Price</label>
           <div class="input-group">
             <span class="input-group-text">Rp</span>

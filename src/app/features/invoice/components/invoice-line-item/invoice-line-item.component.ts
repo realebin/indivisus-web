@@ -1,19 +1,9 @@
+// src/app/features/invoice/components/invoice-line-item/invoice-line-item.component.ts
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProductForInvoice } from '@models/invoice.model';
-
-export interface LineItemData {
-  stockId: string;
-  productId: string;
-  bigPackageNumber: string;
-  smallPackageId: string;
-  unitAmount: number;
-  unitPrice: number;
-  productName?: string;
-  type?: string;
-  sizeDescription?: string;
-  totalPrice?: number;
-}
+import { MultiSelectOption } from 'src/app/shared-components/multi-select-dropdown/multi-select-dropdown.component';
+import { LineItemData } from '@models/line-item-extensions';
 
 @Component({
   selector: 'app-invoice-line-item',
@@ -31,14 +21,18 @@ export class InvoiceLineItemComponent implements OnInit {
   form: FormGroup;
   selectedProduct: ProductForInvoice | null = null;
   selectedBigPackage: any = null;
-  selectedSmallPackage: any = null;
+  smallPackageOptions: MultiSelectOption[] = [];
+  totalSelectedAmount: number = 0;
+
+  // Track selected packages
+  selectedSmallPackages: string[] = [];
 
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({
       stockId: ['', Validators.required],
       productId: ['', Validators.required],
       bigPackageNumber: ['', Validators.required],
-      smallPackageId: ['', Validators.required],
+      smallPackageId: ['', Validators.required], // Keep original field for compatibility
       unitAmount: [0, [Validators.required, Validators.min(0.01)]],
       unitPrice: [0, [Validators.required, Validators.min(0)]]
     });
@@ -47,7 +41,19 @@ export class InvoiceLineItemComponent implements OnInit {
   ngOnInit(): void {
     // Initialize form if we're editing
     if (this.lineItem) {
-      this.form.patchValue(this.lineItem);
+      // Initialize selected packages array
+      this.selectedSmallPackages = this.lineItem._selectedSmallPackages ||
+                                  (this.lineItem.smallPackageId ? [this.lineItem.smallPackageId] : []);
+
+      // Fill the form
+      this.form.patchValue({
+        stockId: this.lineItem.stockId,
+        productId: this.lineItem.productId,
+        bigPackageNumber: this.lineItem.bigPackageNumber,
+        smallPackageId: this.lineItem.smallPackageId,
+        unitAmount: this.lineItem.unitAmount,
+        unitPrice: this.lineItem.unitPrice
+      });
 
       // Set selected items
       this.onProductSelected();
@@ -56,13 +62,20 @@ export class InvoiceLineItemComponent implements OnInit {
 
     // Listen for form changes
     this.form.valueChanges.subscribe(val => {
+      // Create line item data with extended properties
       const lineItemData: LineItemData = {
         ...val,
+        // Calculated fields
         totalPrice: this.calculateTotal(),
         productName: this.selectedProduct?.productName || '',
         type: this.selectedProduct?.type || '',
-        sizeDescription: this.selectedSmallPackage?.sizeDescription || ''
+        sizeDescription: this.getSelectedSizeDescription(),
+        // Multi-select extensions
+        _selectedSmallPackages: this.selectedSmallPackages,
+        _bigPackageInfo: this.selectedBigPackage
       };
+
+      // Emit data
       this.lineItemChange.emit(lineItemData);
     });
   }
@@ -83,7 +96,9 @@ export class InvoiceLineItemComponent implements OnInit {
       this.form.get('bigPackageNumber')?.setValue('');
       this.form.get('smallPackageId')?.setValue('');
       this.selectedBigPackage = null;
-      this.selectedSmallPackage = null;
+      this.smallPackageOptions = [];
+      this.selectedSmallPackages = [];
+      this.totalSelectedAmount = 0;
 
       // Set unit price from product
       this.form.get('unitPrice')?.setValue(this.selectedProduct.price);
@@ -98,33 +113,88 @@ export class InvoiceLineItemComponent implements OnInit {
         bp => bp.packageNumber === packageNumber
       ) || null;
 
-      // Reset small package selection
-      this.form.get('smallPackageId')?.setValue('');
-      this.selectedSmallPackage = null;
+      if (this.selectedBigPackage) {
+        // Reset small package selection in form
+        this.form.get('smallPackageId')?.setValue('');
+
+        // Create options for multi-select dropdown
+        this.smallPackageOptions = this.getSmallPackageOptions();
+
+        // If this is the same big package as before, try to restore selections
+        if (this.lineItem &&
+            this.lineItem.bigPackageNumber === packageNumber &&
+            this.lineItem._selectedSmallPackages &&
+            this.lineItem._selectedSmallPackages.length > 0) {
+
+          // Restore previous selections
+          this.smallPackageOptions.forEach(option => {
+            option.selected = this.lineItem?._selectedSmallPackages?.includes(option.id) || false;
+          });
+
+          this.selectedSmallPackages = [...(this.lineItem._selectedSmallPackages || [])];
+
+          // Set the first selected package as smallPackageId for compatibility
+          if (this.selectedSmallPackages.length > 0) {
+            this.form.get('smallPackageId')?.setValue(this.selectedSmallPackages[0]);
+          }
+
+          // Update amount
+          this.updateTotalAmount();
+        } else {
+          // Reset selections
+          this.selectedSmallPackages = [];
+        }
+      }
     }
   }
 
-  onSmallPackageSelected(): void {
-    const packageId = this.form.get('smallPackageId')?.value;
+  getSmallPackageOptions(): MultiSelectOption[] {
+    if (!this.selectedBigPackage) return [];
 
-    if (this.selectedBigPackage && packageId) {
-      interface SmallPackage {
-        packageId: string;
-        sizeAmount: number;
-        sizeDescription: string;
-        isOpen: boolean;
-      }
+    return this.selectedBigPackage.smallPackages
+      .filter((sp: any) => sp.isOpen)
+      .map((sp: any) => ({
+        id: sp.packageId,
+        label: `${sp.packageId} - ${sp.sizeAmount} ${sp.sizeDescription}`,
+        selected: this.selectedSmallPackages.includes(sp.packageId),
+        disabled: false,
+        data: sp
+      }));
+  }
 
-      interface BigPackage {
-        packageNumber: string;
-        smallPackages: SmallPackage[];
-      }
+  onSmallPackagesSelected(selectedOptions: MultiSelectOption[]): void {
+    // Update the array of selected package IDs
+    this.selectedSmallPackages = selectedOptions.map(option => option.id);
 
-      // Prefill the unit amount with the available size amount
-      if (this.selectedSmallPackage) {
-        this.form.get('unitAmount')?.setValue(this.selectedSmallPackage.sizeAmount);
-      }
+    // For compatibility with the original model, set at least the first one
+    if (this.selectedSmallPackages.length > 0) {
+      this.form.get('smallPackageId')?.setValue(this.selectedSmallPackages[0]);
+    } else {
+      this.form.get('smallPackageId')?.setValue('');
     }
+
+    // Update the total unit amount
+    this.updateTotalAmount();
+  }
+
+  updateTotalAmount(): void {
+    if (!this.selectedBigPackage) return;
+
+    // Calculate total amount based on all selected packages
+    let totalAmount = 0;
+
+    if (this.selectedSmallPackages.length > 0) {
+      // Find all selected small packages
+      const selectedPackages = this.selectedBigPackage.smallPackages
+        .filter((sp: any) => sp.isOpen && this.selectedSmallPackages.includes(sp.packageId));
+
+      // Sum up their size amounts
+      totalAmount = selectedPackages.reduce((sum: number, sp: any) => sum + sp.sizeAmount, 0);
+    }
+
+    // Update total and form
+    this.totalSelectedAmount = totalAmount;
+    this.form.get('unitAmount')?.setValue(totalAmount);
   }
 
   calculateTotal(): number {
@@ -137,8 +207,13 @@ export class InvoiceLineItemComponent implements OnInit {
     this.removeLineItem.emit(this.index);
   }
 
-  // Helper getter to check if small packages are open
-  get availableSmallPackages() {
-    return this.selectedBigPackage?.smallPackages.filter((sp: any) => sp.isOpen) || [];
+  getSelectedSizeDescription(): string {
+    if (!this.selectedBigPackage || this.selectedSmallPackages.length === 0) return '';
+
+    // Find first selected package to get its description
+    const firstSelectedPackage = this.selectedBigPackage.smallPackages
+      .find((sp: any) => this.selectedSmallPackages.includes(sp.packageId));
+
+    return firstSelectedPackage ? firstSelectedPackage.sizeDescription : '';
   }
 }

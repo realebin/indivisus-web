@@ -8,3 +8,4 @@ export * from './responsive-data-table/responsive-data-table.component';
 export * from './action-buttons/action-buttons.component';
 export * from './breadcrumbs/breadcrumbs.component';
 export * from './empty-data/empty-data.component';
+export * from './multi-select-dropdown/multi-select-dropdown.component';

@@ -14,6 +14,7 @@ import { FilterPanelComponent } from './filter-panel/filter-panel.component';
 import { ResponsiveDataTableComponent } from './responsive-data-table/responsive-data-table.component';
 import { AgGridModule } from '@node_modules/ag-grid-angular';
 import { ActionButtonsComponent } from './action-buttons/action-buttons.component';
+import { MultiSelectDropdownComponent } from './multi-select-dropdown/multi-select-dropdown.component';
 
 
 @NgModule({
@@ -27,7 +28,8 @@ import { ActionButtonsComponent } from './action-buttons/action-buttons.componen
     EmptyDataComponent,
     FilterPanelComponent,
     ResponsiveDataTableComponent,
-    ActionButtonsComponent
+    ActionButtonsComponent,
+    MultiSelectDropdownComponent
   ],
   imports: [CommonModule, ReactiveFormsModule, RouterModule, AgGridModule],
   exports: [
@@ -40,7 +42,8 @@ import { ActionButtonsComponent } from './action-buttons/action-buttons.componen
     EmptyDataComponent,
     FilterPanelComponent,
     ResponsiveDataTableComponent,
-    ActionButtonsComponent
+    ActionButtonsComponent,
+    MultiSelectDropdownComponent
   ],
 })
 export class SharedComponentsModule {}

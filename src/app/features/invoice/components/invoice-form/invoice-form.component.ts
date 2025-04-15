@@ -1,3 +1,5 @@
+// src/app/features/invoice/components/invoice-form/invoice-form.component.ts
+
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProductForInvoice } from '@models/invoice.model';
@@ -6,7 +8,7 @@ import { UserManagementService } from '@services/user-management.service';
 import { InvoiceService } from '@services/invoice.service';
 import { Customer } from '@models/user-management.model';
 import { SiteOverviewList } from '@models/site.model';
-import { LineItemData } from '../invoice-line-item/invoice-line-item.component';
+import { LineItemData, expandMultiSelectLineItems } from '@models/line-item-extensions';
 
 export interface InvoiceFormData {
   customerId: string;
@@ -155,7 +157,9 @@ export class InvoiceFormComponent implements OnInit {
       bigPackageNumber: '',
       smallPackageId: '',
       unitAmount: 0,
-      unitPrice: 0
+      unitPrice: 0,
+      // Add empty selected packages array for multi-select support
+      _selectedSmallPackages: []
     });
   }
 
@@ -187,13 +191,16 @@ export class InvoiceFormComponent implements OnInit {
 
     const formValue = this.invoiceForm.getRawValue();
 
+    // Process multi-selected small packages if needed
+    const processedLineItems = expandMultiSelectLineItems(this.lineItemArray);
+
     const invoiceData: InvoiceFormData = {
       customerId: formValue.customerId,
       siteId: formValue.siteId,
       dueDate: formValue.dueDate,
       notes: formValue.notes,
       status: this.isEditMode ? formValue.status : 'PENDING',
-      lineItems: this.lineItemArray
+      lineItems: processedLineItems
     };
 
     this.formSubmit.emit(invoiceData);

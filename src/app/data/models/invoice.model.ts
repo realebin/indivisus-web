@@ -43,6 +43,36 @@ export interface Invoice {
   changedOn: string;
 }
 
+export interface LineItemWithMultiSelect {
+  // Original properties from LineItem interface
+  stockId: string;
+  productId: string;
+  bigPackageNumber: string;
+  smallPackageId: string;
+  unitAmount: number;
+  unitPrice: number;
+  productName?: string;
+  type?: string;
+  sizeDescription?: string;
+
+  // UI extension properties
+  _selectedSmallPackages?: string[];
+  _bigPackageInfo?: {
+    packageNumber: string;
+    totalQuantity: number;
+    totalSizeAmount: number;
+    sizeDescription: string;
+    isOpen: boolean;
+    smallPackages: {
+      packageId: string;
+      quantity: number;
+      sizeAmount: number;
+      sizeDescription: string;
+      isOpen: boolean;
+    }[];
+  };
+}
+
 export interface ProductForInvoice {
   stockId: string;
   productId: string;
@@ -421,3 +451,4 @@ export function transformToMultipleInvoicePdfHttpRequest(
     invoice_numbers: request.invoiceNumbers
   };
 }
+
