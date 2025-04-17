@@ -1,1 +1,51 @@
-<p>multi-select-dropdown works!</p>
+
+<div class="dropdown-container position-relative">
+  <div class="form-control d-flex justify-content-between align-items-center"
+       [class.is-invalid]="isInvalid"
+       [class.disabled]="disabled"
+       (click)="toggleDropdown()">
+    <div class="selected-text">
+      <span *ngIf="!hasSelectedOptions()">{{ placeholder }}</span>
+      <span *ngIf="hasSelectedOptions()">
+        {{ getSelectedCount() }} {{ getSelectedCount() === 1 ? 'item' : 'items' }} selected
+      </span>
+    </div>
+    <i class="bi" [ngClass]="isOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+  </div>
+
+  <div class="dropdown-menu w-100" [class.show]="isOpen">
+    <div class="p-2 border-bottom">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox"
+              [checked]="areAllSelected()"
+              [indeterminate]="hasSelectedOptions() && !areAllSelected()"
+              (change)="toggleSelectAll()"
+              id="selectAll">
+        <label class="form-check-label" for="selectAll">
+          Select All
+        </label>
+      </div>
+    </div>
+    <div class="dropdown-options py-1">
+      <div *ngFor="let option of options; let i = index" class="dropdown-item p-0">
+        <div class="form-check py-2 px-3">
+          <input class="form-check-input" type="checkbox"
+                [id]="'option-' + i"
+                [checked]="option.selected"
+                [disabled]="option.disabled"
+                (change)="toggleOption(option)">
+          <label class="form-check-label" [for]="'option-' + i" [title]="option.label">
+            {{ option.label }}
+          </label>
+        </div>
+      </div>
+      <div *ngIf="options.length === 0" class="p-3 text-muted">
+        No options available
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="isInvalid" class="invalid-feedback">
+    {{ invalidMessage }}
+  </div>
+</div>

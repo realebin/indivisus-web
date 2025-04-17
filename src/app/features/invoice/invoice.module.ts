@@ -11,6 +11,7 @@ import { SharedComponentsModule } from 'src/app/shared-components/shared-compone
 import { AgGridModule } from 'ag-grid-angular';
 import { InvoiceCreateComponent, InvoiceDetailComponent, InvoiceIndexComponent } from './pages';
 import { InvoiceFilterComponent, InvoiceFormComponent, InvoiceLineItemComponent, InvoiceListComponent } from './components';
+import { InvoiceEditComponent } from './components/invoice-edit/invoice-edit.component';
 
 
 @NgModule({
@@ -25,6 +26,7 @@ import { InvoiceFilterComponent, InvoiceFormComponent, InvoiceLineItemComponent,
     InvoiceFormComponent,
     InvoiceLineItemComponent,
     InvoiceFilterComponent,
+    InvoiceEditComponent,
   ],
   imports: [
     CommonModule,
