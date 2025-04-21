@@ -12,9 +12,13 @@
         <!-- Product Selection -->
         <div class="col-md-6">
           <label for="productId-{{ index }}" class="form-label">Product</label>
-          <select class="form-select" id="productId-{{ index }}" formControlName="productId"
+          <select
+            class="form-select"
+            id="productId-{{ index }}"
+            formControlName="productId"
             (change)="onProductSelected()"
-            [ngClass]="{'is-invalid': formControls['productId'].invalid && formControls['productId'].touched}">
+            [ngClass]="{'is-invalid': formControls['productId'].invalid && formControls['productId'].touched}"
+          >
             <option value="">-- Select Product --</option>
             <option *ngFor="let product of products" [value]="product.productId">
               {{ product.productName }} ({{ product.type }})
@@ -28,10 +32,14 @@
         <!-- Big Package Selection -->
         <div class="col-md-6">
           <label for="bigPackageNumber-{{ index }}" class="form-label">Big Package</label>
-          <select class="form-select" id="bigPackageNumber-{{ index }}" formControlName="bigPackageNumber"
+          <select
+            class="form-select"
+            id="bigPackageNumber-{{ index }}"
+            formControlName="bigPackageNumber"
             (change)="onBigPackageSelected()"
             [ngClass]="{'is-invalid': formControls['bigPackageNumber'].invalid && formControls['bigPackageNumber'].touched}"
-            [disabled]="!selectedProduct">
+            [disabled]="!selectedProduct"
+          >
             <option value="">-- Select Package --</option>
             <option *ngFor="let pkg of selectedProduct?.bigPackages" [value]="pkg.packageNumber">
               {{ pkg.packageNumber }} - {{ pkg.totalSizeAmount }} {{ pkg.sizeDescription }}
@@ -51,10 +59,14 @@
           <input type="hidden" formControlName="smallPackageId">
 
           <!-- Multi-select dropdown -->
-          <app-multi-select-dropdown [options]="smallPackageOptions" [placeholder]="'Select Small Packages'"
+          <app-multi-select-dropdown
+            [options]="smallPackageOptions"
+            [placeholder]="'Select Small Packages'"
             [isInvalid]="formControls['smallPackageId'].invalid && formControls['smallPackageId'].touched"
-            [invalidMessage]="'At least one small package is required'" [disabled]="!selectedBigPackage"
-            (selectionChange)="onSmallPackagesSelected($event)"></app-multi-select-dropdown>
+            [invalidMessage]="'At least one small package is required'"
+            [disabled]="!selectedBigPackage"
+            (selectionChange)="onSmallPackagesSelected($event)"
+          ></app-multi-select-dropdown>
 
           <!-- Selected packages summary -->
           <div class="text-muted mt-1" *ngIf="smallPackageOptions.length > 0">
@@ -65,6 +77,7 @@
               </span>
             </small>
           </div>
+
           <div class="invalid-feedback" *ngIf="formControls['smallPackageId'].errors?.['required']">
             At least one small package is required
           </div>
@@ -99,4 +112,4 @@
       </div>
     </form>
   </div>
-</div>  
+</div>

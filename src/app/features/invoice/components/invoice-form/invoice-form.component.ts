@@ -1,5 +1,7 @@
+// src/app/features/invoice/components/invoice-form/invoice-form.component.ts
+
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProductForInvoice } from '@models/invoice.model';
 import { SiteService } from '@services/site.service';
 import { UserManagementService } from '@services/user-management.service';
@@ -51,7 +53,8 @@ export class InvoiceFormComponent implements OnInit {
       siteId: ['', Validators.required],
       dueDate: ['', Validators.required],
       notes: [''],
-      status: [{ value: 'PENDING', disabled: !this.isEditMode }]
+      status: [{ value: 'PENDING', disabled: !this.isEditMode }],
+      lineItems: this.fb.array([])
     });
   }
 
@@ -90,7 +93,7 @@ export class InvoiceFormComponent implements OnInit {
       // Add line items
       if (this.initialData.lineItems && this.initialData.lineItems.length > 0) {
         // Clear existing line items
-        this.lineItemArray = [];
+        this.lineItemsArray.clear();
 
         // Set line items
         this.lineItemArray = [...this.initialData.lineItems];
@@ -143,6 +146,10 @@ export class InvoiceFormComponent implements OnInit {
     });
   }
 
+  get lineItemsArray(): FormArray {
+    return this.invoiceForm.get('lineItems') as FormArray;
+  }
+
   addLineItem(): void {
     this.lineItemArray.push({
       stockId: '',
@@ -151,7 +158,7 @@ export class InvoiceFormComponent implements OnInit {
       smallPackageId: '',
       unitAmount: 0,
       unitPrice: 0,
-      // Initialize empty selected packages array for multi-select support
+      // Add empty selected packages array for multi-select support
       _selectedSmallPackages: []
     });
   }
@@ -212,19 +219,5 @@ export class InvoiceFormComponent implements OnInit {
         this.markFormGroupTouched(control);
       }
     });
-  }
-
-  // Method to check if the entire form is valid including line items
-  isFormValid(): boolean {
-    if (!this.invoiceForm.valid) return false;
-    if (this.lineItemArray.length === 0) return false;
-
-    // Check if all line items are complete
-    return this.lineItemArray.every(item => 
-      item.productId &&
-      item.bigPackageNumber &&
-      (item.smallPackageId || (item._selectedSmallPackages && item._selectedSmallPackages.length > 0)) &&
-      item.unitAmount > 0
-    );
   }
 }

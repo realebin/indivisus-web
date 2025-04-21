@@ -42,7 +42,7 @@ export class InvoiceLineItemComponent implements OnInit {
     if (this.lineItem) {
       // Initialize selected packages array
       this.selectedSmallPackages = this.lineItem._selectedSmallPackages ||
-                      (this.lineItem.smallPackageId ? [this.lineItem.smallPackageId] : []);
+                                  (this.lineItem.smallPackageId ? [this.lineItem.smallPackageId] : []);
 
       // Fill the form
       this.form.patchValue({
@@ -216,7 +216,3 @@ export class InvoiceLineItemComponent implements OnInit {
     return firstSelectedPackage ? firstSelectedPackage.sizeDescription : '';
   }
 }
-
-
-
-          
