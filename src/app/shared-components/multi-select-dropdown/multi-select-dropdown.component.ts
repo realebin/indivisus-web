@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnInit, HostListener } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, HostListener, ElementRef, ChangeDetectorRef } from '@angular/core';
 
 export interface MultiSelectOption {
   id: string;
@@ -24,6 +24,11 @@ export class MultiSelectDropdownComponent implements OnInit {
 
   isOpen: boolean = false;
 
+  constructor(
+    private elementRef: ElementRef,
+    private cdr: ChangeDetectorRef
+  ) {}
+
   ngOnInit(): void {
     // Initial emission of selections
     this.emitSelections();
@@ -31,28 +36,42 @@ export class MultiSelectDropdownComponent implements OnInit {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    const targetElement = event.target as HTMLElement;
-    const clickedInside = targetElement.closest('.dropdown-container');
-
-    if (!clickedInside && this.isOpen) {
+    // Only close if the click is outside our component
+    if (!this.elementRef.nativeElement.contains(event.target) && this.isOpen) {
       this.isOpen = false;
+      this.cdr.detectChanges();
     }
   }
 
   toggleDropdown(): void {
     if (!this.disabled) {
       this.isOpen = !this.isOpen;
+      this.cdr.detectChanges();
     }
   }
 
-  toggleOption(option: MultiSelectOption): void {
+  toggleOption(option: MultiSelectOption, event: MouseEvent): void {
+    // Prevent all default behaviors
+    event.preventDefault();
+    event.stopPropagation();
+
     if (!option.disabled) {
+      // Toggle the selected state
       option.selected = !option.selected;
+
+      // Force change detection to update the view immediately
+      this.cdr.detectChanges();
+
+      // Emit the selection change
       this.emitSelections();
     }
   }
 
-  toggleSelectAll(): void {
+  toggleSelectAll(event: MouseEvent): void {
+    // Prevent all default behaviors
+    event.preventDefault();
+    event.stopPropagation();
+
     const allSelected = this.areAllSelected();
     const enabledOptions = this.options.filter(opt => !opt.disabled);
 
@@ -60,6 +79,10 @@ export class MultiSelectDropdownComponent implements OnInit {
       option.selected = !allSelected;
     });
 
+    // Force change detection to update the view immediately
+    this.cdr.detectChanges();
+
+    // Emit the selection change
     this.emitSelections();
   }
 
@@ -82,5 +105,10 @@ export class MultiSelectDropdownComponent implements OnInit {
 
   emitSelections(): void {
     this.selectionChange.emit(this.getSelectedOptions());
+  }
+
+  // Handle checkbox click separately to ensure proper state update
+  onCheckboxClick(option: MultiSelectOption, event: MouseEvent): void {
+    this.toggleOption(option, event);
   }
 }
