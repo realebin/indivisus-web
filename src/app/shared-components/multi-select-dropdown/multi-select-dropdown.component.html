@@ -3,7 +3,7 @@
   <div class="form-control d-flex justify-content-between align-items-center"
        [class.is-invalid]="isInvalid"
        [class.disabled]="disabled"
-       (click)="toggleDropdown()">
+       (click)="toggleDropdown($event)">
     <div class="selected-text">
       <span *ngIf="!hasSelectedOptions()">{{ placeholder }}</span>
       <span *ngIf="hasSelectedOptions()">
@@ -14,13 +14,15 @@
   </div>
 
   <!-- Dropdown menu with improved event handling -->
-  <div class="dropdown-menu w-100" [class.show]="isOpen" (click)="$event.stopPropagation()">
+  <div class="dropdown-menu w-100" 
+       [class.show]="isOpen" 
+       (click)="$event.stopPropagation()">
     <div class="p-2 border-bottom">
       <div class="custom-checkbox">
         <input type="checkbox"
               id="selectAll"
-              [checked]="areAllSelected()"
-              [indeterminate]="hasSelectedOptions() && !areAllSelected()"
+              [checked]="selectAllState === 'checked'"
+              [attr.indeterminate]="selectAllState === 'indeterminate' ? true : null"
               (click)="toggleSelectAll($event)">
         <label for="selectAll">
           Select All
@@ -28,20 +30,22 @@
       </div>
     </div>
     <div class="dropdown-options py-1">
-      <div *ngFor="let option of options; let i = index" class="dropdown-item">
+      <div *ngIf="filteredOptions.length === 0" class="p-3 text-muted">
+        No options available
+      </div>
+      <div *ngFor="let option of filteredOptions; let i = index" class="dropdown-item">
         <div class="custom-checkbox">
           <input type="checkbox"
                 [id]="'option-' + i"
                 [checked]="option.selected"
                 [disabled]="option.disabled"
-                (click)="onCheckboxClick(option, $event)">
-          <label [for]="'option-' + i" [title]="option.label">
+                (mousedown)="handleOptionInteraction(option, $event)">
+          <label [for]="'option-' + i" 
+                 [title]="option.label"
+                 (mousedown)="handleOptionInteraction(option, $event)">
             {{ option.label }}
           </label>
         </div>
-      </div>
-      <div *ngIf="options.length === 0" class="p-3 text-muted">
-        No options available
       </div>
     </div>
   </div>

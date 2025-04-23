@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Customer } from '@models/user-management.model';
@@ -51,6 +51,7 @@ export class InvoiceCreateComponent implements OnInit {
     { label: 'Invoices', url: '/invoice' },
     { label: 'Create Invoice' }
   ];
+
 
   constructor(
     private fb: FormBuilder,
@@ -396,7 +397,7 @@ export class InvoiceCreateComponent implements OnInit {
 
       this.isLoading = true;
       this.invoiceService.createInvoice(createData).subscribe({
-        next: () => {
+        next: (data) => {
           this.router.navigate(['/invoice']);
         },
         error: (error) => {

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnInit, HostListener, ElementRef, ChangeDetectorRef } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, OnChanges, SimpleChanges, HostListener, ElementRef, ChangeDetectorRef } from '@angular/core';
 
 export interface MultiSelectOption {
   id: string;
@@ -6,6 +6,8 @@ export interface MultiSelectOption {
   selected: boolean;
   disabled?: boolean;
   data?: any;
+  quantity?: number;
+  sizeAmount?: number;
 }
 
 @Component({
@@ -13,7 +15,7 @@ export interface MultiSelectOption {
   templateUrl: './multi-select-dropdown.component.html',
   styleUrls: ['./multi-select-dropdown.component.scss']
 })
-export class MultiSelectDropdownComponent implements OnInit {
+export class MultiSelectDropdownComponent implements OnInit, OnChanges {
   @Input() options: MultiSelectOption[] = [];
   @Input() placeholder: string = 'Select options';
   @Input() isInvalid: boolean = false;
@@ -22,7 +24,9 @@ export class MultiSelectDropdownComponent implements OnInit {
 
   @Output() selectionChange = new EventEmitter<MultiSelectOption[]>();
 
+  filteredOptions: MultiSelectOption[] = [];
   isOpen: boolean = false;
+  selectAllState: 'checked' | 'unchecked' | 'indeterminate' = 'unchecked';
 
   constructor(
     private elementRef: ElementRef,
@@ -30,8 +34,60 @@ export class MultiSelectDropdownComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.filterOptions();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['options']) {
+      this.filterOptions();
+    }
+  }
+
+  filterOptions(): void {
+    // More robust filtering with multiple checks
+    this.filteredOptions = this.options.filter(option => {
+      // Check multiple possible ways to determine if the option should be shown
+      const sizeAmount = 
+        option.sizeAmount ?? 
+        option.quantity ?? 
+        (option.data && (option.data.sizeAmount || option.data.quantity)) ?? 
+        0;
+
+      // Keep options with size/quantity > 0
+      return sizeAmount > 0;
+    });
+
+    // If no options pass the filter, fall back to original options
+    if (this.filteredOptions.length === 0) {
+      this.filteredOptions = this.options;
+    }
+
+    // Update select all state after filtering
+    this.updateSelectAllState();
+
     // Initial emission of selections
     this.emitSelections();
+    
+    // Force change detection
+    this.cdr.detectChanges();
+  }
+
+  updateSelectAllState(): void {
+    const enabledOptions = this.filteredOptions.filter(opt => !opt.disabled);
+    const selectedOptions = enabledOptions.filter(opt => opt.selected);
+
+    console.log('Enabled options:', enabledOptions.length);
+    console.log('Selected options:', selectedOptions.length);
+
+    if (selectedOptions.length === 0) {
+      this.selectAllState = 'unchecked';
+    } else if (selectedOptions.length === enabledOptions.length) {
+      this.selectAllState = 'checked';
+    } else {
+      this.selectAllState = 'indeterminate';
+    }
+
+    console.log('Select all state:', this.selectAllState);
   }
 
   @HostListener('document:click', ['$event'])
@@ -43,21 +99,25 @@ export class MultiSelectDropdownComponent implements OnInit {
     }
   }
 
-  toggleDropdown(): void {
+  toggleDropdown(event?: Event): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
     if (!this.disabled) {
       this.isOpen = !this.isOpen;
       this.cdr.detectChanges();
     }
   }
 
-  toggleOption(option: MultiSelectOption, event: MouseEvent): void {
-    // Prevent all default behaviors
-    event.preventDefault();
-    event.stopPropagation();
-
+  toggleOption(option: MultiSelectOption): void {
     if (!option.disabled) {
       // Toggle the selected state
       option.selected = !option.selected;
+
+      // Update select all state after toggling
+      this.updateSelectAllState();
 
       // Force change detection to update the view immediately
       this.cdr.detectChanges();
@@ -72,12 +132,19 @@ export class MultiSelectDropdownComponent implements OnInit {
     event.preventDefault();
     event.stopPropagation();
 
-    const allSelected = this.areAllSelected();
-    const enabledOptions = this.options.filter(opt => !opt.disabled);
+    // Determine new state based on current state
+    const newSelectedState = this.selectAllState !== 'checked';
 
+    // Select or deselect all enabled options
+    const enabledOptions = this.filteredOptions.filter(opt => !opt.disabled);
     enabledOptions.forEach(option => {
-      option.selected = !allSelected;
+      option.selected = newSelectedState;
     });
+
+    // Manually set the select all state
+    this.selectAllState = newSelectedState ? 'checked' : 'unchecked';
+
+    console.log('Select all clicked. New state:', this.selectAllState);
 
     // Force change detection to update the view immediately
     this.cdr.detectChanges();
@@ -86,29 +153,31 @@ export class MultiSelectDropdownComponent implements OnInit {
     this.emitSelections();
   }
 
-  areAllSelected(): boolean {
-    const enabledOptions = this.options.filter(opt => !opt.disabled);
-    return enabledOptions.length > 0 && enabledOptions.every(opt => opt.selected);
-  }
-
   hasSelectedOptions(): boolean {
-    return this.options.some(opt => opt.selected);
+    return this.filteredOptions.some(opt => opt.selected);
   }
 
   getSelectedCount(): number {
-    return this.options.filter(opt => opt.selected).length;
+    return this.filteredOptions.filter(opt => opt.selected).length;
   }
 
   getSelectedOptions(): MultiSelectOption[] {
-    return this.options.filter(opt => opt.selected);
+    return this.filteredOptions.filter(opt => opt.selected);
   }
 
   emitSelections(): void {
     this.selectionChange.emit(this.getSelectedOptions());
   }
 
-  // Handle checkbox click separately to ensure proper state update
-  onCheckboxClick(option: MultiSelectOption, event: MouseEvent): void {
-    this.toggleOption(option, event);
+  // Handle checkbox interaction
+  handleOptionInteraction(option: MultiSelectOption, event: MouseEvent): void {
+    // Crucial part: Prevent default and stop propagation, 
+    // but WITHOUT using methods that might trigger scrolling
+    event.preventDefault();
+    
+    // Use a microtask to toggle to avoid potential scroll behavior
+    Promise.resolve().then(() => {
+      this.toggleOption(option);
+    });
   }
 }
