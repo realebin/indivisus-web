@@ -18,9 +18,21 @@ export interface LineItemData {
 
   // UI-only properties for multi-select support
   _selectedSmallPackages?: string[];
-  _bigPackageInfo?: any;
+  _bigPackageInfo?: {
+    packageNumber: string;
+    totalQuantity: number;
+    totalSizeAmount: number;
+    sizeDescription: string;
+    isOpen: boolean;
+    smallPackages: {
+      packageId: string;
+      quantity: number;
+      sizeAmount: number;
+      sizeDescription: string;
+      isOpen: boolean;
+    }[];
+  } | null;
 }
-
 /**
  * Expands multi-selected line items into individual API-compatible line items
  * @param lineItems Line items that may contain _selectedSmallPackages

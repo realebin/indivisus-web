@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Customer } from '@models/user-management.model';
@@ -8,20 +8,8 @@ import { UserManagementService } from '@services/user-management.service';
 import { SiteService } from '@services/site.service';
 import { InvoiceService } from '@services/invoice.service';
 import { MultiSelectOption } from 'src/app/shared-components/multi-select-dropdown/multi-select-dropdown.component';
+import { LineItemData } from '@models/line-item-extensions';
 
-// Enhanced line item interface with UI-only properties
-interface LineItem {
-  stockId: string;
-  productId: string;
-  bigPackageNumber: string;
-  smallPackageId: string; // Keep original for compatibility
-  unitAmount: number;
-  unitPrice: number;
-  productName?: string;
-  type?: string;
-  sizeDescription?: string;
-  _selectedSmallPackages?: string[]; // UI-only property for multi-select
-}
 
 @Component({
   selector: 'app-invoice-create',
@@ -41,7 +29,7 @@ export class InvoiceCreateComponent implements OnInit {
   products: ProductForInvoice[] = [];
 
   // Line items
-  lineItems: LineItem[] = [];
+  lineItems: LineItemData[] = [];
 
   // Selected product cache for each line item
   selectedProducts: { [index: number]: ProductForInvoice | null } = {};
@@ -51,7 +39,6 @@ export class InvoiceCreateComponent implements OnInit {
     { label: 'Invoices', url: '/invoice' },
     { label: 'Create Invoice' }
   ];
-
 
   constructor(
     private fb: FormBuilder,
@@ -151,33 +138,45 @@ export class InvoiceCreateComponent implements OnInit {
         });
 
         // Load products for the site
-        this.loadProducts(invoice.siteId);
+        this.invoiceService.getProductListForInvoice(invoice.siteId).subscribe({
+          next: (productsResponse) => {
+            this.products = productsResponse.productList.products;
 
-        // Set line items and initialize _selectedSmallPackages
-        this.lineItems = invoice.lineItems.map(item => ({
-          stockId: item.stockId,
-          productId: item.productId,
-          bigPackageNumber: item.bigPackageNumber,
-          smallPackageId: item.smallPackageId,
-          unitAmount: item.unitAmount,
-          unitPrice: item.unitPrice,
-          productName: item.productName,
-          type: item.type,
-          sizeDescription: item.sizeDescription,
-          _selectedSmallPackages: item.smallPackageId ? [item.smallPackageId] : []
-        }));
+            // Set line items and initialize _selectedSmallPackages
+            this.lineItems = invoice.lineItems.map(item => {
+              // Find the product for this line item
+              const product = this.products.find(p => p.productId === item.productId);
 
-        this.isLoading = false;
+              return {
+                stockId: item.stockId,
+                productId: item.productId,
+                bigPackageNumber: item.bigPackageNumber,
+                smallPackageId: item.smallPackageId,
+                unitAmount: item.unitAmount,
+                unitPrice: item.unitPrice,
+                productName: item.productName,
+                type: item.type,
+                sizeDescription: item.sizeDescription,
+                _selectedSmallPackages: item.smallPackageId ? [item.smallPackageId] : [],
+                _bigPackageInfo: product ?
+                  product.bigPackages.find(bp => bp.packageNumber === item.bigPackageNumber)
+                  : null
+              };
+            });
 
-        // Setup product and package selections for each line item
-        setTimeout(() => {
-          this.lineItems.forEach((_, index) => {
-            this.onProductSelected(index);
-            if (this.lineItems[index].bigPackageNumber) {
+            // Setup product and package selections for each line item
+            this.lineItems.forEach((lineItem, index) => {
+              this.onProductSelected(index);
               this.onBigPackageSelected(index);
-            }
-          });
-        }, 500);
+            });
+
+            this.isLoading = false;
+          },
+          error: (error) => {
+            this.error = 'Failed to load products for the site';
+            this.isLoading = false;
+          }
+        });
       },
       error: (error) => {
         this.error = error.message || 'Failed to load invoice data';
@@ -213,38 +212,52 @@ export class InvoiceCreateComponent implements OnInit {
 
   onProductSelected(index: number): void {
     const productId = this.lineItems[index].productId;
-    this.selectedProducts[index] = this.products.find(p => p.productId === productId) || null;
+    const selectedProduct = this.products.find(p => p.productId === productId);
 
-    if (this.selectedProducts[index]) {
-      // Update stockId and clear other selections
-      this.lineItems[index].stockId = this.selectedProducts[index]!.stockId;
-      this.lineItems[index].bigPackageNumber = '';
-      this.lineItems[index].smallPackageId = '';
-      this.lineItems[index].productName = this.selectedProducts[index]!.productName;
-      this.lineItems[index].type = this.selectedProducts[index]!.type;
+    if (selectedProduct) {
+      this.selectedProducts[index] = selectedProduct;
+
+      // Update line item details
+      this.lineItems[index].stockId = selectedProduct.stockId;
+      this.lineItems[index].productName = selectedProduct.productName;
+      this.lineItems[index].type = selectedProduct.type;
+
+      // Update big package info
+      this.selectedBigPackages[index] = this.lineItems[index]._bigPackageInfo || null;
 
       // Set unit price from product
-      this.lineItems[index].unitPrice = this.selectedProducts[index]!.price;
-
-      // Clear cached selections
-      this.selectedBigPackages[index] = null;
-      this.lineItems[index]._selectedSmallPackages = [];
+      this.lineItems[index].unitPrice = selectedProduct.price;
     }
   }
 
   onBigPackageSelected(index: number): void {
-    if (!this.selectedProducts[index]) return;
-
+    const product = this.selectedProducts[index];
     const packageNumber = this.lineItems[index].bigPackageNumber;
-    this.selectedBigPackages[index] = this.selectedProducts[index]!.bigPackages.find(
-      bp => bp.packageNumber === packageNumber
-    ) || null;
 
-    if (this.selectedBigPackages[index]) {
-      // Clear small package selection
-      this.lineItems[index].smallPackageId = '';
-      this.lineItems[index]._selectedSmallPackages = [];
-      this.lineItems[index].unitAmount = 0;
+    if (product) {
+      const selectedBigPackage = product.bigPackages.find(
+        bp => bp.packageNumber === packageNumber
+      );
+
+      if (selectedBigPackage) {
+        this.selectedBigPackages[index] = selectedBigPackage;
+
+        // Reset small package selection
+        this.lineItems[index].smallPackageId =
+          this.lineItems[index]._selectedSmallPackages?.[0] || '';
+
+        // Update unit amount and size description based on selected small package
+        if (this.lineItems[index]._selectedSmallPackages?.length) {
+          const smallPackage = selectedBigPackage.smallPackages.find(
+            sp => sp.packageId === this.lineItems[index].smallPackageId
+          );
+
+          if (smallPackage) {
+            this.lineItems[index].unitAmount = smallPackage.sizeAmount;
+            this.lineItems[index].sizeDescription = smallPackage.sizeDescription;
+          }
+        }
+      }
     }
   }
 
@@ -397,7 +410,7 @@ export class InvoiceCreateComponent implements OnInit {
 
       this.isLoading = true;
       this.invoiceService.createInvoice(createData).subscribe({
-        next: (data) => {
+        next: () => {
           this.router.navigate(['/invoice']);
         },
         error: (error) => {
