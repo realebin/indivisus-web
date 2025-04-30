@@ -15,17 +15,24 @@
           Here's what's happening with your business today.
         </p>
       </div>
-      <!-- <div class="welcome-actions">
-        <button class="btn btn-view-reports">
-          <i class="bi bi-graph-up-arrow"></i> View Reports
-        </button>
-      </div> -->
     </div>
   </div>
 
+  <!-- Loading spinner when data is loading -->
+  <div *ngIf="loading" class="d-flex justify-content-center mb-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Error message if loading fails -->
+  <div *ngIf="error" class="alert alert-danger mb-4">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    {{ error }}
+  </div>
+
   <!-- Stat Cards -->
-  <!-- Stat Cards Row -->
-  <div class="row stats-row mb-4">
+  <div class="row stats-row mb-4" *ngIf="!loading && !error">
     <!-- Total Sites Card -->
     <div class="col-sm-6 col-xl-3 mb-3">
       <div class="stat-card">
@@ -39,9 +46,9 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">Total Sites</div>
-          <div class="stat-value">5</div>
+          <div class="stat-value">{{ siteCount || 0 }}</div>
           <div class="stat-trend positive">
-            <i class="bi bi-arrow-up"></i> 12% <span class="trend-period">vs last month</span>
+            <i class="bi bi-arrow-up"></i> {{ siteTrend }}% <span class="trend-period">vs last month</span>
           </div>
         </div>
       </div>
@@ -60,16 +67,16 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">Total Invoice</div>
-          <div class="stat-value">120</div>
+          <div class="stat-value">{{ invoiceCount || 0 }}</div>
           <div class="stat-trend positive">
-            <i class="bi bi-arrow-up"></i> 8% <span class="trend-period">vs last month</span>
+            <i class="bi bi-arrow-up"></i> {{ invoiceTrend }}% <span class="trend-period">vs last month</span>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Stock Kain Card -->
-    <div class="col-sm-6 col-xl-3 mb-3">
+    <div class="col-sm-6 col-xl-3 mb-3" *ngIf="stockStats.kain">
       <div class="stat-card">
         <div class="stat-card-header">
           <div class="icon-wrapper light-orange">
@@ -81,16 +88,17 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">Stock Kain</div>
-          <div class="stat-value">200 <span class="unit">Yard</span></div>
-          <div class="stat-trend negative">
-            <i class="bi bi-arrow-down"></i> 5% <span class="trend-period">vs last month</span>
+          <div class="stat-value">{{ stockStats.kain.total }} <span class="unit">{{ stockStats.kain.unit }}</span></div>
+          <div class="stat-trend" [ngClass]="{'positive': stockStats.kain.trend > 0, 'negative': stockStats.kain.trend < 0}">
+            <i class="bi" [ngClass]="{'bi-arrow-up': stockStats.kain.trend > 0, 'bi-arrow-down': stockStats.kain.trend < 0}"></i> 
+            {{ Math.abs(stockStats.kain.trend) }}% <span class="trend-period">vs last month</span>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Stock Tali Card -->
-    <div class="col-sm-6 col-xl-3 mb-3">
+    <div class="col-sm-6 col-xl-3 mb-3" *ngIf="stockStats.tali">
       <div class="stat-card">
         <div class="stat-card-header">
           <div class="icon-wrapper light-green">
@@ -102,9 +110,32 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">Stock Tali</div>
-          <div class="stat-value">200 <span class="unit">Meter</span></div>
-          <div class="stat-trend positive">
-            <i class="bi bi-arrow-up"></i> 15% <span class="trend-period">vs last month</span>
+          <div class="stat-value">{{ stockStats.tali.total }} <span class="unit">{{ stockStats.tali.unit }}</span></div>
+          <div class="stat-trend" [ngClass]="{'positive': stockStats.tali.trend > 0, 'negative': stockStats.tali.trend < 0}">
+            <i class="bi" [ngClass]="{'bi-arrow-up': stockStats.tali.trend > 0, 'bi-arrow-down': stockStats.tali.trend < 0}"></i> 
+            {{ Math.abs(stockStats.tali.trend) }}% <span class="trend-period">vs last month</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Render other stock types dynamically -->
+    <div class="col-sm-6 col-xl-3 mb-3" *ngFor="let type of otherStockTypes">
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <div class="icon-wrapper" [ngClass]="getIconClass(type)">
+            <i class="bi bi-box"></i>
+          </div>
+          <button class="menu-button">
+            <i class="bi bi-three-dots-vertical"></i>
+          </button>
+        </div>
+        <div class="stat-content">
+          <div class="stat-label">Stock {{ type }}</div>
+          <div class="stat-value">{{ stockStats[type]?.total }} <span class="unit">{{ stockStats[type]?.unit }}</span></div>
+          <div class="stat-trend" [ngClass]="{'positive': stockStats[type]?.trend ?? 0 > 0, 'negative': stockStats[type]?.trend ?? 0 < 0}">
+            <i class="bi" [ngClass]="{'bi-arrow-up': stockStats[type]?.trend ?? 0 > 0, 'bi-arrow-down': stockStats[type]?.trend ?? 0 < 0}"></i> 
+            {{ Math.abs(stockStats[type]?.trend ?? 0) }}% <span class="trend-period">vs last month</span>
           </div>
         </div>
       </div>
@@ -112,7 +143,7 @@
   </div>
 
   <!-- Charts Row -->
-  <div class="row mt-4">
+  <div class="row mt-4" *ngIf="!loading && !error">
     <!-- Revenue Chart -->
     <div class="col-lg-8 mb-4">
       <div class="chart-card">
@@ -120,23 +151,21 @@
           <div class="chart-title">Total Revenue</div>
           <div class="chart-controls">
             <div class="btn-group period-selector">
-              <button class="period-btn active">Monthly</button>
-              <button class="period-btn">Quarterly</button>
-              <button class="period-btn">Yearly</button>
+              <button class="period-btn" [ngClass]="{'active': revenuePeriod === 'monthly'}" (click)="setRevenuePeriod('monthly')">Monthly</button>
+              <button class="period-btn" [ngClass]="{'active': revenuePeriod === 'quarterly'}" (click)="setRevenuePeriod('quarterly')">Quarterly</button>
+              <button class="period-btn" [ngClass]="{'active': revenuePeriod === 'yearly'}" (click)="setRevenuePeriod('yearly')">Yearly</button>
             </div>
             <div class="year-dropdown">
               <button class="year-btn">
-                2024 <i class="bi bi-chevron-down"></i>
+                {{ currentYear }} <i class="bi bi-chevron-down"></i>
               </button>
             </div>
           </div>
         </div>
         <div class="chart-body">
           <div class="chart-container">
-            <!-- Chart would be rendered here by Chart.js -->
-            <div id="revenue-chart" style="height: 320px; position: relative;">
-              <!-- Placeholder for the chart -->
-            </div>
+            <!-- Use a canvas element with a ViewChild reference -->
+            <canvas #revenueCanvas width="400" height="320"></canvas>
           </div>
         </div>
       </div>
@@ -147,41 +176,29 @@
       <div class="chart-card">
         <div class="chart-header">
           <div class="chart-title">Most Sold Items</div>
-          <div class="year-badge">YEAR 2024</div>
+          <div class="year-badge">YEAR {{ currentYear }}</div>
         </div>
         <div class="chart-body">
           <div class="chart-container">
-            <!-- Chart would be rendered here by Chart.js -->
-            <div id="items-chart" style="height: 200px; position: relative;">
-              <!-- Placeholder for the chart -->
-            </div>
+            <!-- Use a canvas element with a ViewChild reference -->
+            <canvas #itemsCanvas width="200" height="200"></canvas>
           </div>
           <div class="item-list mt-4">
-            <div class="item-entry">
-              <div class="item-icon light-blue">
-                <i class="bi bi-box"></i>
-              </div>
-              <div class="item-details">
-                <div class="item-header">
-                  <div class="item-name">Kain A Warna B</div>
-                  <div class="item-badge positive">+24%</div>
-                </div>
-                <div class="item-progress">
-                  <div class="progress-bar" style="width: 75%;"></div>
-                </div>
-              </div>
+            <div *ngIf="topSellingItems.length === 0" class="text-center py-3 text-muted">
+              <i class="bi bi-info-circle d-block mb-2" style="font-size: 2rem; opacity: 0.7;"></i>
+              <p>No sales data available yet</p>
             </div>
-            <div class="item-entry">
-              <div class="item-icon light-orange">
+            <div class="item-entry" *ngFor="let item of topSellingItems">
+              <div class="item-icon" [ngClass]="item.iconClass">
                 <i class="bi bi-box"></i>
               </div>
               <div class="item-details">
                 <div class="item-header">
-                  <div class="item-name">Tali A Warna B</div>
-                  <div class="item-badge positive">+18%</div>
+                  <div class="item-name">{{ item.name }}</div>
+                  <div class="item-badge positive">+{{ item.growth }}%</div>
                 </div>
                 <div class="item-progress">
-                  <div class="progress-bar" style="width: 55%;"></div>
+                  <div class="progress-bar" [style.width.%]="item.percentage"></div>
                 </div>
               </div>
             </div>
@@ -190,3 +207,4 @@
       </div>
     </div>
   </div>
+</div>

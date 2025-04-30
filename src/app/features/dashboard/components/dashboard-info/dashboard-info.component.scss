@@ -115,6 +115,11 @@
   color: #71dd37;
 }
 
+.light-warning {
+  background-color: rgba(255, 171, 0, 0.1);
+  color: #ffab00;
+}
+
 .menu-button {
   background: transparent;
   border: none;
@@ -275,16 +280,6 @@
   align-items: center;
   justify-content: center;
   font-size: 1rem;
-}
-
-.light-blue {
-  background-color: rgba(105, 108, 255, 0.1);
-  color: #696cff;
-}
-
-.light-orange {
-  background-color: rgba(255, 171, 0, 0.1);
-  color: #ffab00;
 }
 
 .item-details {
