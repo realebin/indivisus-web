@@ -10,8 +10,8 @@ describe('FilterPanelComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [FilterPanelComponent]
     })
-    .compileComponents();
-    
+      .compileComponents();
+
     fixture = TestBed.createComponent(FilterPanelComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

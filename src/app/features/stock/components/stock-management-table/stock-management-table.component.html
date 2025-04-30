@@ -1,13 +1,6 @@
-<app-responsive-data-table
-  [data]="data"
-  [columnDefs]="columnDefs"
-  [cardConfigs]="cardConfigs"
-  [type]="'STOCK'"
-  [sortOptions]="sortOptions"
-  [title]="'Stock Management'"
-  (editItem)="editStock($event)"
-  (deleteItem)="deleteStock($event)"
-></app-responsive-data-table>
+<app-responsive-data-table [data]="data" [columnDefs]="columnDefs" [cardConfigs]="cardConfigs" [type]="'STOCK'"
+  [sortOptions]="sortOptions" [title]="'Stock Management'" (editItem)="editStock($event)"
+  (deleteItem)="deleteStock($event)"></app-responsive-data-table>
 <!-- <app-responsive-data-table
   [data]="data"
   [columnDefs]="columnDefs"

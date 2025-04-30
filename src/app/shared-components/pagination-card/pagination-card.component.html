@@ -4,9 +4,7 @@
     <ng-container *ngFor="let item of paginatedData">
       <div class="card mb-2" [class]="cardClass">
         <div class="card-body">
-          <ng-content
-            *ngTemplateOutlet="contentTemplate; context: { $implicit: item }"
-          >
+          <ng-content *ngTemplateOutlet="contentTemplate; context: { $implicit: item }">
           </ng-content>
         </div>
       </div>
@@ -18,11 +16,7 @@
         <li class="page-item" [class.disabled]="currentPage === 1">
           <button class="page-link" (click)="previousPage()">Previous</button>
         </li>
-        <li
-          class="page-item"
-          [class.active]="page === currentPage"
-          *ngFor="let page of displayedPages"
-        >
+        <li class="page-item" [class.active]="page === currentPage" *ngFor="let page of displayedPages">
           <button class="page-link" (click)="goToPage(page)">{{ page }}</button>
         </li>
         <li class="page-item" [class.disabled]="currentPage === maxPage">

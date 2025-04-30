@@ -10,8 +10,8 @@ describe('StockFormComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [StockFormComponent]
     })
-    .compileComponents();
-    
+      .compileComponents();
+
     fixture = TestBed.createComponent(StockFormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

@@ -15,7 +15,7 @@ export class AuthHttpService {
   constructor(
     private httpClient: HttpClient,
     private env: EnvironmentService
-  ) {}
+  ) { }
 
   login(
     request: AuthLoginHttpRequest

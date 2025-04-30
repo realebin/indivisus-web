@@ -72,12 +72,15 @@
               <div class="col-4" *ngIf="invoice.status !== 'CANCELLED'">
                 <!-- TODO : update status still ugly when resizing -->
                 <div class="dropdown w-100">
-                  <button class="btn btn-outline-primary dropdown-toggle w-100" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                  <button class="btn btn-outline-primary dropdown-toggle w-100" type="button" id="statusDropdown"
+                    data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-check-circle me-1"></i>Update Status
                   </button>
                   <ul class="dropdown-menu" aria-labelledby="statusDropdown">
-                    <li><a class="dropdown-item" (click)="updateStatus('PENDING')" *ngIf="invoice.status !== 'PENDING'">Mark as Pending</a></li>
-                    <li><a class="dropdown-item" (click)="updateStatus('PAID')" *ngIf="invoice.status !== 'PAID'">Mark as Paid</a></li>
+                    <li><a class="dropdown-item" (click)="updateStatus('PENDING')"
+                        *ngIf="invoice.status !== 'PENDING'">Mark as Pending</a></li>
+                    <li><a class="dropdown-item" (click)="updateStatus('PAID')" *ngIf="invoice.status !== 'PAID'">Mark
+                        as Paid</a></li>
                     <li><a class="dropdown-item" (click)="updateStatus('CANCELLED')">Cancel Invoice</a></li>
                   </ul>
                 </div>

@@ -27,7 +27,8 @@
 }
 
 /* Fix for IE11 and Edge browser modal issues */
-@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+@media all and (-ms-high-contrast: none),
+(-ms-high-contrast: active) {
   .modal-dialog {
     display: flex;
     align-items: center;

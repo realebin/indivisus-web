@@ -60,7 +60,7 @@ export class UserManagementTableInquiryComponent implements OnInit, OnChanges, O
   constructor(
     private userManagementService: UserManagementService,
     private modalService: BsModalService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.setupColumnDefs();

@@ -27,16 +27,10 @@
           <i class="bi bi-box-seam me-2"></i><b>Stock Information</b>
         </div>
       </div>
-      <div
-        class="card p-3 bg-light rounded-3 border-0 mb-2"
-        *ngIf="site.stocks"
-      >
+      <div class="card p-3 bg-light rounded-3 border-0 mb-2" *ngIf="site.stocks">
         <b class="text-secondary">Measure:</b>
         <div class="row">
-          <div
-            class="col-12 col-md-6 text-muted"
-            *ngFor="let stock of site.stocks"
-          >
+          <div class="col-12 col-md-6 text-muted" *ngFor="let stock of site.stocks">
             <i class="bi bi-tags me-2"></i><b>{{ stock.description }}:</b>
             <ng-container *ngFor="let size of stock.sizes; let last = last">
               {{ size.sizeAmount }} {{ size.sizeDesc }}{{ !last ? ", " : "" }}
@@ -47,10 +41,7 @@
       <div class="card p-3 bg-light rounded-3 border-0" *ngIf="site.packages">
         <b class="text-secondary">Packages:</b>
         <div class="row">
-          <div
-            class="col-12 col-md-6 text-muted"
-            *ngFor="let pack of site.packages"
-          >
+          <div class="col-12 col-md-6 text-muted" *ngFor="let pack of site.packages">
             <i class="bi bi-box me-2"></i><b>{{ pack.description }}:</b>
             {{ pack.amount }} Pack
           </div>
@@ -59,4 +50,3 @@
     </ng-container>
   </ng-template>
 </app-pagination-card>
-

@@ -36,7 +36,7 @@ import { InvoiceHttpService } from '@http_services/invoice.http-service';
   providedIn: 'root',
 })
 export class InvoiceService {
-  constructor(private invoiceHttpService: InvoiceHttpService) {}
+  constructor(private invoiceHttpService: InvoiceHttpService) { }
 
   getAllInvoices(): Observable<InvoiceInquiryModelResponse> {
     return this.invoiceHttpService.getAllInvoices().pipe(

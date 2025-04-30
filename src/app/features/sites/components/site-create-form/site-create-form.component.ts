@@ -73,7 +73,7 @@ export class SiteCreateFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private userManagementService: UserManagementService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.initForm();

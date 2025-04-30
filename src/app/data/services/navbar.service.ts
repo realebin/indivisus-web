@@ -5,7 +5,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root',
 })
 export class NavbarService {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   getNavbarItems() {
     const navItems = [

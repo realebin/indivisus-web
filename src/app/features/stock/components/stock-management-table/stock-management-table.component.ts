@@ -31,7 +31,7 @@ export class StockManagementTableComponent implements OnInit {
     ]
   };
 
-  constructor() {}
+  constructor() { }
 
   ngOnInit(): void {
     this.setupColumnDefs();

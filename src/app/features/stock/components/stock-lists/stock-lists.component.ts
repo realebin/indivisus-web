@@ -10,7 +10,7 @@ import { StockHeaderModel } from '@models/stock.model';
 export class StockListsComponent implements OnInit {
   @Input() stocks: StockHeaderModel[] = [];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   ngOnInit(): void {
     // Initialize component

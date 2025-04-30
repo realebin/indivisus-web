@@ -28,7 +28,7 @@ export class SitesCreateBuilderComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private siteService: SiteService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {

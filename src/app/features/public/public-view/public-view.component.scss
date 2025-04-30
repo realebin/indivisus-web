@@ -1,20 +1,23 @@
 .wrapper {
   display: flex;
   min-height: 100vh;
-  padding-top: 56px; /* Match navbar height */
+  padding-top: 56px;
+  /* Match navbar height */
   position: relative;
 }
 
 .main-content {
   flex-grow: 1;
-  margin-left: 250px; /* Match sidebar width */
+  margin-left: 250px;
+  /* Match sidebar width */
   width: calc(100% - 250px);
   transition: margin-left 0.3s ease, width 0.3s ease;
   padding: 1rem;
 }
 
 .main-content.collapsed {
-  margin-left: 70px; /* Match collapsed sidebar width */
+  margin-left: 70px;
+  /* Match collapsed sidebar width */
   width: calc(100% - 70px);
 }
 
@@ -25,7 +28,8 @@
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1025; /* Between sidebar and top navbar */
+  z-index: 1025;
+  /* Between sidebar and top navbar */
   display: none;
 }
 

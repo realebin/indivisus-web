@@ -29,7 +29,8 @@
 
               <div class="mb-3">
                 <p class="text-muted mb-2">
-                  <i class="bi bi-geo-alt me-2"></i><strong>Address:</strong> {{ siteDetail.address || 'Not specified' }}
+                  <i class="bi bi-geo-alt me-2"></i><strong>Address:</strong> {{ siteDetail.address || 'Not specified'
+                  }}
                 </p>
                 <p class="text-muted mb-2">
                   <i class="bi bi-person me-2"></i><strong>PIC:</strong> {{ siteDetail.picFullName }}
@@ -71,12 +72,16 @@
           <!-- Tabs navigation -->
           <ul class="nav nav-tabs" id="productTypeTabs" role="tablist">
             <li class="nav-item" role="presentation">
-              <button class="nav-link" [class.active]="currentTab === 'Kain'" id="kain-tab" data-bs-toggle="tab" data-bs-target="#kain" type="button" role="tab" aria-controls="kain" aria-selected="true" (click)="switchTab('Kain')">
+              <button class="nav-link" [class.active]="currentTab === 'Kain'" id="kain-tab" data-bs-toggle="tab"
+                data-bs-target="#kain" type="button" role="tab" aria-controls="kain" aria-selected="true"
+                (click)="switchTab('Kain')">
                 Kain (Fabric)
               </button>
             </li>
             <li class="nav-item" role="presentation">
-              <button class="nav-link" [class.active]="currentTab === 'Tali'" id="tali-tab" data-bs-toggle="tab" data-bs-target="#tali" type="button" role="tab" aria-controls="tali" aria-selected="false" (click)="switchTab('Tali')">
+              <button class="nav-link" [class.active]="currentTab === 'Tali'" id="tali-tab" data-bs-toggle="tab"
+                data-bs-target="#tali" type="button" role="tab" aria-controls="tali" aria-selected="false"
+                (click)="switchTab('Tali')">
                 Tali (Rope)
               </button>
             </li>
@@ -100,17 +105,9 @@
 
             <!-- Data Table -->
             <div *ngIf="rowData.length > 0" class="tab-pane fade show active" role="tabpanel">
-              <ag-grid-angular
-                class="ag-theme-alpine"
-                style="width: 100%;"
-                [rowData]="rowData"
-                [columnDefs]="colDefs"
-                [defaultColDef]="defaultColDef"
-                (cellClicked)="onGridCellClicked($event)"
-                domLayout="autoHeight"
-                [pagination]="true"
-                [paginationPageSize]="10"
-              ></ag-grid-angular>
+              <ag-grid-angular class="ag-theme-alpine" style="width: 100%;" [rowData]="rowData" [columnDefs]="colDefs"
+                [defaultColDef]="defaultColDef" (cellClicked)="onGridCellClicked($event)" domLayout="autoHeight"
+                [pagination]="true" [paginationPageSize]="10"></ag-grid-angular>
             </div>
           </div>
         </div>

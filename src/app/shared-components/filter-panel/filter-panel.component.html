@@ -3,17 +3,12 @@
   <div class="d-flex justify-content-between align-items-center">
     <h5 class="mb-0">{{ title }}</h5>
     <div>
-      <button
-        class="btn btn-outline-secondary"
-        [class.btn-secondary]="isVisible || hasActiveFilters"
-        [class.text-white]="isVisible || hasActiveFilters"
-        (click)="onTogglePanel()">
+      <button class="btn btn-outline-secondary" [class.btn-secondary]="isVisible || hasActiveFilters"
+        [class.text-white]="isVisible || hasActiveFilters" (click)="onTogglePanel()">
         <i class="bi bi-funnel"></i>
         <span class="d-none d-sm-inline">Filter</span>
         <!-- Alert badge -->
-        <span
-          *ngIf="hasActiveFilters"
-          class="badge rounded-pill bg-danger">
+        <span *ngIf="hasActiveFilters" class="badge rounded-pill bg-danger">
           !
         </span>
       </button>
@@ -36,17 +31,9 @@
           <span class="input-group-text">
             <i class="bi bi-search"></i>
           </span>
-          <input
-            type="text"
-            class="form-control"
-            placeholder="Search anything..."
-            [formControl]="searchControl"
+          <input type="text" class="form-control" placeholder="Search anything..." [formControl]="searchControl"
             aria-label="Search">
-          <button
-            *ngIf="searchControl.value"
-            class="btn btn-outline-secondary"
-            type="button"
-            (click)="clearSearch()">
+          <button *ngIf="searchControl.value" class="btn btn-outline-secondary" type="button" (click)="clearSearch()">
             <i class="bi bi-x"></i>
           </button>
         </div>
@@ -57,12 +44,8 @@
         <label class="form-label">Sort by</label>
         <div class="sort-buttons">
           <ng-container *ngFor="let option of sortOptions">
-            <button
-              type="button"
-              class="btn mb-2 me-2"
-              [class.btn-outline-primary]="sortField !== option.field"
-              [class.btn-primary]="sortField === option.field"
-              (click)="onSortData(option.field)">
+            <button type="button" class="btn mb-2 me-2" [class.btn-outline-primary]="sortField !== option.field"
+              [class.btn-primary]="sortField === option.field" (click)="onSortData(option.field)">
               {{ option.label }}
               <i [class]="getSortIcon(option.field)"></i>
             </button>
@@ -75,15 +58,10 @@
 
       <!-- Filter actions -->
       <div class="d-flex justify-content-end">
-        <button
-          class="btn btn-outline-secondary me-2"
-          (click)="onResetFilters()"
-          [disabled]="!hasActiveFilters">
+        <button class="btn btn-outline-secondary me-2" (click)="onResetFilters()" [disabled]="!hasActiveFilters">
           Reset
         </button>
-        <button
-          class="btn btn-primary"
-          (click)="onDone()">
+        <button class="btn btn-primary" (click)="onDone()">
           Done
         </button>
       </div>

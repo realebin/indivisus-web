@@ -35,7 +35,7 @@
 .btn-view-reports:hover {
   background-color: #f8f9fa;
   transform: translateY(-2px);
-  box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
 }
 
 .btn-view-reports i {
@@ -58,7 +58,7 @@
   margin-right: -0.5rem;
 }
 
-.stats-row > div {
+.stats-row>div {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
 }
@@ -66,16 +66,16 @@
 .stat-card {
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
   padding: 1.25rem;
   height: 100%;
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .stat-card-header {
@@ -178,8 +178,8 @@
 .chart-card {
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   height: 100%;
 }
 
@@ -188,7 +188,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .chart-title {

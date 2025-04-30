@@ -10,7 +10,7 @@ import { SiteInquiryResponse } from '@models/site.model';
 })
 export class SitesInquiryComponent {
   @Input() sites: SiteInquiryResponse;
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
   // Getter to access just the sites array for pagination
   get sitesList() {
     return this.sites?.sites || [];

@@ -1,5 +1,6 @@
 // Improved styling for the ag-grid
 ::ng-deep .ag-theme-alpine {
+
   // Fix for horizontal scrolling
   .ag-root-wrapper {
     border: 1px solid #dee2e6;
@@ -67,6 +68,7 @@
     }
   }
 }
+
 // Active filter indicator styles
 .position-relative {
   .badge {
@@ -101,8 +103,15 @@
 
 // Animation for filter panel
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .container {

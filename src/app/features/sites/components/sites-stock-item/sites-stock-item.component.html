@@ -7,12 +7,14 @@
     <span class="badge bg-primary">{{ stocks.remainingTotalPackages || 0 }} pkg</span>
   </h6>
 
-  <div class="text-muted small mb-3">Total Stock: {{ stocks.remainingTotalStock || 0 }} {{ stocks.sizeDescription }}</div>
+  <div class="text-muted small mb-3">Total Stock: {{ stocks.remainingTotalStock || 0 }} {{ stocks.sizeDescription }}
+  </div>
 
   <div *ngIf="stocks.sizes?.length">
     <p class="text-muted mb-1 small">Available Sizes:</p>
     <ul class="list-group list-group-flush mb-3">
-      <li class="list-group-item d-flex justify-content-between align-items-center py-2" *ngFor="let size of stocks.sizes">
+      <li class="list-group-item d-flex justify-content-between align-items-center py-2"
+        *ngFor="let size of stocks.sizes">
         <span>{{ size.sizeDescription }}</span>
         <span class="badge bg-light text-dark">{{ size.sizeAmount }}</span>
       </li>

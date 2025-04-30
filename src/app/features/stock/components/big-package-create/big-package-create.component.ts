@@ -71,16 +71,11 @@ export class BigPackageCreateComponent implements OnInit {
 
     const formValue = this.form.value;
 
-    // Add logging to debug
-    console.log('Form value:', formValue);
-    console.log('Small packages:', formValue.smallPackages);
 
     try {
       // Process small packages with multiplier - Add defensive coding
       const smallPackages = formValue.smallPackages || [];
       const expandedSmallPackages = this.processSmallPackagesWithMultiplier(smallPackages);
-
-      console.log('Expanded small packages:', expandedSmallPackages);
 
       // Create a copy of the form value with expanded small packages
       const requestPayload = {
@@ -90,17 +85,13 @@ export class BigPackageCreateComponent implements OnInit {
         createdBy: formValue.createdBy || localStorage.getItem('username') || 'admin'
       };
 
-      console.log('Request payload:', requestPayload);
-
       this.stockService.createBigPackage(this.stockId, requestPayload).subscribe({
         next: (response) => {
-          console.log('Big package created successfully:', response);
           this.isLoading = false;
           this.onSaved.emit();
           this.modalRef.hide();
         },
         error: (error) => {
-          console.error('Error creating big package:', error);
           this.isLoading = false;
           this.errorMessage = error.message || 'Error creating big package';
         }
@@ -125,18 +116,15 @@ export class BigPackageCreateComponent implements OnInit {
 
     smallPackages.forEach(pkg => {
       if (!pkg) {
-        console.warn('Undefined package found in smallPackages array');
         return;
       }
 
       const { multiplier, ...packageData } = pkg;
       const count = parseInt(multiplier as string) || 1;
 
-      console.log(`Processing package with multiplier ${count}:`, packageData);
-
       // Create 'count' copies of this package
       for (let i = 0; i < count; i++) {
-        expandedPackages.push({...packageData});
+        expandedPackages.push({ ...packageData });
       }
     });
 

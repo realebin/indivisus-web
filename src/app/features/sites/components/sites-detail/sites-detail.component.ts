@@ -95,7 +95,7 @@ export class SitesDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private siteService: SiteService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
@@ -136,35 +136,33 @@ export class SitesDetailComponent implements OnInit {
     this.specificStockErrorMessage = '';
     this.rowData = [];
 
-    if(productType) {
-    this.siteService.getSpecificStockBySite(siteId, productType)
-      .pipe(finalize(() => this.isLoadingStocks = false))
-      .subscribe({
-        next: (response) => {
-          console.log(response)
-          this.specificStockItems = response.data || [];
-          this.rowData = this.specificStockItems;
-        },
-        error: (error) => {
-          console.error('Error loading stock headers:', error);
-          this.specificStockErrorMessage = 'Failed to load stock information';
-        }
-      });
+    if (productType) {
+      this.siteService.getSpecificStockBySite(siteId, productType)
+        .pipe(finalize(() => this.isLoadingStocks = false))
+        .subscribe({
+          next: (response) => {
+            this.specificStockItems = response.data || [];
+            this.rowData = this.specificStockItems;
+          },
+          error: (error) => {
+            console.error('Error loading stock headers:', error);
+            this.specificStockErrorMessage = 'Failed to load stock information';
+          }
+        });
     }
     else {
       this.siteService.getStockHeadersBySite(siteId)
-      .pipe(finalize(() => this.isLoadingStocks = false))
-      .subscribe({
-        next: (response) => {
-          console.log(response)
-          this.stockHeaders = response.stockItems || [];
-          this.rowData = this.stockHeaders;
-        },
-        error: (error) => {
-          console.error('Error loading stock headers:', error);
-          this.stockErrorMessage = 'Failed to load stock information';
-        }
-      });
+        .pipe(finalize(() => this.isLoadingStocks = false))
+        .subscribe({
+          next: (response) => {
+            this.stockHeaders = response.stockItems || [];
+            this.rowData = this.stockHeaders;
+          },
+          error: (error) => {
+            console.error('Error loading stock headers:', error);
+            this.stockErrorMessage = 'Failed to load stock information';
+          }
+        });
     }
   }
 
@@ -192,7 +190,7 @@ export class SitesDetailComponent implements OnInit {
     }
   }
 
-  handleAction(event: {type: string, item: any, id?: string}): void {
+  handleAction(event: { type: string, item: any, id?: string }): void {
     switch (event.type) {
       case 'edit':
         // Navigate to edit site page

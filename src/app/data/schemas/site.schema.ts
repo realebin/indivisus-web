@@ -84,7 +84,7 @@ export interface SiteStockHeadersHttpResponse {
 }
 
 export interface SiteStockHeadersWithSpecificProductHttpResponse {
-  data : {
+  data: {
     changed_by: string;
     changed_on: string;
     created_at: string;

@@ -29,4 +29,4 @@ import { AgGridModule } from '@node_modules/ag-grid-angular';
     AgGridModule,
   ],
 })
-export class UserManagementModule {}
+export class UserManagementModule { }

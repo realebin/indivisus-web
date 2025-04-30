@@ -23,7 +23,18 @@ body {
 }
 
 // Typography
-h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
+h1,
+.h1,
+h2,
+.h2,
+h3,
+.h3,
+h4,
+.h4,
+h5,
+.h5,
+h6,
+.h6 {
   font-weight: 600;
   color: $gray-800;
   margin-bottom: 0.5rem;
@@ -99,7 +110,8 @@ h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
   border-radius: $border-radius;
   transition: all 0.2s ease-in-out;
 
-  &:focus, &:active {
+  &:focus,
+  &:active {
     box-shadow: none !important;
   }
 
@@ -107,7 +119,9 @@ h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
     background-color: $primary;
     border-color: $primary;
 
-    &:hover, &:focus, &:active {
+    &:hover,
+    &:focus,
+    &:active {
       background-color: $primary-dark;
       border-color: $primary-dark;
     }
@@ -117,7 +131,9 @@ h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
     color: $primary;
     border-color: $primary;
 
-    &:hover, &:focus, &:active {
+    &:hover,
+    &:focus,
+    &:active {
       background-color: $primary;
       border-color: $primary;
       color: $white;
@@ -136,7 +152,8 @@ h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
 }
 
 // Form styling
-.form-control, .form-select {
+.form-control,
+.form-select {
   padding: 0.5rem 1rem;
   border-radius: $border-radius;
   border-color: $gray-300;

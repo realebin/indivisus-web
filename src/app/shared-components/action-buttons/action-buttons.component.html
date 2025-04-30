@@ -2,15 +2,10 @@
                         'justify-content-center': justifyContent === 'center',
                         'justify-content-end': justifyContent === 'end'}">
   <ng-container *ngFor="let action of actions">
-    <button
-      *ngIf="isActionVisible(action)"
-      type="button"
-      class="btn me-2"
-      [ngClass]="[
+    <button *ngIf="isActionVisible(action)" type="button" class="btn me-2" [ngClass]="[
         action.buttonClass || 'btn-secondary',
         buttonSize === 'sm' ? 'btn-sm' : buttonSize === 'lg' ? 'btn-lg' : ''
-      ]"
-      (click)="handleAction(action)">
+      ]" (click)="handleAction(action)">
       <i class="bi" [ngClass]="action.icon"></i>
       <ng-container *ngIf="showLabels && action.label">
         <span class="ms-1">{{ action.label }}</span>

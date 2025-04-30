@@ -28,7 +28,7 @@ import {
   providedIn: 'root',
 })
 export class UserManagementService {
-  constructor(private userManagementHttpService: UserManagementHttpService) {}
+  constructor(private userManagementHttpService: UserManagementHttpService) { }
 
   inquiryAppUser(): Observable<UserManagementInquiryAppUserModelResponse> {
     return this.userManagementHttpService.inquiryAppUser().pipe(
@@ -45,8 +45,8 @@ export class UserManagementService {
             ...error,
             data: error?.data
               ? transformToUserManagementInquiryAppUserModelResponse(
-                  error?.data
-                )
+                error?.data
+              )
               : null,
           });
         }
@@ -69,8 +69,8 @@ export class UserManagementService {
             ...error,
             data: error?.data
               ? transformToUserManagementInquiryCustomerModelResponse(
-                  error?.data
-                )
+                error?.data
+              )
               : null,
           });
         }
@@ -93,8 +93,8 @@ export class UserManagementService {
             ...error,
             data: error?.data
               ? transformToUserManagementInquirySupplierModelResponse(
-                  error?.data
-                )
+                error?.data
+              )
               : null,
           });
         }

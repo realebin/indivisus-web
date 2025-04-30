@@ -22,7 +22,7 @@ export class SiteProductDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private siteService: SiteService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {

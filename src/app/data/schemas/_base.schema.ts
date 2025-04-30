@@ -6,9 +6,9 @@ export interface ApiResponse<T> {
 export interface ErrorSchema {
   error_code: string;
   error_message:
-    | {
-        english: string;
-        indonesian: string;
-      }
-    | string;
+  | {
+    english: string;
+    indonesian: string;
+  }
+  | string;
 }

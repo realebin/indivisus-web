@@ -10,8 +10,8 @@ describe('SitesIndexComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [SitesIndexComponent]
     })
-    .compileComponents();
-    
+      .compileComponents();
+
     fixture = TestBed.createComponent(SitesIndexComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

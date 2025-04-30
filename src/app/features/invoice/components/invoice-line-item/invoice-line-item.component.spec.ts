@@ -10,8 +10,8 @@ describe('InvoiceLineItemComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [InvoiceLineItemComponent]
     })
-    .compileComponents();
-    
+      .compileComponents();
+
     fixture = TestBed.createComponent(InvoiceLineItemComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

@@ -35,4 +35,4 @@ import { InvoiceFilterComponent, InvoiceFormComponent, InvoiceLineItemComponent,
     AgGridModule
   ],
 })
-export class InvoiceModule {}
+export class InvoiceModule { }

@@ -25,7 +25,8 @@
     display: inline-flex;
     align-items: center;
 
-    i, .bi {
+    i,
+    .bi {
       margin-right: 0.25rem;
       font-size: 0.875em;
     }
@@ -172,7 +173,8 @@
 }
 
 // Notification badge (for menu items)
-.nav-item, .dropdown {
+.nav-item,
+.dropdown {
   .badge-notification {
     position: absolute;
     top: 0.25rem;

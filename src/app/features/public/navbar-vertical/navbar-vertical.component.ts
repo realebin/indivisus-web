@@ -49,8 +49,8 @@ export class NavbarVerticalComponent implements OnInit {
   @HostListener('window:resize', ['$event'])
   onResize(event: Event) {
     const windowWidth = (event.target as Window).innerWidth;
-    this.isMobileView  = windowWidth <= 768;
-    if(this.isMobileView) {
+    this.isMobileView = windowWidth <= 768;
+    if (this.isMobileView) {
       this.isCollapsed = false;
       // this.sidebarToggle.emit(this.isCollapsed);
     }

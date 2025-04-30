@@ -10,8 +10,8 @@ describe('StockDetailComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [StockDetailComponent]
     })
-    .compileComponents();
-    
+      .compileComponents();
+
     fixture = TestBed.createComponent(StockDetailComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

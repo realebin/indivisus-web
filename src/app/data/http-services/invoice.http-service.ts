@@ -22,7 +22,7 @@ export class InvoiceHttpService {
   constructor(
     private httpClient: HttpClient,
     private env: EnvironmentService
-  ) {}
+  ) { }
 
   private get baseUrl(): string {
     return `${this.env.apiEndpoint}/invoice-management`;

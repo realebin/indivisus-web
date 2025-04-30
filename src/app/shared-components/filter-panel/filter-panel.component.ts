@@ -24,7 +24,7 @@ export class FilterPanelComponent implements OnInit {
   @Input() searchTerm: string = '';
 
   @Output() togglePanel = new EventEmitter<void>();
-  @Output() sortChange = new EventEmitter<{field: string}>();
+  @Output() sortChange = new EventEmitter<{ field: string }>();
   @Output() resetFilters = new EventEmitter<void>();
   @Output() doneFiltering = new EventEmitter<void>();
 
@@ -47,7 +47,7 @@ export class FilterPanelComponent implements OnInit {
   }
 
   onSortData(field: string): void {
-    this.sortChange.emit({field});
+    this.sortChange.emit({ field });
   }
 
   onResetFilters(): void {

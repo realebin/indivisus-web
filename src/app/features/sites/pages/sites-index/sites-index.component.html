@@ -33,15 +33,17 @@
               </button>
               <ul class="dropdown-menu">
                 <li><a class="dropdown-item" [routerLink]="['/site', site.siteId]">
-                  <i class="bi bi-eye me-2"></i>View Details
-                </a></li>
+                    <i class="bi bi-eye me-2"></i>View Details
+                  </a></li>
                 <li><a class="dropdown-item" href="javascript:void(0)" (click)="openEditSiteModal(site)">
-                  <i class="bi bi-pencil me-2"></i>Edit
-                </a></li>
-                <li><hr class="dropdown-divider"></li>
+                    <i class="bi bi-pencil me-2"></i>Edit
+                  </a></li>
+                <li>
+                  <hr class="dropdown-divider">
+                </li>
                 <li><a class="dropdown-item text-danger" href="javascript:void(0)" (click)="deleteSite(site)">
-                  <i class="bi bi-trash me-2"></i>Delete
-                </a></li>
+                    <i class="bi bi-trash me-2"></i>Delete
+                  </a></li>
               </ul>
             </div>
           </div>
@@ -88,7 +90,8 @@
                   <div *ngFor="let type of getTypeKeys(site.typeOverviews)" class="col-6">
                     <div class="d-flex align-items-center">
                       <i class="bi bi-rulers me-2"></i>
-                      <span>{{ type }}: <b>{{ site.typeOverviews[type].totalStock || 0 }}</b> {{ site.typeOverviews[type].sizeDescription }}</span>
+                      <span>{{ type }}: <b>{{ site.typeOverviews[type].totalStock || 0 }}</b> {{
+                        site.typeOverviews[type].sizeDescription }}</span>
                     </div>
                   </div>
                 </ng-container>
@@ -122,18 +125,10 @@
 
   <!-- Site Modal Template -->
   <ng-template #createSiteModal>
-    <app-modal
-      [title]="isEditMode ? 'Edit Site' : 'Create New Site'"
-      [confirmButtonText]="'Save'"
-      [isFormValid]="isSiteFormValid"
-      [isLoading]="isSubmitting"
-      (confirm)="submitSiteForm()">
-      <app-site-create-form
-        [data]="siteRequest"
-        [isEditMode]="isEditMode"
-        [errorMessage]="formErrorMessage"
-        (dataChange)="onSiteFormDataChange($event)"
-        (formValidityChange)="onSiteFormValidityChange($event)">
+    <app-modal [title]="isEditMode ? 'Edit Site' : 'Create New Site'" [confirmButtonText]="'Save'"
+      [isFormValid]="isSiteFormValid" [isLoading]="isSubmitting" (confirm)="submitSiteForm()">
+      <app-site-create-form [data]="siteRequest" [isEditMode]="isEditMode" [errorMessage]="formErrorMessage"
+        (dataChange)="onSiteFormDataChange($event)" (formValidityChange)="onSiteFormValidityChange($event)">
       </app-site-create-form>
     </app-modal>
   </ng-template>

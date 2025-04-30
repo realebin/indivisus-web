@@ -20,7 +20,7 @@ export class ModalComponent {
 
   content: ComponentRef<any> | null = null;
 
-  constructor() {}
+  constructor() { }
 
   ngAfterViewInit() {
     // If content component was set, attach it to the container

@@ -10,7 +10,7 @@ describe('ExpandableCardComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [ExpandableCardComponent]
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(ExpandableCardComponent);
     component = fixture.componentInstance;

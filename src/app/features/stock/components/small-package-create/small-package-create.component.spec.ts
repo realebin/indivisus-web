@@ -10,8 +10,8 @@ describe('SmallPackageCreateComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [SmallPackageCreateComponent]
     })
-    .compileComponents();
-    
+      .compileComponents();
+
     fixture = TestBed.createComponent(SmallPackageCreateComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

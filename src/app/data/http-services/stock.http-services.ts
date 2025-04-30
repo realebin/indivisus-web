@@ -20,7 +20,7 @@ export class StockManagementHttpService {
   constructor(
     private httpClient: HttpClient,
     private env: EnvironmentService
-  ) {}
+  ) { }
 
   private get baseUrl(): string {
     return `${this.env.apiEndpoint}/stock-management`;
@@ -105,8 +105,8 @@ export class StockManagementHttpService {
       }[];
       created_by: string;
     }
-  ): Observable<ApiResponse<{epoch: number}>> {
-    return this.httpClient.post<ApiResponse<{epoch: number}>>(
+  ): Observable<ApiResponse<{ epoch: number }>> {
+    return this.httpClient.post<ApiResponse<{ epoch: number }>>(
       `${this.baseUrl}/stock/${stockId}/big-package/create`,
       request
     );
@@ -117,8 +117,8 @@ export class StockManagementHttpService {
     size_description: string;
     is_open: boolean;
     changed_by: string;
-  }): Observable<ApiResponse<{epoch: number}>> {
-    return this.httpClient.put<ApiResponse<{epoch: number}>>(
+  }): Observable<ApiResponse<{ epoch: number }>> {
+    return this.httpClient.put<ApiResponse<{ epoch: number }>>(
       `${this.baseUrl}/stock/big-package/update`,
       request
     );

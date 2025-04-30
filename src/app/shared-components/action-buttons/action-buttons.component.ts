@@ -24,7 +24,7 @@ export class ActionButtonsComponent {
   @Input() buttonSize: 'sm' | 'md' | 'lg' = 'sm';
   @Input() justifyContent: 'start' | 'center' | 'end' = 'end';
 
-  @Output() actionClick = new EventEmitter<{type: string, item: any, id?: string}>();
+  @Output() actionClick = new EventEmitter<{ type: string, item: any, id?: string }>();
 
   isActionVisible(action: Action): boolean {
     if (action.visible === undefined) return true;

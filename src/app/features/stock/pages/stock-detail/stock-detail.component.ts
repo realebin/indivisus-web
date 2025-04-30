@@ -32,7 +32,7 @@ export class StockDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     private stockService: StockManagementService,
     private modalService: BsModalService
-  ) {}
+  ) { }
 
   ngOnDestroy(): void {
     if (this.modalRef) {

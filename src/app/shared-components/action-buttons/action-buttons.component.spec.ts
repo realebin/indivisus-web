@@ -10,8 +10,8 @@ describe('ActionButtonsComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [ActionButtonsComponent]
     })
-    .compileComponents();
-    
+      .compileComponents();
+
     fixture = TestBed.createComponent(ActionButtonsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

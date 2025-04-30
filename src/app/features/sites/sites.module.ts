@@ -35,4 +35,4 @@ import { SitesCreateBuilderComponent } from './pages/sites-create-builder/sites-
     AgGridModule,
   ],
 })
-export class SitesModule {}
+export class SitesModule { }

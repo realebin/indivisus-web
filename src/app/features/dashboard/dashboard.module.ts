@@ -7,4 +7,4 @@ import { DashboardInfoComponent } from './components/dashboard-info/dashboard-in
   declarations: [DashboardInfoComponent],
   imports: [CommonModule, DashboardRoutingModule],
 })
-export class DashboardModule {}
+export class DashboardModule { }

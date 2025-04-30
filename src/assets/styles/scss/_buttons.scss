@@ -14,12 +14,15 @@
   align-items: center;
   // transition: all 0.2s;
 
-  &:focus, &:active, &:active:focus {
+  &:focus,
+  &:active,
+  &:active:focus {
     box-shadow: none;
   }
 
   // Icon buttons
-  .bi, i {
+  .bi,
+  i {
     font-size: 1.1em;
     vertical-align: -0.125em;
 
@@ -38,7 +41,9 @@
     border-color: $primary;
     color: #fff; // Ensuring white text on primary background
 
-    &:hover, &:focus, &:active {
+    &:hover,
+    &:focus,
+    &:active {
       background-color: $primary-dark;
       border-color: $primary-dark;
       color: #fff;
@@ -50,7 +55,9 @@
     border-color: $gray-200;
     color: $gray-700;
 
-    &:hover, &:focus, &:active {
+    &:hover,
+    &:focus,
+    &:active {
       background-color: $gray-100;
       border-color: $gray-300;
       color: $gray-800;
@@ -61,7 +68,9 @@
     border-color: $primary;
     color: $primary;
 
-    &:hover, &:focus, &:active {
+    &:hover,
+    &:focus,
+    &:active {
       background-color: $primary;
       border-color: $primary;
       color: #fff;

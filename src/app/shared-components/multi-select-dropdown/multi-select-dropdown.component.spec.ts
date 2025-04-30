@@ -10,8 +10,8 @@ describe('MultiSelectDropdownComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [MultiSelectDropdownComponent]
     })
-    .compileComponents();
-    
+      .compileComponents();
+
     fixture = TestBed.createComponent(MultiSelectDropdownComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

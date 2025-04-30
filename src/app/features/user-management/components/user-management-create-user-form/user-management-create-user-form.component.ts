@@ -107,7 +107,7 @@ export class UserManagementCreateUserFormComponent implements OnInit {
     },
   };
 
-  constructor(private fb: FormBuilder, private siteService: SiteService) {}
+  constructor(private fb: FormBuilder, private siteService: SiteService) { }
   ngOnInit(): void {
     this.inquirySitesDropdown();
     this.initForm();
@@ -143,185 +143,185 @@ export class UserManagementCreateUserFormComponent implements OnInit {
 
 
 
-// In user-management-create-user-form.component.ts
-ngOnChanges(changes: SimpleChanges): void {
-  if (changes['data'] && this.formGroup) {
-    this.patchFormData();
-  }
+  // In user-management-create-user-form.component.ts
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['data'] && this.formGroup) {
+      this.patchFormData();
+    }
 
-  if (changes['isEditMode'] && this.formGroup) {
-    const passwordControl = this.formGroup.get('password');
-    const usernameControl = this.formGroup.get('username');
+    if (changes['isEditMode'] && this.formGroup) {
+      const passwordControl = this.formGroup.get('password');
+      const usernameControl = this.formGroup.get('username');
 
-    if (this.isEditMode) {
-      // In edit mode
-      usernameControl?.disable();
-      if (!this.showPasswordFields) {
-        passwordControl?.clearValidators();
+      if (this.isEditMode) {
+        // In edit mode
+        usernameControl?.disable();
+        if (!this.showPasswordFields) {
+          passwordControl?.clearValidators();
+          passwordControl?.updateValueAndValidity();
+        }
+      } else {
+        // In create mode
+        usernameControl?.enable();
+        passwordControl?.setValidators([
+          Validators.required,
+          Validators.minLength(8),
+          Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)
+        ]);
         passwordControl?.updateValueAndValidity();
       }
-    } else {
-      // In create mode
-      usernameControl?.enable();
-      passwordControl?.setValidators([
-        Validators.required,
-        Validators.minLength(8),
-        Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)
-      ]);
-      passwordControl?.updateValueAndValidity();
+
+      this.updateFormValidity();
     }
-
-    this.updateFormValidity();
   }
-}
 
-private updateFormValidity(): void {
-  // Calculate form validity with special handling for edit mode
-  let isValid = false;
+  private updateFormValidity(): void {
+    // Calculate form validity with special handling for edit mode
+    let isValid = false;
 
-  if (this.isEditMode) {
-    if (this.showPasswordFields) {
-      // In edit mode with password showing, the entire form must be valid
+    if (this.isEditMode) {
+      if (this.showPasswordFields) {
+        // In edit mode with password showing, the entire form must be valid
+        isValid = this.formGroup.valid;
+      } else {
+        // In edit mode without password showing, only check other fields
+        isValid = true;
+        Object.keys(this.formGroup.controls)
+          .filter(key => key !== 'password')
+          .forEach(key => {
+            const control = this.formGroup.get(key);
+            if (control && control.invalid && (control.touched || control.dirty)) {
+              isValid = false;
+            }
+          });
+      }
+    } else {
+      // In create mode, entire form must be valid
       isValid = this.formGroup.valid;
-    } else {
-      // In edit mode without password showing, only check other fields
-      isValid = true;
-      Object.keys(this.formGroup.controls)
-        .filter(key => key !== 'password')
-        .forEach(key => {
-          const control = this.formGroup.get(key);
-          if (control && control.invalid && (control.touched || control.dirty)) {
-            isValid = false;
-          }
-        });
-    }
-  } else {
-    // In create mode, entire form must be valid
-    isValid = this.formGroup.valid;
-  }
-
-  // Emit the calculated validity
-  this.formValidityChange.emit(isValid);
-}
-
-private patchFormData(): void {
-  if (this.data && this.formGroup) {
-    // Create a copy of the data to patch
-    const patchData = { ...this.data };
-
-    // Instead of deleting, set password to empty string in edit mode when not showing password
-    if (this.isEditMode && !this.showPasswordFields) {
-      patchData.password = '';  // Set to empty string instead of deleting
     }
 
-    this.formGroup.patchValue(patchData);
+    // Emit the calculated validity
+    this.formValidityChange.emit(isValid);
   }
-}
 
-getPasswordField(): FieldConfig | undefined {
-  // if (!this.isEditMode || this.showPasswordFields) {
-  //   return {
-  //     ...this.passwordField,
-  //     validators: this.isEditMode && this.showPasswordFields
-  //       ? [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)]
-  //       : this.passwordField.validators
-  //   };
-  // }
-  // return undefined;
-  if (!this.isEditMode || this.showPasswordFields) {
-    return this.passwordField;
-  }
-  return undefined;
-}
+  private patchFormData(): void {
+    if (this.data && this.formGroup) {
+      // Create a copy of the data to patch
+      const patchData = { ...this.data };
 
-private setupFormListeners(): void {
-  // Listen for form changes
-  this.formGroup.valueChanges.subscribe(value => {
-    // Update the data
-    const formValue = this.formGroup.getRawValue(); // Includes disabled fields
-    const updatedData = {
-      ...this.data,
-      ...formValue,
-      fullName: `${formValue.firstName || ''} ${formValue.lastName || ''}`.trim()
-    };
-    this.dataChange.emit(updatedData);
-  });
+      // Instead of deleting, set password to empty string in edit mode when not showing password
+      if (this.isEditMode && !this.showPasswordFields) {
+        patchData.password = '';  // Set to empty string instead of deleting
+      }
 
-  // Listen for form status changes
-  this.formGroup.statusChanges.subscribe(() => {
-    this.updateFormValidity();
-  });
-}
-
-
-togglePasswordFields(): void {
-  this.showPasswordFields = !this.showPasswordFields;
-  this.btnPasswordText = this.showPasswordFields
-    ? 'Cancel Update Password'
-    : 'Update Password';
-
-  const passwordControl = this.formGroup.get('password');
-  if (passwordControl) {
-    if (this.showPasswordFields) {
-      // When showing password, add validators
-      passwordControl.setValidators([
-        Validators.required,
-        Validators.minLength(8),
-        Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)
-      ]);
-      passwordControl.setValue(''); // Clear any existing password
-    } else {
-      // When hiding password, remove validators
-      passwordControl.clearValidators();
-      passwordControl.setValue('');
+      this.formGroup.patchValue(patchData);
     }
-
-    passwordControl.updateValueAndValidity();
-    this.updateFormValidity();
   }
-}
 
-// In user-management-create-user-form.component.ts
+  getPasswordField(): FieldConfig | undefined {
+    // if (!this.isEditMode || this.showPasswordFields) {
+    //   return {
+    //     ...this.passwordField,
+    //     validators: this.isEditMode && this.showPasswordFields
+    //       ? [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)]
+    //       : this.passwordField.validators
+    //   };
+    // }
+    // return undefined;
+    if (!this.isEditMode || this.showPasswordFields) {
+      return this.passwordField;
+    }
+    return undefined;
+  }
 
-resetForm(): void {
-  if (this.formGroup) {
-    // Reset the form values
-    this.formGroup.reset();
-
-    // Set default values
-    const defaultValues = {
-      role: '',
-      username: '',
-      firstName: '',
-      lastName: '',
-      site: '',
-      password: ''
-    };
-
-    this.formGroup.patchValue(defaultValues);
-
-    // Important: Mark all controls as pristine and untouched
-    Object.keys(this.formGroup.controls).forEach(key => {
-      const control = this.formGroup.get(key);
-      control?.markAsPristine();
-      control?.markAsUntouched();
+  private setupFormListeners(): void {
+    // Listen for form changes
+    this.formGroup.valueChanges.subscribe(value => {
+      // Update the data
+      const formValue = this.formGroup.getRawValue(); // Includes disabled fields
+      const updatedData = {
+        ...this.data,
+        ...formValue,
+        fullName: `${formValue.firstName || ''} ${formValue.lastName || ''}`.trim()
+      };
+      this.dataChange.emit(updatedData);
     });
 
-    // Reset password toggle state
-    this.showPasswordFields = false;
-    this.btnPasswordText = 'Update Password';
-
-    // Disable username field if in edit mode
-    if (this.isEditMode && this.formGroup.get('username')) {
-      this.formGroup.get('username')?.disable();
-    } else if (this.formGroup.get('username')) {
-      this.formGroup.get('username')?.enable();
-    }
-
-    // Update form validity
-    this.updateFormValidity();
+    // Listen for form status changes
+    this.formGroup.statusChanges.subscribe(() => {
+      this.updateFormValidity();
+    });
   }
-}
+
+
+  togglePasswordFields(): void {
+    this.showPasswordFields = !this.showPasswordFields;
+    this.btnPasswordText = this.showPasswordFields
+      ? 'Cancel Update Password'
+      : 'Update Password';
+
+    const passwordControl = this.formGroup.get('password');
+    if (passwordControl) {
+      if (this.showPasswordFields) {
+        // When showing password, add validators
+        passwordControl.setValidators([
+          Validators.required,
+          Validators.minLength(8),
+          Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)
+        ]);
+        passwordControl.setValue(''); // Clear any existing password
+      } else {
+        // When hiding password, remove validators
+        passwordControl.clearValidators();
+        passwordControl.setValue('');
+      }
+
+      passwordControl.updateValueAndValidity();
+      this.updateFormValidity();
+    }
+  }
+
+  // In user-management-create-user-form.component.ts
+
+  resetForm(): void {
+    if (this.formGroup) {
+      // Reset the form values
+      this.formGroup.reset();
+
+      // Set default values
+      const defaultValues = {
+        role: '',
+        username: '',
+        firstName: '',
+        lastName: '',
+        site: '',
+        password: ''
+      };
+
+      this.formGroup.patchValue(defaultValues);
+
+      // Important: Mark all controls as pristine and untouched
+      Object.keys(this.formGroup.controls).forEach(key => {
+        const control = this.formGroup.get(key);
+        control?.markAsPristine();
+        control?.markAsUntouched();
+      });
+
+      // Reset password toggle state
+      this.showPasswordFields = false;
+      this.btnPasswordText = 'Update Password';
+
+      // Disable username field if in edit mode
+      if (this.isEditMode && this.formGroup.get('username')) {
+        this.formGroup.get('username')?.disable();
+      } else if (this.formGroup.get('username')) {
+        this.formGroup.get('username')?.enable();
+      }
+
+      // Update form validity
+      this.updateFormValidity();
+    }
+  }
 
 
   isFieldConfig(field: FieldConfig | any): boolean {

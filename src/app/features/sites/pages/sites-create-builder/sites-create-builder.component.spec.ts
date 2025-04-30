@@ -10,8 +10,8 @@ describe('SitesCreateBuilderComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [SitesCreateBuilderComponent]
     })
-    .compileComponents();
-    
+      .compileComponents();
+
     fixture = TestBed.createComponent(SitesCreateBuilderComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

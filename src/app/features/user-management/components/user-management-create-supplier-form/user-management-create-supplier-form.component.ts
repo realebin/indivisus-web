@@ -39,11 +39,11 @@ export class UserManagementCreateSupplierFormComponent implements OnInit {
   @Input() errorMessageCreate: string;
   @Output() formValidityChange = new EventEmitter<boolean>();
   @Output() dataChange = new EventEmitter<UserManagementCreateSupplierModelRequest>();
-  
+
   formGroup!: FormGroup;
   errorMessage = '';
   isLoading = false;
-  
+
   fields: FieldConfig[] = [
     {
       name: 'name',
@@ -115,7 +115,7 @@ export class UserManagementCreateSupplierFormComponent implements OnInit {
     },
   ];
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder) { }
 
   ngOnInit(): void {
     this.initForm();
@@ -135,26 +135,25 @@ export class UserManagementCreateSupplierFormComponent implements OnInit {
     });
   }
 
-// In user-management-create-supplier-form.component.ts
-private setupFormListeners(): void {
-  // Listen for form changes
-  this.formGroup.valueChanges.subscribe(value => {
-    const updatedData = { ...this.data, ...value };
-    this.dataChange.emit(updatedData);
-  });
+  // In user-management-create-supplier-form.component.ts
+  private setupFormListeners(): void {
+    // Listen for form changes
+    this.formGroup.valueChanges.subscribe(value => {
+      const updatedData = { ...this.data, ...value };
+      this.dataChange.emit(updatedData);
+    });
 
-  // Listen for form status changes
-  this.formGroup.statusChanges.subscribe(status => {
-    console.log('Supplier form status:', status);
-    this.formValidityChange.emit(status === 'VALID');
-  });
-}
+    // Listen for form status changes
+    this.formGroup.statusChanges.subscribe(status => {
+      this.formValidityChange.emit(status === 'VALID');
+    });
+  }
 
-// Add this method to check validity before saving
-validateForm(): boolean {
-  this.markFormAsTouched();
-  return this.formGroup.valid;
-}
+  // Add this method to check validity before saving
+  validateForm(): boolean {
+    this.markFormAsTouched();
+    return this.formGroup.valid;
+  }
 
   private updateFormValidity(): void {
     this.formValidityChange.emit(this.formGroup.valid);
@@ -179,7 +178,7 @@ validateForm(): boolean {
   resetForm(): void {
     if (this.formGroup) {
       this.formGroup.reset();
-      
+
       // Set default values
       const defaultValues = {
         name: '',
@@ -190,16 +189,16 @@ validateForm(): boolean {
         postalCode: '',
         description: ''
       };
-      
+
       this.formGroup.patchValue(defaultValues);
-      
+
       // Mark all controls as pristine and untouched
       Object.keys(this.formGroup.controls).forEach(key => {
         const control = this.formGroup.get(key);
         control?.markAsPristine();
         control?.markAsUntouched();
       });
-      
+
       // Update form validity
       this.updateFormValidity();
     }

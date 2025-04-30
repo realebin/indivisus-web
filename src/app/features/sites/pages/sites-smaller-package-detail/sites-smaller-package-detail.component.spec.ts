@@ -10,8 +10,8 @@ describe('SitesSmallerPackageDetailComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [SitesSmallerPackageDetailComponent]
     })
-    .compileComponents();
-    
+      .compileComponents();
+
     fixture = TestBed.createComponent(SitesSmallerPackageDetailComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

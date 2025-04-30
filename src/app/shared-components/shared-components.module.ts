@@ -46,4 +46,4 @@ import { MultiSelectDropdownComponent } from './multi-select-dropdown/multi-sele
     MultiSelectDropdownComponent
   ],
 })
-export class SharedComponentsModule {}
+export class SharedComponentsModule { }

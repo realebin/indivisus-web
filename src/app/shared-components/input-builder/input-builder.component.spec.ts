@@ -10,8 +10,8 @@ describe('InputBuilderComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [InputBuilderComponent]
     })
-    .compileComponents();
-    
+      .compileComponents();
+
     fixture = TestBed.createComponent(InputBuilderComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

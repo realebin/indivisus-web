@@ -11,7 +11,7 @@ export class DynamicModalService {
   constructor(
     private appRef: ApplicationRef,
     private environmentInjector: EnvironmentInjector
-  ) {}
+  ) { }
 
   open(contentComponentType: Type<any>, config: any): ComponentRef<ModalComponent> {
     // Clean up any existing modal

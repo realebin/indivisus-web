@@ -23,7 +23,7 @@ export class InvoiceDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private invoiceService: InvoiceService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {

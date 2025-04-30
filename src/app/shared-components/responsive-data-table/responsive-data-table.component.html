@@ -1,45 +1,24 @@
 <section *ngIf="data && data.length > 0">
   <!-- AG Grid for larger screens -->
   <div class="mt-4 d-none d-md-block">
-    <ag-grid-angular
-      class="ag-theme-alpine"
-      style="width: 100%; height: 500px;"
-      [rowData]="data"
-      [columnDefs]="columnDefs"
-      [pagination]="pagination"
-      [paginationPageSize]="pageSize"
-      [defaultColDef]="defaultColDef"
-      (gridReady)="onGridReady($event)"
-      domLayout="autoHeight"
-    >
+    <ag-grid-angular class="ag-theme-alpine" style="width: 100%; height: 500px;" [rowData]="data"
+      [columnDefs]="columnDefs" [pagination]="pagination" [paginationPageSize]="pageSize"
+      [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)" domLayout="autoHeight">
     </ag-grid-angular>
   </div>
 
   <!-- Smaller screen view with filter panel and expandable cards -->
   <section class="d-md-none">
     <!-- Filter Panel Component -->
-    <app-filter-panel
-      [title]="title"
-      [isVisible]="showFilterPanel"
-      [sortOptions]="sortOptions"
-      [searchControl]="searchFilter"
-      [sortField]="sortField"
-      [sortDirection]="sortDirection"
-      [activeFilterText]="getActiveFilterText()"
-      [resultCount]="filteredData.length"
-      (togglePanel)="toggleFilterPanel()"
-      (sortChange)="onSortChange($event)"
-      (resetFilters)="resetFilters()"
-      (doneFiltering)="toggleFilterPanel()"
-    ></app-filter-panel>
+    <app-filter-panel [title]="title" [isVisible]="showFilterPanel" [sortOptions]="sortOptions"
+      [searchControl]="searchFilter" [sortField]="sortField" [sortDirection]="sortDirection"
+      [activeFilterText]="getActiveFilterText()" [resultCount]="filteredData.length" (togglePanel)="toggleFilterPanel()"
+      (sortChange)="onSortChange($event)" (resetFilters)="resetFilters()"
+      (doneFiltering)="toggleFilterPanel()"></app-filter-panel>
 
     <!-- Mobile cards with filtered data -->
     <ng-container *ngIf="!searchFilter.value || filteredData.length > 0">
-      <app-expandable-card
-        [data]="filteredData"
-        [columnConfig]="getCardConfig()"
-        [cardTitle]="title"
-      >
+      <app-expandable-card [data]="filteredData" [columnConfig]="getCardConfig()" [cardTitle]="title">
         <ng-template #footerTemplate let-item>
           <div class="d-flex justify-content-end p-3 border-top">
             <button class="btn btn-sm btn-primary me-2" (click)="onEdit(item)">

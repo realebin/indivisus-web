@@ -1,9 +1,7 @@
 <div class="dropdown-container position-relative">
   <!-- Toggle button -->
-  <div class="form-control d-flex justify-content-between align-items-center"
-       [class.is-invalid]="isInvalid"
-       [class.disabled]="disabled"
-       (click)="toggleDropdown($event)">
+  <div class="form-control d-flex justify-content-between align-items-center" [class.is-invalid]="isInvalid"
+    [class.disabled]="disabled" (click)="toggleDropdown($event)">
     <div class="selected-text">
       <span *ngIf="!hasSelectedOptions()">{{ placeholder }}</span>
       <span *ngIf="hasSelectedOptions()">
@@ -14,42 +12,54 @@
   </div>
 
   <!-- Dropdown menu with improved event handling -->
-  <div class="dropdown-menu w-100" 
-       [class.show]="isOpen" 
-       (click)="$event.stopPropagation()">
-    <div class="p-2 border-bottom">
+  <div class="dropdown-menu w-100" [class.show]="isOpen" (click)="$event.stopPropagation()">
+
+    <!-- Search input -->
+    <div class="px-2 pt-2 pb-1 border-bottom" *ngIf="allowSearch">
+      <div class="input-group input-group-sm">
+        <input type="text" class="form-control form-control-sm" placeholder="Search packages..."
+          [formControl]="searchControl" (click)="onSearchInputClick($event)" autocomplete="off">
+        <button *ngIf="searchControl.value" class="btn btn-outline-secondary btn-sm" type="button"
+          (click)="clearSearch($event)">
+          <i class="bi bi-x"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Select All option -->
+    <div class="px-2 py-1 border-bottom">
       <div class="custom-checkbox">
-        <input type="checkbox"
-              id="selectAll"
-              [checked]="selectAllState === 'checked'"
-              [attr.indeterminate]="selectAllState === 'indeterminate' ? true : null"
-              (click)="toggleSelectAll($event)">
+        <input type="checkbox" id="selectAll" [checked]="selectAllState === 'checked'" #selectAllCheckbox
+          (click)="toggleSelectAll($event)">
         <label for="selectAll">
           Select All
         </label>
       </div>
     </div>
+
+    <!-- Options list -->
     <div class="dropdown-options py-1">
       <div *ngIf="filteredOptions.length === 0" class="p-3 text-muted">
         No options available
       </div>
       <div *ngFor="let option of filteredOptions; let i = index" class="dropdown-item">
         <div class="custom-checkbox">
-          <input type="checkbox"
-                [id]="'option-' + i"
-                [checked]="option.selected"
-                [disabled]="option.disabled"
-                (mousedown)="handleOptionInteraction(option, $event)">
-          <label [for]="'option-' + i" 
-                 [title]="option.label"
-                 (mousedown)="handleOptionInteraction(option, $event)">
+          <input type="checkbox" [id]="'option-' + i" [checked]="option.selected" [disabled]="option.disabled"
+            (mousedown)="handleOptionInteraction(option, $event)">
+          <label [for]="'option-' + i" [title]="option.label" (mousedown)="handleOptionInteraction(option, $event)">
             {{ option.label }}
           </label>
         </div>
       </div>
     </div>
+
+    <!-- No results message -->
+    <div *ngIf="searchControl.value && filteredOptions.length === 0" class="p-2 text-center">
+      <small class="text-muted">No matches found</small>
+    </div>
   </div>
 
+  <!-- Validation message -->
   <div *ngIf="isInvalid" class="invalid-feedback">
     {{ invalidMessage }}
   </div>

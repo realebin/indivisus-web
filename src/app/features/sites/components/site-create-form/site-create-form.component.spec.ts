@@ -10,8 +10,8 @@ describe('SiteCreateFormComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [SiteCreateFormComponent]
     })
-    .compileComponents();
-    
+      .compileComponents();
+
     fixture = TestBed.createComponent(SiteCreateFormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

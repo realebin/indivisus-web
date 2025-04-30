@@ -45,7 +45,7 @@ export class SitesIndexComponent implements OnInit {
     private siteService: SiteService,
     private modalService: BsModalService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadSites();

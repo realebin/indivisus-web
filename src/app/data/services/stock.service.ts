@@ -19,7 +19,7 @@ import { BigPackage, SmallPackage, StockHeader } from '@schemas/stock.schema';
   providedIn: 'root',
 })
 export class StockManagementService {
-  constructor(private stockManagementHttpService: StockManagementHttpService) {}
+  constructor(private stockManagementHttpService: StockManagementHttpService) { }
 
   // Stock Header Methods
   // In stock.service.ts
@@ -217,20 +217,19 @@ export class StockManagementService {
         changed_by: bigPackageData.changedBy,
       })
       .pipe(
-        map((response) =>
-        {
+        map((response) => {
           const language = 'indonesian';
-        const errorMessage = response.error_schema.error_message;
-        // const language =
-        // this.translocoService.getActiveLang() === LanguageEnum.EN ? 'english' : 'indonesian';
-        // return response.error_schema.error_message[language];
+          const errorMessage = response.error_schema.error_message;
+          // const language =
+          // this.translocoService.getActiveLang() === LanguageEnum.EN ? 'english' : 'indonesian';
+          // return response.error_schema.error_message[language];
 
-        // Check if errorMessage is an object with language properties
-        if (typeof errorMessage === 'object' && errorMessage !== null) {
-          return errorMessage[language];
-        }
-        // If it's a string, return it directly
-        return errorMessage;
+          // Check if errorMessage is an object with language properties
+          if (typeof errorMessage === 'object' && errorMessage !== null) {
+            return errorMessage[language];
+          }
+          // If it's a string, return it directly
+          return errorMessage;
         }),
       );
   }

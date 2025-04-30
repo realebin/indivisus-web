@@ -332,16 +332,13 @@ export class UserManagementIndexComponent
   }
 
   onUserFormValidityChange(isValid: boolean): void {
-    console.log('Form validity changed:', isValid);
     this.isUserFormValid = isValid;
   }
   onCustomerFormValidityChange(isValid: boolean): void {
-    console.log('Customer form validity changed:', isValid);
     this.isCustomerFormValid = isValid;
   }
-  
+
   onSupplierFormValidityChange(isValid: boolean): void {
-    console.log('Supplier form validity changed:', isValid);
     this.isSupplierFormValid = isValid;
   }
 
@@ -349,34 +346,34 @@ export class UserManagementIndexComponent
   saveUser(): void {
     this.createEditUser();
   }
-// Add these to user-management-index.component.ts
-// In user-management-index.component.ts
+  // Add these to user-management-index.component.ts
+  // In user-management-index.component.ts
 
-saveCustomer(): void {
-  // Mark all fields as touched to trigger validation display
-  if (this.customerFormComponent) {
-    const isValid = this.customerFormComponent.validateForm();
-    // This will trigger formValidityChange which updates isCustomerFormValid
-    
-    // If valid after validation, proceed with save
-    if (isValid) {
-      this.createEditCustomer();
+  saveCustomer(): void {
+    // Mark all fields as touched to trigger validation display
+    if (this.customerFormComponent) {
+      const isValid = this.customerFormComponent.validateForm();
+      // This will trigger formValidityChange which updates isCustomerFormValid
+
+      // If valid after validation, proceed with save
+      if (isValid) {
+        this.createEditCustomer();
+      }
     }
   }
-}
 
-saveSupplier(): void {
-  // Mark all fields as touched to trigger validation display
-  if (this.supplierFormComponent) {
-    const isValid = this.supplierFormComponent.validateForm();
-    // This will trigger formValidityChange which updates isSupplierFormValid
-    
-    // If valid after validation, proceed with save
-    if (isValid) {
-      this.createEditSupplier();
+  saveSupplier(): void {
+    // Mark all fields as touched to trigger validation display
+    if (this.supplierFormComponent) {
+      const isValid = this.supplierFormComponent.validateForm();
+      // This will trigger formValidityChange which updates isSupplierFormValid
+
+      // If valid after validation, proceed with save
+      if (isValid) {
+        this.createEditSupplier();
+      }
     }
   }
-}
 
   // CREATE/EDIT OPERATIONS
   createEditUser(): void {
@@ -553,7 +550,7 @@ saveSupplier(): void {
     // First reset form state
     this.resetForm();
     this.isEditMode = false;
-    
+
     // Reset form components
     if (this.activeTab === UserManagementDictionaryEnum.AppUser && this.userFormComponent) {
       this.userFormComponent.resetForm();
@@ -562,7 +559,7 @@ saveSupplier(): void {
     } else if (this.activeTab === UserManagementDictionaryEnum.Supplier && this.supplierFormComponent) {
       this.supplierFormComponent.resetForm();
     }
-  
+
     // Now hide the appropriate modal
     if (this.activeTab === UserManagementDictionaryEnum.AppUser) {
       this.userModal?.hide();
@@ -571,40 +568,40 @@ saveSupplier(): void {
     } else if (this.activeTab === UserManagementDictionaryEnum.Supplier) {
       this.supplierModal?.hide();
     }
-  
+
     // Force change detection
     this.changeDetectorRef.detectChanges();
   }
 
   // Add these methods to user-management-index.component.ts
 
-validateAndSaveCustomer(): void {
-  if (this.customerFormComponent) {
-    this.customerFormComponent.markFormAsTouched();
-    // Force change detection
-    this.changeDetectorRef.detectChanges();
-    
-    // Check form validity after validation is applied
-    setTimeout(() => {
-      if (this.isCustomerFormValid) {
-        this.saveCustomer();
-      }
-    }, 0);
-  }
-}
+  validateAndSaveCustomer(): void {
+    if (this.customerFormComponent) {
+      this.customerFormComponent.markFormAsTouched();
+      // Force change detection
+      this.changeDetectorRef.detectChanges();
 
-validateAndSaveSupplier(): void {
-  if (this.supplierFormComponent) {
-    this.supplierFormComponent.markFormAsTouched();
-    // Force change detection
-    this.changeDetectorRef.detectChanges();
-    
-    // Check form validity after validation is applied
-    setTimeout(() => {
-      if (this.isSupplierFormValid) {
-        this.saveSupplier();
-      }
-    }, 0);
+      // Check form validity after validation is applied
+      setTimeout(() => {
+        if (this.isCustomerFormValid) {
+          this.saveCustomer();
+        }
+      }, 0);
+    }
   }
-}
+
+  validateAndSaveSupplier(): void {
+    if (this.supplierFormComponent) {
+      this.supplierFormComponent.markFormAsTouched();
+      // Force change detection
+      this.changeDetectorRef.detectChanges();
+
+      // Check form validity after validation is applied
+      setTimeout(() => {
+        if (this.isSupplierFormValid) {
+          this.saveSupplier();
+        }
+      }, 0);
+    }
+  }
 }

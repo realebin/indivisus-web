@@ -42,7 +42,7 @@ export class InvoiceLineItemComponent implements OnInit {
     if (this.lineItem) {
       // Initialize selected packages array
       this.selectedSmallPackages = this.lineItem._selectedSmallPackages ||
-                                  (this.lineItem.smallPackageId ? [this.lineItem.smallPackageId] : []);
+        (this.lineItem.smallPackageId ? [this.lineItem.smallPackageId] : []);
 
       // Fill the form
       this.form.patchValue({
@@ -121,9 +121,9 @@ export class InvoiceLineItemComponent implements OnInit {
 
         // If this is the same big package as before, try to restore selections
         if (this.lineItem &&
-            this.lineItem.bigPackageNumber === packageNumber &&
-            this.lineItem._selectedSmallPackages &&
-            this.lineItem._selectedSmallPackages.length > 0) {
+          this.lineItem.bigPackageNumber === packageNumber &&
+          this.lineItem._selectedSmallPackages &&
+          this.lineItem._selectedSmallPackages.length > 0) {
 
           // Restore previous selections
           this.smallPackageOptions.forEach(option => {
@@ -151,7 +151,9 @@ export class InvoiceLineItemComponent implements OnInit {
     if (!this.selectedBigPackage) return [];
 
     return this.selectedBigPackage.smallPackages
-      .filter((sp: any) => sp.isOpen)
+      .filter((sp: any) => {
+        return sp.isOpen && (sp.sizeAmount > 0 || sp.quantity > 0);
+      })
       .map((sp: any) => ({
         id: sp.packageId,
         label: `${sp.packageId} - ${sp.sizeAmount} ${sp.sizeDescription}`,

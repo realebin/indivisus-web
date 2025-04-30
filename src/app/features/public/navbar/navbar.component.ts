@@ -19,7 +19,7 @@ export class NavbarComponent implements OnInit {
     private router: Router,
     private navbarService: NavbarService,
     private authService: AuthService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.navItems = this.navbarService.getNavbarItems();

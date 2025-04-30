@@ -9,9 +9,9 @@ import { Router } from '@angular/router';
 export class SitesStockItemComponent {
   @Input() stocks!: any;
   @Input() siteId!: string;
-  @Output() viewDetails = new EventEmitter<{productId: string, siteId: string}>();
+  @Output() viewDetails = new EventEmitter<{ productId: string, siteId: string }>();
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   viewStockDetails(): void {
     if (this.stocks && this.stocks.productId && this.siteId) {

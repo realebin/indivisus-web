@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output, OnInit, OnChanges, SimpleChanges, HostListener, ElementRef, ChangeDetectorRef } from '@angular/core';
+import { FormControl } from '@angular/forms';
 
 export interface MultiSelectOption {
   id: string;
@@ -21,20 +22,27 @@ export class MultiSelectDropdownComponent implements OnInit, OnChanges {
   @Input() isInvalid: boolean = false;
   @Input() invalidMessage: string = 'Please select at least one option';
   @Input() disabled: boolean = false;
+  @Input() allowSearch: boolean = true;
 
   @Output() selectionChange = new EventEmitter<MultiSelectOption[]>();
 
   filteredOptions: MultiSelectOption[] = [];
   isOpen: boolean = false;
   selectAllState: 'checked' | 'unchecked' | 'indeterminate' = 'unchecked';
+  searchControl = new FormControl('');
 
   constructor(
     private elementRef: ElementRef,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.filterOptions();
+
+    // Listen for search input changes
+    this.searchControl.valueChanges.subscribe(searchTerm => {
+      this.applySearch(searchTerm || '');
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -47,10 +55,10 @@ export class MultiSelectDropdownComponent implements OnInit, OnChanges {
     // More robust filtering with multiple checks
     this.filteredOptions = this.options.filter(option => {
       // Check multiple possible ways to determine if the option should be shown
-      const sizeAmount = 
-        option.sizeAmount ?? 
-        option.quantity ?? 
-        (option.data && (option.data.sizeAmount || option.data.quantity)) ?? 
+      const sizeAmount =
+        option.sizeAmount ??
+        option.quantity ??
+        (option.data && (option.data.sizeAmount || option.data.quantity)) ??
         0;
 
       // Keep options with size/quantity > 0
@@ -58,26 +66,51 @@ export class MultiSelectDropdownComponent implements OnInit, OnChanges {
     });
 
     // If no options pass the filter, fall back to original options
-    if (this.filteredOptions.length === 0) {
-      this.filteredOptions = this.options;
-    }
+    // if (this.filteredOptions.length === 0) {
+    //   this.filteredOptions = this.options;
+    // }
 
     // Update select all state after filtering
     this.updateSelectAllState();
 
     // Initial emission of selections
     this.emitSelections();
-    
+
     // Force change detection
     this.cdr.detectChanges();
+
+    // Apply search if there's a search term
+    if (this.searchControl.value) {
+      this.applySearch(this.searchControl.value);
+    }
+  }
+
+  applySearch(searchTerm: string): void {
+    if (!searchTerm.trim()) {
+      // If search is empty, restore to the quantity-filtered list
+      // We don't need to do anything here as filteredOptions already has the quantity-filtered items
+      return;
+    }
+
+    // Store the original quantity-filtered options if needed
+    const quantityFilteredOptions = [...this.filteredOptions];
+
+    // Apply the search filter to the already quantity-filtered options
+    const term = searchTerm.toLowerCase().trim();
+    this.filteredOptions = quantityFilteredOptions.filter(option =>
+      option.label.toLowerCase().includes(term)
+    );
+
+    // If debugging is needed
+    console.log('After search filter:', this.filteredOptions.length, 'items remain');
+
+    // Update select all state after search
+    this.updateSelectAllState();
   }
 
   updateSelectAllState(): void {
     const enabledOptions = this.filteredOptions.filter(opt => !opt.disabled);
     const selectedOptions = enabledOptions.filter(opt => opt.selected);
-
-    console.log('Enabled options:', enabledOptions.length);
-    console.log('Selected options:', selectedOptions.length);
 
     if (selectedOptions.length === 0) {
       this.selectAllState = 'unchecked';
@@ -86,8 +119,6 @@ export class MultiSelectDropdownComponent implements OnInit, OnChanges {
     } else {
       this.selectAllState = 'indeterminate';
     }
-
-    console.log('Select all state:', this.selectAllState);
   }
 
   @HostListener('document:click', ['$event'])
@@ -107,6 +138,12 @@ export class MultiSelectDropdownComponent implements OnInit, OnChanges {
 
     if (!this.disabled) {
       this.isOpen = !this.isOpen;
+
+      // Clear search when opening dropdown
+      if (this.isOpen && this.allowSearch) {
+        this.searchControl.setValue('');
+      }
+
       this.cdr.detectChanges();
     }
   }
@@ -144,8 +181,6 @@ export class MultiSelectDropdownComponent implements OnInit, OnChanges {
     // Manually set the select all state
     this.selectAllState = newSelectedState ? 'checked' : 'unchecked';
 
-    console.log('Select all clicked. New state:', this.selectAllState);
-
     // Force change detection to update the view immediately
     this.cdr.detectChanges();
 
@@ -154,15 +189,15 @@ export class MultiSelectDropdownComponent implements OnInit, OnChanges {
   }
 
   hasSelectedOptions(): boolean {
-    return this.filteredOptions.some(opt => opt.selected);
+    return this.options.some(opt => opt.selected);
   }
 
   getSelectedCount(): number {
-    return this.filteredOptions.filter(opt => opt.selected).length;
+    return this.options.filter(opt => opt.selected).length;
   }
 
   getSelectedOptions(): MultiSelectOption[] {
-    return this.filteredOptions.filter(opt => opt.selected);
+    return this.options.filter(opt => opt.selected);
   }
 
   emitSelections(): void {
@@ -174,10 +209,21 @@ export class MultiSelectDropdownComponent implements OnInit, OnChanges {
     // Crucial part: Prevent default and stop propagation, 
     // but WITHOUT using methods that might trigger scrolling
     event.preventDefault();
-    
+
     // Use a microtask to toggle to avoid potential scroll behavior
     Promise.resolve().then(() => {
       this.toggleOption(option);
     });
+  }
+
+  // Clear search input
+  clearSearch(event: Event): void {
+    event.stopPropagation();
+    this.searchControl.setValue('');
+  }
+
+  // Stop propagation for search input clicks
+  onSearchInputClick(event: MouseEvent): void {
+    event.stopPropagation();
   }
 }

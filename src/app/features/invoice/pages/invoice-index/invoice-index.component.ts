@@ -19,7 +19,7 @@ export class InvoiceIndexComponent implements OnInit {
   constructor(
     private invoiceService: InvoiceService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadInvoices();

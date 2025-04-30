@@ -15,11 +15,8 @@
   </div>
 
   <!-- Filter Panel -->
-  <app-invoice-filter
-    [expanded]="showFilterPanel"
-    (filterChange)="onFilterChanged($event)"
-    (toggleFilter)="toggleFilterPanel()"
-  ></app-invoice-filter>
+  <app-invoice-filter [expanded]="showFilterPanel" (filterChange)="onFilterChanged($event)"
+    (toggleFilter)="toggleFilterPanel()"></app-invoice-filter>
 
   <!-- Alert for errors -->
   <div *ngIf="error" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
@@ -32,11 +29,7 @@
 
   <!-- Invoice List -->
   <div *ngIf="!isLoading">
-    <app-invoice-list
-      [invoices]="filteredInvoices"
-      (editInvoice)="editInvoice($event)"
-      (deleteInvoice)="deleteInvoice($event)"
-      (viewPdf)="downloadPdf($event)"
-    ></app-invoice-list>
+    <app-invoice-list [invoices]="filteredInvoices" (editInvoice)="editInvoice($event)"
+      (deleteInvoice)="deleteInvoice($event)" (viewPdf)="downloadPdf($event)"></app-invoice-list>
   </div>
 </div>

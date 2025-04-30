@@ -22,7 +22,7 @@ import {
   standalone: true,
 })
 export class NoEmptyValidatorDirective implements Validator {
-  constructor() {}
+  constructor() { }
 
   validate(control: AbstractControl): ValidationErrors {
     const isMatch = /.*\S.*/.test(control.value);

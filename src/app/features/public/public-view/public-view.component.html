@@ -1,9 +1,7 @@
 <div class="wrapper">
   <app-navbar (toggleMobileSidebar)="toggleMobileSidebar()"></app-navbar>
 
-  <app-navbar-vertical
-    [isMobileVisible]="isMobileSidebarVisible"
-    (sidebarToggle)="onSidebarToggle($event)">
+  <app-navbar-vertical [isMobileVisible]="isMobileSidebarVisible" (sidebarToggle)="onSidebarToggle($event)">
   </app-navbar-vertical>
 
   <div class="main-content" [ngClass]="{ 'collapsed': isSidebarCollapsed }">
@@ -11,8 +9,6 @@
   </div>
 
   <!-- Backdrop for mobile sidebar -->
-  <div *ngIf="isMobileSidebarVisible"
-       class="mobile-backdrop"
-       (click)="closeMobileSidebar()">
+  <div *ngIf="isMobileSidebarVisible" class="mobile-backdrop" (click)="closeMobileSidebar()">
   </div>
 </div>

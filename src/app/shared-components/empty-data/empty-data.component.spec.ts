@@ -10,8 +10,8 @@ describe('EmptyDataComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [EmptyDataComponent]
     })
-    .compileComponents();
-    
+      .compileComponents();
+
     fixture = TestBed.createComponent(EmptyDataComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

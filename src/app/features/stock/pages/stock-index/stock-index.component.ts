@@ -39,7 +39,7 @@ export class StockIndexComponent implements OnInit, OnDestroy {
     private stockService: StockManagementService,
     private modalService: BsModalService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadStocks();

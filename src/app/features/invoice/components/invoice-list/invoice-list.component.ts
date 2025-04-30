@@ -16,7 +16,7 @@ export class InvoiceListComponent implements OnInit {
 
   columnDefs: ColDef[] = [];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   ngOnInit(): void {
     this.setupColumnDefs();

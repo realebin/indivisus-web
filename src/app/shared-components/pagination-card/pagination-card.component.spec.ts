@@ -10,7 +10,7 @@ describe('PaginationCardComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [PaginationCardComponent]
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(PaginationCardComponent);
     component = fixture.componentInstance;

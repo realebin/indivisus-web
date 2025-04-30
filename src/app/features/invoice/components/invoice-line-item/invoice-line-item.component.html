@@ -12,13 +12,9 @@
         <!-- Product Selection -->
         <div class="col-md-6">
           <label for="productId-{{ index }}" class="form-label">Product</label>
-          <select
-            class="form-select"
-            id="productId-{{ index }}"
-            formControlName="productId"
+          <select class="form-select" id="productId-{{ index }}" formControlName="productId"
             (change)="onProductSelected()"
-            [ngClass]="{'is-invalid': formControls['productId'].invalid && formControls['productId'].touched}"
-          >
+            [ngClass]="{'is-invalid': formControls['productId'].invalid && formControls['productId'].touched}">
             <option value="">-- Select Product --</option>
             <option *ngFor="let product of products" [value]="product.productId">
               {{ product.productName }} ({{ product.type }})
@@ -32,14 +28,10 @@
         <!-- Big Package Selection -->
         <div class="col-md-6">
           <label for="bigPackageNumber-{{ index }}" class="form-label">Big Package</label>
-          <select
-            class="form-select"
-            id="bigPackageNumber-{{ index }}"
-            formControlName="bigPackageNumber"
+          <select class="form-select" id="bigPackageNumber-{{ index }}" formControlName="bigPackageNumber"
             (change)="onBigPackageSelected()"
             [ngClass]="{'is-invalid': formControls['bigPackageNumber'].invalid && formControls['bigPackageNumber'].touched}"
-            [disabled]="!selectedProduct"
-          >
+            [disabled]="!selectedProduct">
             <option value="">-- Select Package --</option>
             <option *ngFor="let pkg of selectedProduct?.bigPackages" [value]="pkg.packageNumber">
               {{ pkg.packageNumber }} - {{ pkg.totalSizeAmount }} {{ pkg.sizeDescription }}
@@ -51,22 +43,18 @@
           </div>
         </div>
 
-        <!-- Small Package Multi-Selection -->
+        <!-- Small Package Multi-Selection with Search -->
         <div class="col-md-6">
           <label for="smallPackages-{{ index }}" class="form-label">Small Packages</label>
 
           <!-- Hidden form control for compatibility -->
           <input type="hidden" formControlName="smallPackageId">
 
-          <!-- Multi-select dropdown -->
-          <app-multi-select-dropdown
-            [options]="smallPackageOptions"
-            [placeholder]="'Select Small Packages'"
+          <!-- Multi-select dropdown with search -->
+          <app-multi-select-dropdown [options]="smallPackageOptions" [placeholder]="'Select Small Packages'"
             [isInvalid]="formControls['smallPackageId'].invalid && formControls['smallPackageId'].touched"
-            [invalidMessage]="'At least one small package is required'"
-            [disabled]="!selectedBigPackage"
-            (selectionChange)="onSmallPackagesSelected($event)"
-          ></app-multi-select-dropdown>
+            [invalidMessage]="'At least one small package is required'" [disabled]="!selectedBigPackage"
+            [allowSearch]="true" (selectionChange)="onSmallPackagesSelected($event)"></app-multi-select-dropdown>
 
           <!-- Selected packages summary -->
           <div class="text-muted mt-1" *ngIf="smallPackageOptions.length > 0">
@@ -88,15 +76,9 @@
           <label for="unitPrice-{{ index }}" class="form-label">Unit Price</label>
           <div class="input-group">
             <span class="input-group-text">Rp</span>
-            <input
-              type="number"
-              class="form-control"
-              id="unitPrice-{{ index }}"
-              formControlName="unitPrice"
-              [ngClass]="{'is-invalid': formControls['unitPrice'].invalid && formControls['unitPrice'].touched}"
-              min="0"
-              step="1000"
-            >
+            <input type="number" class="form-control" id="unitPrice-{{ index }}" formControlName="unitPrice"
+              [ngClass]="{'is-invalid': formControls['unitPrice'].invalid && formControls['unitPrice'].touched}" min="0"
+              step="1000">
           </div>
           <div class="invalid-feedback" *ngIf="formControls['unitPrice'].errors?.['required']">
             Unit Price is required

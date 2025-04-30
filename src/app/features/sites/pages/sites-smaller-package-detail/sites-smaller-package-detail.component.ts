@@ -8,7 +8,7 @@ import { ActivatedRoute } from '@node_modules/@angular/router';
 })
 export class SitesSmallerPackageDetailComponent {
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private route: ActivatedRoute) { }
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
       const productId = params.get('productId');

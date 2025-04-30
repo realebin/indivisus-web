@@ -44,4 +44,4 @@ import { StockManagementTableComponent } from './components/stock-management-tab
     AgGridModule
   ],
 })
-export class StockModule {}
+export class StockModule { }

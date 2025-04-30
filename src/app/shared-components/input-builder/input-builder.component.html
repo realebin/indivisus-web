@@ -3,35 +3,17 @@
 
   <ng-container [ngSwitch]="config.type">
     <!-- Text Input -->
-    <input
-      *ngSwitchCase="'text'"
-      [id]="config.name"
-      type="text"
-      class="form-control"
-      [formControlName]="config.name"
-      [placeholder]="config.placeholder"
-      [ngClass]="{ 'is-invalid': isFieldInvalid() }"
-    />
+    <input *ngSwitchCase="'text'" [id]="config.name" type="text" class="form-control" [formControlName]="config.name"
+      [placeholder]="config.placeholder" [ngClass]="{ 'is-invalid': isFieldInvalid() }" />
 
     <!-- Password Input -->
-    <input
-      *ngSwitchCase="'password'"
-      [id]="config.name"
-      type="password"
-      class="form-control"
-      [formControlName]="config.name"
-      [placeholder]="config.placeholder"
-      [ngClass]="{ 'is-invalid': isFieldInvalid() }"
-    />
+    <input *ngSwitchCase="'password'" [id]="config.name" type="password" class="form-control"
+      [formControlName]="config.name" [placeholder]="config.placeholder"
+      [ngClass]="{ 'is-invalid': isFieldInvalid() }" />
 
     <!-- Select Input -->
-    <select
-      *ngSwitchCase="'select'"
-      [id]="config.name"
-      class="form-select"
-      [formControlName]="config.name"
-      [ngClass]="{ 'is-invalid': isFieldInvalid() }"
-    >
+    <select *ngSwitchCase="'select'" [id]="config.name" class="form-select" [formControlName]="config.name"
+      [ngClass]="{ 'is-invalid': isFieldInvalid() }">
       <option value="">Select an option</option>
       <option *ngFor="let option of config.options" [value]="option.value">
         {{ option.label }}
@@ -39,22 +21,11 @@
     </select>
 
     <!-- Date Input -->
-    <input
-      *ngSwitchCase="'date'"
-      [id]="config.name"
-      type="date"
-      class="form-control"
-      [formControlName]="config.name"
-      [ngClass]="{ 'is-invalid': isFieldInvalid() }"
-    />
+    <input *ngSwitchCase="'date'" [id]="config.name" type="date" class="form-control" [formControlName]="config.name"
+      [ngClass]="{ 'is-invalid': isFieldInvalid() }" />
 
-    <input
-      *ngSwitchCase="'checkbox'"
-      [id]="config.name"
-      type="checkbox"
-      class="form-check-input"
-      [formControlName]="config.name"
-    />
+    <input *ngSwitchCase="'checkbox'" [id]="config.name" type="checkbox" class="form-check-input"
+      [formControlName]="config.name" />
   </ng-container>
 
   <!-- Error Messages -->

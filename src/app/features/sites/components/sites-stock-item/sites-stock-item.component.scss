@@ -20,20 +20,25 @@
 }
 
 /* Styling for nested packages */
-.card .ms-3.border { /* Big and Smaller packages */
+.card .ms-3.border {
+  /* Big and Smaller packages */
   border-color: #ced4da;
 }
 
-.card .small.text-muted { /* Smaller and Smallest package labels */
+.card .small.text-muted {
+  /* Smaller and Smallest package labels */
   font-size: 0.8rem;
 }
 
-.card ul.list-unstyled { /* Smallest packages */
-  margin-left: 1.5rem !important; /* Adjusted margin */
+.card ul.list-unstyled {
+  /* Smallest packages */
+  margin-left: 1.5rem !important;
+  /* Adjusted margin */
   font-size: 0.85rem;
   color: #777;
 }
 
-.badge.bg-secondary { /* Quantity badge */
+.badge.bg-secondary {
+  /* Quantity badge */
   font-size: 0.75rem;
 }

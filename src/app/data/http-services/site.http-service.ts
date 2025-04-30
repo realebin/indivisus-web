@@ -22,7 +22,7 @@ export class SiteHttpService {
   constructor(
     private httpClient: HttpClient,
     private env: EnvironmentService
-  ) {}
+  ) { }
 
   private get baseUrl(): string {
     return `${this.env.apiEndpoint}/site-management`;

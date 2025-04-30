@@ -1,7 +1,8 @@
 /* Add this to navbar-vertical.component.scss */
 .sidebar {
   position: fixed;
-  top: 56px; /* Match the navbar height */
+  top: 56px;
+  /* Match the navbar height */
   left: 0;
   bottom: 0;
   width: 250px;
@@ -81,7 +82,8 @@
   .sidebar {
     /* On mobile, transform instead of width for better performance */
     transform: translateX(-100%);
-    width: 250px !important; /* Fixed width on mobile */
+    width: 250px !important;
+    /* Fixed width on mobile */
 
     &.mobile-visible {
       transform: translateX(0);

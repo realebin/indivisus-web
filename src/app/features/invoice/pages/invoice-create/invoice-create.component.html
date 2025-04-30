@@ -8,22 +8,13 @@
   <app-breadcrumbs [breadcrumbs]="breadcrumbs"></app-breadcrumbs>
 
   <!-- Alert for errors -->
-  <div
-    *ngIf="error"
-    class="alert alert-danger alert-dismissible fade show mb-4"
-    role="alert"
-  >
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
     <i class="bi bi-exclamation-circle me-2"></i>{{ error }}
-    <button
-      type="button"
-      class="btn-close"
-      (click)="error = ''"
-      aria-label="Close"
-    ></button>
+    <button type="button" class="btn-close" (click)="error = ''" aria-label="Close"></button>
   </div>
 
   <!-- Loading indicator -->
-  <app-loader *ngIf="isLoading" type="loading-relative"></app-loader>
+  <app-loader *ngIf="isLoading" type="loading-absolute"></app-loader>
 
   <!-- Invoice Form -->
   <div class="card shadow-sm mb-4">
@@ -39,16 +30,11 @@
           <!-- Customer Selection -->
           <div class="col-md-6">
             <label for="customerId" class="form-label">Customer*</label>
-            <select
-              class="form-select"
-              id="customerId"
-              formControlName="customerId"
-              [ngClass]="{
+            <select class="form-select" id="customerId" formControlName="customerId" [ngClass]="{
                 'is-invalid':
                   invoiceForm.get('customerId')?.invalid &&
                   invoiceForm.get('customerId')?.touched
-              }"
-            >
+              }">
               <option value="">-- Select Customer --</option>
               <option *ngFor="let customer of customers" [value]="customer.id">
                 {{ customer.fullName }}
@@ -60,16 +46,11 @@
           <!-- Site Selection -->
           <div class="col-md-6">
             <label for="siteId" class="form-label">Site*</label>
-            <select
-              class="form-select"
-              id="siteId"
-              formControlName="siteId"
-              [ngClass]="{
+            <select class="form-select" id="siteId" formControlName="siteId" [ngClass]="{
                 'is-invalid':
                   invoiceForm.get('siteId')?.invalid &&
                   invoiceForm.get('siteId')?.touched
-              }"
-            >
+              }">
               <option value="">-- Select Site --</option>
               <option *ngFor="let site of sites" [value]="site.siteId">
                 {{ site.siteName }}
@@ -81,17 +62,11 @@
           <!-- Due Date -->
           <div class="col-md-4">
             <label for="dueDate" class="form-label">Due Date*</label>
-            <input
-              type="date"
-              class="form-control"
-              id="dueDate"
-              formControlName="dueDate"
-              [ngClass]="{
+            <input type="date" class="form-control" id="dueDate" formControlName="dueDate" [ngClass]="{
                 'is-invalid':
                   invoiceForm.get('dueDate')?.invalid &&
                   invoiceForm.get('dueDate')?.touched
-              }"
-            />
+              }" />
             <div class="invalid-feedback">Due date is required</div>
           </div>
 
@@ -108,13 +83,8 @@
           <!-- Notes -->
           <div class="col-md-4">
             <label for="notes" class="form-label">Notes</label>
-            <textarea
-              class="form-control"
-              id="notes"
-              formControlName="notes"
-              rows="2"
-              placeholder="Optional notes for this invoice"
-            ></textarea>
+            <textarea class="form-control" id="notes" formControlName="notes" rows="2"
+              placeholder="Optional notes for this invoice"></textarea>
           </div>
         </div>
 
@@ -122,47 +92,28 @@
         <div class="line-items-section border-top pt-4">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="mb-0">Line Items</h5>
-            <button
-              type="button"
-              class="btn btn-primary"
-              (click)="addLineItem()"
-              [disabled]="!invoiceForm.get('siteId')?.value"
-            >
+            <button type="button" class="btn btn-primary" (click)="addLineItem()"
+              [disabled]="!invoiceForm.get('siteId')?.value">
               <i class="bi bi-plus-circle me-1"></i>Add Item
             </button>
           </div>
 
           <!-- Warning message when no site is selected -->
-          <div
-            *ngIf="!invoiceForm.get('siteId')?.value"
-            class="alert alert-warning py-2"
-          >
+          <div *ngIf="!invoiceForm.get('siteId')?.value" class="alert alert-warning py-2">
             <i class="bi bi-exclamation-triangle me-2"></i>Please select a site
             to add line items
           </div>
 
           <!-- List of line items -->
-          <div
-            *ngIf="lineItems.length === 0 && invoiceForm.get('siteId')?.value"
-            class="alert alert-info py-2"
-          >
+          <div *ngIf="lineItems.length === 0 && invoiceForm.get('siteId')?.value" class="alert alert-info py-2">
             <i class="bi bi-info-circle me-2"></i>Click "Add Item" to add
             products to this invoice
           </div>
 
-          <div
-            *ngFor="let item of lineItems; let i = index"
-            class="card mb-3 border-primary border-opacity-25"
-          >
-            <div
-              class="card-header bg-light d-flex justify-content-between align-items-center"
-            >
+          <div *ngFor="let item of lineItems; let i = index" class="card mb-3 border-primary border-opacity-25">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
               <h6 class="mb-0">Line Item #{{ i + 1 }}</h6>
-              <button
-                type="button"
-                class="btn btn-sm btn-danger"
-                (click)="removeLineItem(i)"
-              >
+              <button type="button" class="btn btn-sm btn-danger" (click)="removeLineItem(i)">
                 <i class="bi bi-trash"></i>
               </button>
             </div>
@@ -170,22 +121,11 @@
               <div class="row g-3">
                 <!-- Product Selection -->
                 <div class="col-md-6">
-                  <label [for]="'productId-' + i" class="form-label"
-                    >Product*</label
-                  >
-                  <select
-                    class="form-select"
-                    [id]="'productId-' + i"
-                    [(ngModel)]="item.productId"
-                    [ngModelOptions]="{ standalone: true }"
-                    (change)="onProductSelected(i)"
-                    required
-                  >
+                  <label [for]="'productId-' + i" class="form-label">Product*</label>
+                  <select class="form-select" [id]="'productId-' + i" [(ngModel)]="item.productId"
+                    [ngModelOptions]="{ standalone: true }" (change)="onProductSelected(i)" required>
                     <option value="">-- Select Product --</option>
-                    <option
-                      *ngFor="let product of products"
-                      [value]="product.productId"
-                    >
+                    <option *ngFor="let product of products" [value]="product.productId">
                       {{ product.productName }} ({{ product.type }})
                     </option>
                   </select>
@@ -193,23 +133,12 @@
 
                 <!-- Big Package Selection -->
                 <div class="col-md-6">
-                  <label [for]="'bigPackage-' + i" class="form-label"
-                    >Big Package*</label
-                  >
-                  <select
-                    class="form-select"
-                    [id]="'bigPackage-' + i"
-                    [(ngModel)]="item.bigPackageNumber"
-                    [ngModelOptions]="{ standalone: true }"
-                    (change)="onBigPackageSelected(i)"
-                    required
-                    [disabled]="!item.productId"
-                  >
+                  <label [for]="'bigPackage-' + i" class="form-label">Big Package*</label>
+                  <select class="form-select" [id]="'bigPackage-' + i" [(ngModel)]="item.bigPackageNumber"
+                    [ngModelOptions]="{ standalone: true }" (change)="onBigPackageSelected(i)" required
+                    [disabled]="!item.productId">
                     <option value="">-- Select Package --</option>
-                    <option
-                      *ngFor="let pkg of getBigPackages(i)"
-                      [value]="pkg.packageNumber"
-                    >
+                    <option *ngFor="let pkg of getBigPackages(i)" [value]="pkg.packageNumber">
                       {{ pkg.packageNumber }} ({{ pkg.totalSizeAmount }}
                       {{ pkg.sizeDescription }})
                       {{ pkg.isOpen ? "[Open]" : "[Closed]" }}
@@ -225,56 +154,33 @@
                   <input type="hidden" [(ngModel)]="item.smallPackageId" [ngModelOptions]="{standalone: true}">
 
                   <!-- Multi-select dropdown -->
-                  <app-multi-select-dropdown
-                    [options]="getSmallPackageOptions(i)"
-                    [placeholder]="'Select Small Packages'"
-                    [isInvalid]="isSmallPackageInvalid(i)"
-                    [invalidMessage]="'Please select at least one small package'"
-                    [disabled]="!item.bigPackageNumber"
-                    (selectionChange)="onMultiSmallPackagesSelected($event, i)"
-                  ></app-multi-select-dropdown>
+                  <app-multi-select-dropdown [options]="getSmallPackageOptions(i)"
+                    [placeholder]="'Select Small Packages'" [isInvalid]="isSmallPackageInvalid(i)"
+                    [invalidMessage]="'Please select at least one small package'" [disabled]="!item.bigPackageNumber"
+                    (selectionChange)="onMultiSmallPackagesSelected($event, i)"></app-multi-select-dropdown>
 
                   <!-- Selected packages counter -->
-                  <div class="text-muted mt-1" *ngIf="item._selectedSmallPackages && item._selectedSmallPackages.length > 0">
+                  <div class="text-muted mt-1"
+                    *ngIf="item._selectedSmallPackages && item._selectedSmallPackages.length > 0">
                     <small>{{ item._selectedSmallPackages.length }} package(s) selected</small>
                   </div>
                 </div>
 
                 <!-- Unit Amount -->
                 <div class="col-md-4">
-                  <label [for]="'unitAmount-' + i" class="form-label"
-                    >Amount*</label
-                  >
-                  <input
-                    type="number"
-                    class="form-control"
-                    [id]="'unitAmount-' + i"
-                    [(ngModel)]="item.unitAmount"
-                    [ngModelOptions]="{ standalone: true }"
-                    required
-                    min="0.01"
-                    step="0.01"
-                    [disabled]="!item.smallPackageId"
-                  />
+                  <label [for]="'unitAmount-' + i" class="form-label">Amount*</label>
+                  <input type="number" class="form-control" [id]="'unitAmount-' + i" [(ngModel)]="item.unitAmount"
+                    [ngModelOptions]="{ standalone: true }" required min="0.01" step="0.01"
+                    [disabled]="!item.smallPackageId" />
                 </div>
 
                 <!-- Unit Price -->
                 <div class="col-md-4">
-                  <label [for]="'unitPrice-' + i" class="form-label"
-                    >Unit Price*</label
-                  >
+                  <label [for]="'unitPrice-' + i" class="form-label">Unit Price*</label>
                   <div class="input-group">
                     <span class="input-group-text">Rp</span>
-                    <input
-                      type="number"
-                      class="form-control"
-                      [id]="'unitPrice-' + i"
-                      [(ngModel)]="item.unitPrice"
-                      [ngModelOptions]="{ standalone: true }"
-                      required
-                      min="0"
-                      step="1000"
-                    />
+                    <input type="number" class="form-control" [id]="'unitPrice-' + i" [(ngModel)]="item.unitPrice"
+                      [ngModelOptions]="{ standalone: true }" required min="0" step="1000" />
                   </div>
                 </div>
               </div>
@@ -309,18 +215,13 @@
           <button type="button" class="btn btn-secondary" (click)="cancel()">
             <i class="bi bi-x-circle me-1"></i>Cancel
           </button>
-          <button
-            type="submit"
-            class="btn btn-primary"
-            [disabled]="
+          <button type="submit" class="btn btn-primary" [disabled]="
               invoiceForm.invalid ||
               isLoading ||
               lineItems.length === 0 ||
               !isFormValid()
-            "
-          >
-            <i class="bi bi-save me-1"></i
-            >{{ isEditMode ? "Update" : "Create" }} Invoice
+            ">
+            <i class="bi bi-save me-1"></i>{{ isEditMode ? "Update" : "Create" }} Invoice
           </button>
         </div>
       </form>

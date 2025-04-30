@@ -42,8 +42,8 @@ export function expandMultiSelectLineItems(lineItems: LineItemData[]): LineItemD
   return lineItems.flatMap(item => {
     // Check if item has multiple selected small packages
     if (item._selectedSmallPackages &&
-        Array.isArray(item._selectedSmallPackages) &&
-        item._selectedSmallPackages.length > 0) {
+      Array.isArray(item._selectedSmallPackages) &&
+      item._selectedSmallPackages.length > 0) {
 
       // Create a separate line item for each selected small package
       return item._selectedSmallPackages.map((packageId: string) => {
@@ -59,8 +59,8 @@ export function expandMultiSelectLineItems(lineItems: LineItemData[]): LineItemD
           smallPackageId: packageId, // Each gets a unique smallPackageId
           // Safely calculate the amount - handle the case where _selectedSmallPackages might be undefined
           unitAmount: sizeAmount || (item._selectedSmallPackages && item._selectedSmallPackages.length > 0 ?
-                                     item.unitAmount / item._selectedSmallPackages.length :
-                                     item.unitAmount),
+            item.unitAmount / item._selectedSmallPackages.length :
+            item.unitAmount),
           unitPrice: item.unitPrice,
           productName: item.productName,
           type: item.type,

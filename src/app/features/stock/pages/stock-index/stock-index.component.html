@@ -13,18 +13,10 @@
     </div>
 
     <div *ngIf="showFilterPanel" class="mb-4">
-      <app-filter-panel
-        [title]="'Filter Users'"
-        [isVisible]="showFilterPanel"
-        [sortOptions]="sortOptions"
-        [searchControl]="searchFilter"
-        [sortField]="sortField"
-        [sortDirection]="sortDirection"
-        (togglePanel)="toggleFilterPanel()"
-        (sortChange)="onSortChange($event)"
-        (resetFilters)="resetFilters()"
-        (doneFiltering)="toggleFilterPanel()"
-      >
+      <app-filter-panel [title]="'Filter Users'" [isVisible]="showFilterPanel" [sortOptions]="sortOptions"
+        [searchControl]="searchFilter" [sortField]="sortField" [sortDirection]="sortDirection"
+        (togglePanel)="toggleFilterPanel()" (sortChange)="onSortChange($event)" (resetFilters)="resetFilters()"
+        (doneFiltering)="toggleFilterPanel()">
       </app-filter-panel>
     </div>
 
@@ -33,18 +25,11 @@
     </div>
 
     <ng-container *ngIf="!isLoading; else loading">
-      <app-stock-management-table
-        [data]="filteredStocks"
-        (editStockEvent)="editStock($event)"
-        (deleteStockEvent)="deleteStock($event)"
-        (viewDetailEvent)="navigateToDetail($event)"
-      >
+      <app-stock-management-table [data]="filteredStocks" (editStockEvent)="editStock($event)"
+        (deleteStockEvent)="deleteStock($event)" (viewDetailEvent)="navigateToDetail($event)">
       </app-stock-management-table>
 
-      <div
-        *ngIf="filteredStocks.length === 0 && !errorMessage"
-        class="text-center py-5"
-      >
+      <div *ngIf="filteredStocks.length === 0 && !errorMessage" class="text-center py-5">
         <app-empty-data></app-empty-data>
       </div>
     </ng-container>

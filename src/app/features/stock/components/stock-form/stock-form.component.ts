@@ -230,7 +230,7 @@ export class StockFormComponent implements OnInit {
 
         // Create 'count' copies of this package
         for (let i = 0; i < count; i++) {
-          expandedSmallPackages.push({...packageData});
+          expandedSmallPackages.push({ ...packageData });
         }
       });
 

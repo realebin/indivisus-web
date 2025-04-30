@@ -28,12 +28,8 @@
           <app-loader *ngIf="isLoading" type="loading-relative"></app-loader>
 
           <!-- Form Component -->
-          <app-site-create-form
-            *ngIf="!isLoading"
-            [data]="siteRequest"
-            [isEditMode]="isEditMode"
-            [errorMessage]="errorMessage"
-            (dataChange)="onSiteFormDataChange($event)"
+          <app-site-create-form *ngIf="!isLoading" [data]="siteRequest" [isEditMode]="isEditMode"
+            [errorMessage]="errorMessage" (dataChange)="onSiteFormDataChange($event)"
             (formValidityChange)="onSiteFormValidityChange($event)">
           </app-site-create-form>
 

@@ -26,7 +26,7 @@ export class HttpRequestInterceptor implements HttpInterceptor {
   constructor(
     private loadingService: LoadingService,
     private authService: AuthService
-  ) {}
+  ) { }
 
   intercept(
     request: HttpRequest<any>,

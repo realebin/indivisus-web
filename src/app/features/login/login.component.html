@@ -19,18 +19,9 @@
                 <span class="input-group-text">
                   <i class="bi bi-person"></i>
                 </span>
-                <input
-                  type="text"
-                  id="username"
-                  class="form-control"
-                  placeholder="Enter your username"
-                  [(ngModel)]="formData.username"
-                  name="username"
-                  minlength="5"
-                  required
-                  #username="ngModel"
-                  [ngClass]="{'is-invalid': username.invalid && username.touched}"
-                >
+                <input type="text" id="username" class="form-control" placeholder="Enter your username"
+                  [(ngModel)]="formData.username" name="username" minlength="5" required #username="ngModel"
+                  [ngClass]="{'is-invalid': username.invalid && username.touched}">
               </div>
               <!-- Validation Error Message -->
               <div *ngIf="username.invalid && username.touched" class="invalid-feedback d-block mt-1">
@@ -46,23 +37,11 @@
                 <span class="input-group-text">
                   <i class="bi bi-lock"></i>
                 </span>
-                <input
-                  [type]="isPasswordVisible ? 'text' : 'password'"
-                  id="password"
-                  class="form-control"
-                  placeholder="Enter your password"
-                  [(ngModel)]="formData.password"
-                  name="password"
-                  required
-                  #password="ngModel"
-                  [ngClass]="{'is-invalid': password.invalid && password.touched}"
-                >
-                <button
-                  type="button"
-                  class="btn btn-outline-secondary"
-                  (click)="togglePasswordVisibility()"
-                  tabindex="-1"
-                >
+                <input [type]="isPasswordVisible ? 'text' : 'password'" id="password" class="form-control"
+                  placeholder="Enter your password" [(ngModel)]="formData.password" name="password" required
+                  #password="ngModel" [ngClass]="{'is-invalid': password.invalid && password.touched}">
+                <button type="button" class="btn btn-outline-secondary" (click)="togglePasswordVisibility()"
+                  tabindex="-1">
                   <i [ngClass]="isPasswordVisible ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
                 </button>
               </div>
@@ -89,11 +68,8 @@
             </div>
 
             <!-- Submit Button -->
-            <button
-              type="submit"
-              class="btn btn-primary d-flex align-items-center justify-content-center gap-2"
-              [disabled]="form.invalid || isLoading"
-            >
+            <button type="submit" class="btn btn-primary d-flex align-items-center justify-content-center gap-2"
+              [disabled]="form.invalid || isLoading">
               <span *ngIf="isLoading" class="spinner-border spinner-border-sm"></span>
               <span>Login</span>
             </button>
@@ -104,7 +80,8 @@
       <!-- Right side - Just the image -->
       <div class="col-md-6 d-none d-md-block position-relative">
         <div class="">
-          <img src="../../../assets/png/login-placeholder.jpg" alt="Login Image" class="img-fluid rounded shadow" style="object-fit: cover;">
+          <img src="../../../assets/png/login-placeholder.jpg" alt="Login Image" class="img-fluid rounded shadow"
+            style="object-fit: cover;">
         </div>
       </div>
     </div>

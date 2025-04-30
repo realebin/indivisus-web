@@ -7,4 +7,4 @@ import * as Validators from './directives/validators';
   imports: [CommonModule, Validators.NoEmptyValidatorDirective],
   exports: [Validators.NoEmptyValidatorDirective],
 })
-export class CoresModule {}
+export class CoresModule { }

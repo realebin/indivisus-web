@@ -10,8 +10,8 @@ describe('UserManagementCreateUserFormComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [UserManagementCreateUserFormComponent]
     })
-    .compileComponents();
-    
+      .compileComponents();
+
     fixture = TestBed.createComponent(UserManagementCreateUserFormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

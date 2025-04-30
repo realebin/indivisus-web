@@ -280,17 +280,27 @@ export class InvoiceCreateComponent implements OnInit {
   }
 
   // Multi-select specific methods
+  // In invoice-create.component.ts
+
+  // Updated method to filter out zero quantity packages before they reach the dropdown
   getSmallPackageOptions(index: number): MultiSelectOption[] {
     if (!this.selectedBigPackages[index]) return [];
 
     return this.selectedBigPackages[index].smallPackages
-      .filter((sp: any) => sp.isOpen)
+      // First, filter to only include open packages with size amount > 0
+      .filter((sp: any) => {
+        return sp.isOpen && (sp.sizeAmount > 0 || sp.quantity > 0);
+      })
+      // Then map to dropdown options
       .map((sp: any) => ({
         id: sp.packageId,
         label: `${sp.packageId} - ${sp.sizeAmount} ${sp.sizeDescription}`,
         selected: (this.lineItems[index]._selectedSmallPackages || []).includes(sp.packageId),
         disabled: false,
-        data: sp
+        data: {
+          sizeAmount: sp.sizeAmount,
+          sizeDescription: sp.sizeDescription
+        }
       }));
   }
 
@@ -432,7 +442,7 @@ export class InvoiceCreateComponent implements OnInit {
           // Find the small package to get its size amount
           const smallPackage = this.findSmallPackageById(item.productId, item.bigPackageNumber, packageId);
           const sizeAmount = smallPackage ? smallPackage.sizeAmount :
-                            (item.unitAmount / selectedPackages.length);
+            (item.unitAmount / selectedPackages.length);
 
           return {
             stockId: item.stockId,

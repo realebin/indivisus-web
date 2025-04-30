@@ -10,8 +10,8 @@ describe('ResponsiveDataTableComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [ResponsiveDataTableComponent]
     })
-    .compileComponents();
-    
+      .compileComponents();
+
     fixture = TestBed.createComponent(ResponsiveDataTableComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

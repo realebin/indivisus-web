@@ -6,27 +6,16 @@
     {{ errorMessage }}
   </div>
   <form [formGroup]="formGroup" class="needs-validation">
-    <app-input-builder
-      *ngFor="let field of fields.filter(this.isFieldConfig)"
-      [formGroup]="formGroup"
-      [config]="field"
-    ></app-input-builder>
+    <app-input-builder *ngFor="let field of fields.filter(this.isFieldConfig)" [formGroup]="formGroup"
+      [config]="field"></app-input-builder>
 
-    <button
-      class="btn btn-outline-primary mb-2"
-      *ngIf="isEditMode"
-      (click)="togglePasswordFields()"
-      type="button"
-    >
+    <button class="btn btn-outline-primary mb-2" *ngIf="isEditMode" (click)="togglePasswordFields()" type="button">
       {{ btnPasswordText }}
     </button>
 
     <div *ngIf="!isEditMode || showPasswordFields">
-      <app-input-builder
-        *ngIf="getPasswordField()"
-        [formGroup]="formGroup"
-        [config]="getPasswordField() || { name: '', label: '', type: '' }"
-      ></app-input-builder>
+      <app-input-builder *ngIf="getPasswordField()" [formGroup]="formGroup"
+        [config]="getPasswordField() || { name: '', label: '', type: '' }"></app-input-builder>
     </div>
   </form>
 </div>

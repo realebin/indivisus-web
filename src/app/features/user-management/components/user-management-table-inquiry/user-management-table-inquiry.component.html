@@ -1,13 +1,6 @@
 <!-- Use the shared responsive-data-table component -->
-<app-responsive-data-table
-  [data]="data"
-  [columnDefs]="columnDefs"
-  [cardConfigs]="cardConfigs"
-  [type]="type"
-  [sortOptions]="sortOptions"
-  [title]="getPageTitle()"
-  (editItem)="editUser($event)"
-  (deleteItem)="deleteUser($event)">
+<app-responsive-data-table [data]="data" [columnDefs]="columnDefs" [cardConfigs]="cardConfigs" [type]="type"
+  [sortOptions]="sortOptions" [title]="getPageTitle()" (editItem)="editUser($event)" (deleteItem)="deleteUser($event)">
 </app-responsive-data-table>
 <!-- <app-responsive-data-table
   [data]="data"

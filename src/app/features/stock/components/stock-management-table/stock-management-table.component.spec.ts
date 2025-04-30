@@ -10,8 +10,8 @@ describe('StockManagementTableComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [StockManagementTableComponent]
     })
-    .compileComponents();
-    
+      .compileComponents();
+
     fixture = TestBed.createComponent(StockManagementTableComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

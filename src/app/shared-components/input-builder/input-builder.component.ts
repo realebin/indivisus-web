@@ -23,17 +23,17 @@ export class InputBuilderComponent {
     if (!this.control || !this.control.errors || (!this.control.touched && !this.control.dirty)) {
       return '';
     }
-  
+
     // Get the first error key
     const errorKey = Object.keys(this.control.errors)[0];
-    
+
     // Use custom message from config if available, otherwise provide a default
     return this.config.validationMessages?.[errorKey] || `${this.config.label} is invalid`;
   }
 
   isFieldInvalid(): boolean {
     return (
-      this.control !== null && 
+      this.control !== null &&
       this.control !== undefined &&
       this.control.invalid &&
       (this.control.touched || this.control.dirty)

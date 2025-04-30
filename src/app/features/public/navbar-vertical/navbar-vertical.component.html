@@ -14,10 +14,8 @@
     <!-- Navigation items -->
     <ng-container *ngFor="let item of navItems">
       <div class="sidebar-item">
-        <a class="sidebar-link"
-           [routerLink]="item.href"
-           routerLinkActive="active"
-           [class.selected]="isActive(item.href)">
+        <a class="sidebar-link" [routerLink]="item.href" routerLinkActive="active"
+          [class.selected]="isActive(item.href)">
           <i class="bi" [ngClass]="item.icon"></i>
           <span class="sidebar-text" *ngIf="!isCollapsed">{{ item.label }}</span>
         </a>

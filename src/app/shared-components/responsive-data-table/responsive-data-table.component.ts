@@ -72,7 +72,7 @@ export class ResponsiveDataTableComponent implements OnInit, OnChanges, OnDestro
       // Reset sorting and filtering when data changes
       this.sortField = '';
       this.sortDirection = 'asc';
-      this.searchFilter.setValue('', {emitEvent: false});
+      this.searchFilter.setValue('', { emitEvent: false });
       this.showFilterPanel = false;
     }
   }
@@ -94,7 +94,7 @@ export class ResponsiveDataTableComponent implements OnInit, OnChanges, OnDestro
   }
 
   // Handle sort change from filter panel
-  onSortChange(event: {field: string}): void {
+  onSortChange(event: { field: string }): void {
     this.sortData(event.field);
   }
 

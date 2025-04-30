@@ -1,7 +1,8 @@
 /* Add this to your _sidebar.scss file */
 .sidebar {
   position: fixed;
-  top: 56px; /* Match the navbar height */
+  top: 56px;
+  /* Match the navbar height */
   left: 0;
   bottom: 0;
   width: 250px;
@@ -80,7 +81,7 @@
 .navbar {
   height: 56px;
   background-color: #fff;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
   padding: 0;
   position: fixed;
   top: 0;
@@ -93,19 +94,22 @@
 .wrapper {
   display: flex;
   min-height: 100vh;
-  padding-top: 56px; /* Match navbar height */
+  padding-top: 56px;
+  /* Match navbar height */
 }
 
 .main-content {
   flex-grow: 1;
-  margin-left: 250px; /* Match sidebar width */
+  margin-left: 250px;
+  /* Match sidebar width */
   width: calc(100% - 250px);
   transition: margin-left 0.3s ease, width 0.3s ease;
   padding: 1rem;
 }
 
 .main-content.collapsed {
-  margin-left: 70px; /* Match collapsed sidebar width */
+  margin-left: 70px;
+  /* Match collapsed sidebar width */
   width: calc(100% - 70px);
 }
 

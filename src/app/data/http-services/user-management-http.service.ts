@@ -29,7 +29,7 @@ export class UserManagementHttpService {
   constructor(
     private httpClient: HttpClient,
     private env: EnvironmentService // private httpServiceHelper: HttpServiceHelper
-  ) {}
+  ) { }
 
   // token = localStorage.getItem('authToken');
   // header = new HttpHeaders({

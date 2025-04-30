@@ -10,8 +10,8 @@ describe('BreadcrumbsComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [BreadcrumbsComponent]
     })
-    .compileComponents();
-    
+      .compileComponents();
+
     fixture = TestBed.createComponent(BreadcrumbsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
