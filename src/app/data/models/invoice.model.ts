@@ -358,7 +358,7 @@ export function transformToInvoiceByDateRangeModelResponse(
       totalPrice: item.total_price,
       sizeDescription: item.size_description,
       packageStatus: item.package_status
-    })),
+    })) || [],
     createdBy: invoiceData.created_by,
     changedBy: invoiceData.changed_by,
     createdAt: invoiceData.created_at,

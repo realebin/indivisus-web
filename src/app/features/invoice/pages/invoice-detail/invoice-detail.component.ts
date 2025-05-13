@@ -86,7 +86,8 @@ export class InvoiceDetailComponent implements OnInit {
       dueDate: this.invoice.dueDate,
       notes: this.invoice.notes,
       status: status,
-      changedBy: localStorage.getItem('username') || 'admin'
+      changedBy: localStorage.getItem('username') || 'admin',
+      lineItems: this.invoice.lineItems
     };
 
     this.isLoading = true;
