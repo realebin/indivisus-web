@@ -150,7 +150,7 @@ export interface InvoiceByDateRangeHttpResponse {
     total_quantity: number;
     notes: string;
     status: 'PENDING' | 'PAID' | 'CANCELLED';
-    line_items: {
+    line_items?: {
       line_item_id: string;
       stock_id: string;
       product_id: string;
@@ -220,6 +220,8 @@ export interface InvoiceCreateHttpRequest {
   created_by: string;
 }
 
+// Updated invoice.schema.ts - Include line items in update schema
+
 export interface InvoiceUpdateHttpRequest {
   invoice_number: string;
   customer_id: string;
@@ -227,6 +229,14 @@ export interface InvoiceUpdateHttpRequest {
   due_date: string;
   notes?: string;
   status: 'PENDING' | 'PAID' | 'CANCELLED';
+  line_items: {  // Required in update request
+    stock_id: string;
+    product_id: string;
+    big_package_number: string;
+    small_package_id: string;
+    unit_amount: number;
+    unit_price: number;
+  }[];
   changed_by: string;
 }
 

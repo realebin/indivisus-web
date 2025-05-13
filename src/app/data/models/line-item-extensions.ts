@@ -5,6 +5,7 @@
  * This matches your original LineItemData interface used in InvoiceFormComponent
  */
 export interface LineItemData {
+  lineItemId?: string;
   stockId: string;
   productId: string;
   bigPackageNumber: string;
@@ -64,12 +65,14 @@ export function expandMultiSelectLineItems(lineItems: LineItemData[]): LineItemD
           unitPrice: item.unitPrice,
           productName: item.productName,
           type: item.type,
-          sizeDescription: smallPackage ? smallPackage.sizeDescription : item.sizeDescription
+          sizeDescription: smallPackage ? smallPackage.sizeDescription : item.sizeDescription,
+          // Don't include lineItemId in expanded items since they're new
+          lineItemId: undefined
         };
       });
     }
 
-    // If no multiple selection, return the original item
+    // If no multiple selection, return the original item (preserving lineItemId)
     return [item];
   });
 }

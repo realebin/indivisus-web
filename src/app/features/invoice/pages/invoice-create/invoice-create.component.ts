@@ -366,106 +366,113 @@ export class InvoiceCreateComponent implements OnInit {
     return !this.lineItems[index].smallPackageId && !!this.lineItems[index].bigPackageNumber;
   }
 
-  onSubmit(): void {
-    if (this.invoiceForm.invalid) {
-      // Mark all controls as touched to trigger validation messages
-      Object.keys(this.invoiceForm.controls).forEach(key => {
-        this.invoiceForm.get(key)?.markAsTouched();
-      });
-      return;
-    }
+// Correct onSubmit method that includes line items in update requests
 
-    if (this.lineItems.length === 0) {
-      this.error = 'At least one line item is required';
-      return;
-    }
-
-    const formValue = this.invoiceForm.value;
-
-    if (this.isEditMode) {
-      // Update existing invoice
-      const updateData = {
-        invoiceNumber: this.invoiceNumber,
-        customerId: formValue.customerId,
-        siteId: formValue.siteId,
-        dueDate: formValue.dueDate,
-        notes: formValue.notes,
-        status: formValue.status,
-        changedBy: localStorage.getItem('username') || 'admin'
-      };
-
-      this.isLoading = true;
-      this.invoiceService.updateInvoice(updateData).subscribe({
-        next: () => {
-          this.router.navigate(['/invoice/detail', this.invoiceNumber]);
-        },
-        error: (error) => {
-          this.error = error.message || 'Error updating invoice';
-          this.isLoading = false;
-        }
-      });
-    } else {
-      // Process multi-selected small packages before submitting
-      const expandedLineItems = this.expandMultiSelectedPackages();
-
-      // Create new invoice
-      const createData = {
-        customerId: formValue.customerId,
-        siteId: formValue.siteId,
-        dueDate: formValue.dueDate,
-        notes: formValue.notes,
-        lineItems: expandedLineItems,
-        createdBy: localStorage.getItem('username') || 'admin'
-      };
-
-      this.isLoading = true;
-      this.invoiceService.createInvoice(createData).subscribe({
-        next: () => {
-          this.router.navigate(['/invoice']);
-        },
-        error: (error) => {
-          this.error = error.message || 'Error creating invoice';
-          this.isLoading = false;
-        }
-      });
-    }
+onSubmit(): void {
+  if (this.invoiceForm.invalid) {
+    // Mark all controls as touched to trigger validation messages
+    Object.keys(this.invoiceForm.controls).forEach(key => {
+      this.invoiceForm.get(key)?.markAsTouched();
+    });
+    return;
   }
 
-  // Expand multi-selected small packages into individual line items
-  expandMultiSelectedPackages(): any[] {
-    return this.lineItems.flatMap(item => {
-      const selectedPackages = item._selectedSmallPackages || [];
+  if (this.lineItems.length === 0) {
+    this.error = 'At least one line item is required';
+    return;
+  }
 
-      if (selectedPackages.length > 1) {
-        // Create a separate line item for each selected package
-        return selectedPackages.map(packageId => {
-          // Find the small package to get its size amount
-          const smallPackage = this.findSmallPackageById(item.productId, item.bigPackageNumber, packageId);
-          const sizeAmount = smallPackage ? smallPackage.sizeAmount :
-            (item.unitAmount / selectedPackages.length);
+  const formValue = this.invoiceForm.value;
 
-          return {
-            stockId: item.stockId,
-            productId: item.productId,
-            bigPackageNumber: item.bigPackageNumber,
-            smallPackageId: packageId,
-            unitAmount: sizeAmount,
-            unitPrice: item.unitPrice
-          };
-        });
-      } else {
-        // If there's only one or no selected packages, return the original
-        return [{
-          stockId: item.stockId,
-          productId: item.productId,
-          bigPackageNumber: item.bigPackageNumber,
-          smallPackageId: item.smallPackageId,
-          unitAmount: item.unitAmount,
-          unitPrice: item.unitPrice
-        }];
+  if (this.isEditMode) {
+    // Process multi-selected small packages before submitting
+    const expandedLineItems = this.expandMultiSelectedPackages();
+
+    // Update existing invoice - NOW INCLUDES LINE ITEMS as per API documentation
+    const updateData = {
+      invoiceNumber: this.invoiceNumber,
+      customerId: formValue.customerId,
+      siteId: formValue.siteId,
+      dueDate: formValue.dueDate,
+      notes: formValue.notes,
+      status: formValue.status,
+      lineItems: expandedLineItems, // Include line items in update request
+      changedBy: localStorage.getItem('username') || 'admin'
+    };
+
+    this.isLoading = true;
+    this.invoiceService.updateInvoice(updateData).subscribe({
+      next: () => {
+        this.router.navigate(['/invoice/detail', this.invoiceNumber]);
+      },
+      error: (error) => {
+        this.error = error.message || 'Error updating invoice';
+        this.isLoading = false;
+      }
+    });
+  } else {
+    // Create new invoice logic remains the same
+    const expandedLineItems = this.expandMultiSelectedPackages();
+
+    const createData = {
+      customerId: formValue.customerId,
+      siteId: formValue.siteId,
+      dueDate: formValue.dueDate,
+      notes: formValue.notes,
+      lineItems: expandedLineItems,
+      createdBy: localStorage.getItem('username') || 'admin'
+    };
+
+    this.isLoading = true;
+    this.invoiceService.createInvoice(createData).subscribe({
+      next: () => {
+        this.router.navigate(['/invoice']);
+      },
+      error: (error) => {
+        this.error = error.message || 'Error creating invoice';
+        this.isLoading = false;
       }
     });
   }
+}
+
+// Expand multi-selected small packages into individual line items
+expandMultiSelectedPackages(): any[] {
+  return this.lineItems.flatMap(item => {
+    const selectedPackages = item._selectedSmallPackages || [];
+
+    if (selectedPackages.length > 1) {
+      // Create a separate line item for each selected package
+      return selectedPackages.map(packageId => {
+        // Find the small package to get its size amount
+        const smallPackage = this.findSmallPackageById(item.productId, item.bigPackageNumber, packageId);
+        const sizeAmount = smallPackage ? smallPackage.sizeAmount :
+          (item.unitAmount / selectedPackages.length);
+
+        return {
+          // DON'T include lineItemId - the API doesn't expect it
+          stockId: item.stockId,
+          productId: item.productId,
+          bigPackageNumber: item.bigPackageNumber,
+          smallPackageId: packageId,
+          unitAmount: sizeAmount,
+          unitPrice: item.unitPrice
+        };
+      });
+    } else {
+      // If there's only one or no selected packages, return the original
+      return [{
+        // DON'T include lineItemId - the API doesn't expect it
+        stockId: item.stockId,
+        productId: item.productId,
+        bigPackageNumber: item.bigPackageNumber,
+        smallPackageId: item.smallPackageId,
+        unitAmount: item.unitAmount,
+        unitPrice: item.unitPrice
+      }];
+    }
+  });
+}
 
   // Helper method to find a small package by ID
   findSmallPackageById(productId: string, bigPackageNumber: string, smallPackageId: string): any {

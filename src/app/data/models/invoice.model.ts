@@ -345,7 +345,7 @@ export function transformToInvoiceByDateRangeModelResponse(
     totalQuantity: invoiceData.total_quantity,
     notes: invoiceData.notes,
     status: invoiceData.status,
-    lineItems: invoiceData.line_items.map(item => ({
+    lineItems: invoiceData?.line_items?.map(item => ({
       lineItemId: item.line_item_id,
       stockId: item.stock_id,
       productId: item.product_id,
@@ -430,6 +430,27 @@ export function transformToInvoiceCreateHttpRequest(
   };
 }
 
+// Updated invoice.model.ts - Add line items to update request
+
+export interface InvoiceUpdateModelRequest {
+  invoiceNumber: string;
+  customerId: string;
+  siteId: string;
+  dueDate: string;
+  notes?: string;
+  status: 'PENDING' | 'PAID' | 'CANCELLED';
+  lineItems: {  // Required according to API documentation
+    stockId: string;
+    productId: string;
+    bigPackageNumber: string;
+    smallPackageId: string;
+    unitAmount: number;
+    unitPrice: number;
+  }[];
+  changedBy: string;
+}
+
+
 export function transformToInvoiceUpdateHttpRequest(
   request: InvoiceUpdateModelRequest
 ): InvoiceUpdateHttpRequest {
@@ -440,6 +461,14 @@ export function transformToInvoiceUpdateHttpRequest(
     due_date: request.dueDate,
     notes: request.notes,
     status: request.status,
+    line_items: request.lineItems.map(item => ({
+      stock_id: item.stockId,
+      product_id: item.productId,
+      big_package_number: item.bigPackageNumber,
+      small_package_id: item.smallPackageId,
+      unit_amount: item.unitAmount,
+      unit_price: item.unitPrice
+    })),
     changed_by: request.changedBy
   };
 }
