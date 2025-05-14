@@ -289,7 +289,7 @@ export class InvoiceCreateComponent implements OnInit {
     return this.selectedBigPackages[index].smallPackages
       // First, filter to only include open packages with size amount > 0
       .filter((sp: any) => {
-        return sp.isOpen && (sp.sizeAmount > 0 || sp.quantity > 0);
+        return (sp.sizeAmount > 0 || sp.quantity > 0);
       })
       // Then map to dropdown options
       .map((sp: any) => ({
@@ -331,7 +331,7 @@ export class InvoiceCreateComponent implements OnInit {
     if (selectedIds.length > 0) {
       // Find all selected small packages
       const selectedPackages = this.selectedBigPackages[index].smallPackages
-        .filter((sp: any) => sp.isOpen && selectedIds.includes(sp.packageId));
+        .filter((sp: any) => selectedIds.includes(sp.packageId));
 
       // Sum up their size amounts
       totalAmount = selectedPackages.reduce((sum: number, sp: any) => sum + sp.sizeAmount, 0);
@@ -347,7 +347,7 @@ export class InvoiceCreateComponent implements OnInit {
   }
 
   getSmallPackages(index: number): any[] {
-    return this.selectedBigPackages[index]?.smallPackages.filter((sp: any) => sp.isOpen) || [];
+    return this.selectedBigPackages[index]?.smallPackages || [];
   }
 
   getLineItemTotal(index: number): number {

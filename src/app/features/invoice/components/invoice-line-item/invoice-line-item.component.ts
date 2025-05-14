@@ -152,7 +152,7 @@ export class InvoiceLineItemComponent implements OnInit {
 
     return this.selectedBigPackage.smallPackages
       .filter((sp: any) => {
-        return sp.isOpen && (sp.sizeAmount > 0 || sp.quantity > 0);
+        return (sp.sizeAmount > 0 || sp.quantity > 0);
       })
       .map((sp: any) => ({
         id: sp.packageId,
@@ -187,7 +187,7 @@ export class InvoiceLineItemComponent implements OnInit {
     if (this.selectedSmallPackages.length > 0) {
       // Find all selected small packages
       const selectedPackages = this.selectedBigPackage.smallPackages
-        .filter((sp: any) => sp.isOpen && this.selectedSmallPackages.includes(sp.packageId));
+        .filter((sp: any) => this.selectedSmallPackages.includes(sp.packageId));
 
       // Sum up their size amounts
       totalAmount = selectedPackages.reduce((sum: number, sp: any) => sum + sp.sizeAmount, 0);
