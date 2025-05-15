@@ -64,42 +64,41 @@
           <div class="mt-3">
             <h6 class="text-secondary mb-2"><i class="bi bi-box-seam me-2"></i>Stock Information</h6>
 
-            <!-- Package Information -->
-            <div class="p-2 bg-light rounded mb-2">
-              <small class="text-muted mb-1"><b>Total Package:</b></small>
-              <div class="row g-2">
-                <ng-container *ngIf="site.typeOverviews">
-                  <div *ngFor="let type of getTypeKeys(site.typeOverviews)" class="col-6">
+            <!-- Check if there's stock overview data -->
+            <ng-container *ngIf="site.stockOverview && site.stockOverview.length > 0; else noStockInfo">
+              <!-- Package Information -->
+              <div class="p-2 bg-light rounded mb-2">
+                <small class="text-muted mb-1"><b>Total Package:</b></small>
+                <div class="row g-2">
+                  <div *ngFor="let stock of site.stockOverview" class="col-6">
                     <div class="d-flex align-items-center">
                       <i class="bi bi-box me-2"></i>
-                      <span>{{ type }}: <b>{{ site.typeOverviews[type].totalPackage || 0 }}</b> Pack</span>
+                      <span>{{ stock.type }}: <b>{{ stock.totalPackages || 0 }}</b> Pack</span>
                     </div>
                   </div>
-                </ng-container>
-                <div *ngIf="!site.typeOverviews || getTypeKeys(site.typeOverviews).length === 0" class="col-12">
-                  <span class="text-muted">No package information</span>
                 </div>
               </div>
-            </div>
 
-            <!-- Stock Size Information -->
-            <div class="p-2 bg-light rounded">
-              <small class="text-muted mb-1"><b>Total Stock:</b></small>
-              <div class="row g-2">
-                <ng-container *ngIf="site.typeOverviews">
-                  <div *ngFor="let type of getTypeKeys(site.typeOverviews)" class="col-6">
+              <!-- Stock Size Information -->
+              <div class="p-2 bg-light rounded">
+                <small class="text-muted mb-1"><b>Total Stock:</b></small>
+                <div class="row g-2">
+                  <div *ngFor="let stock of site.stockOverview" class="col-6">
                     <div class="d-flex align-items-center">
                       <i class="bi bi-rulers me-2"></i>
-                      <span>{{ type }}: <b>{{ site.typeOverviews[type].totalStock || 0 }}</b> {{
-                        site.typeOverviews[type].sizeDescription }}</span>
+                      <span>{{ stock.type }}: <b>{{ stock.totalStock || 0 }}</b> {{ stock.sizeDescription }}</span>
                     </div>
                   </div>
-                </ng-container>
-                <div *ngIf="!site.typeOverviews || getTypeKeys(site.typeOverviews).length === 0" class="col-12">
-                  <span class="text-muted">No stock information</span>
                 </div>
               </div>
-            </div>
+            </ng-container>
+
+            <!-- No stock information template -->
+            <ng-template #noStockInfo>
+              <div class="p-2 bg-light rounded">
+                <span class="text-muted">No stock information available</span>
+              </div>
+            </ng-template>
           </div>
 
           <!-- View Details Link -->

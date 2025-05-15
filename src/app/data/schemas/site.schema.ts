@@ -38,13 +38,13 @@ export interface SiteInquiryHttpResponse {
     phone?: string;
     created_at: string;
     changed_on: string;
-    type_overviews?: {
-      [type: string]: {
-        total_package: number;
-        total_stock: number;
-        size_description: string;
-      };
-    };
+    // Updated to match API response structure
+    stock_overview: {
+      type: string;
+      total_packages: number;
+      total_size: number;
+      size_description: string;
+    }[];
   }[];
 }
 

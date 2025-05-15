@@ -1,4 +1,3 @@
-
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl } from '@angular/forms';
@@ -64,11 +63,13 @@ export class SitesIndexComponent implements OnInit {
       .pipe(finalize(() => this.isLoading = false))
       .subscribe({
         next: (response) => {
+          console.log('Sites response:', response); // Debug log
           this.sites = response.sites;
           this.filteredSites = [...this.sites];
           this.applyFilters();
         },
         error: (error) => {
+          console.error('Error loading sites:', error);
           this.errorMessage = error.message || 'Failed to load sites';
         }
       });
@@ -219,9 +220,26 @@ export class SitesIndexComponent implements OnInit {
     this.filteredSites = filtered;
   }
 
-  // Helper method to get object keys for typeOverviews
+  // Helper method to get stock overview keys (for backward compatibility)
   getTypeKeys(typeOverviews: any): string[] {
     if (!typeOverviews) return [];
     return Object.keys(typeOverviews);
+  }
+
+  // New helper method to check if site has stock information
+  hasStockInfo(site: SiteWithOverview): boolean {
+    return !!site.stockOverview && site.stockOverview.length > 0;
+  }
+
+  // New helper method to get total packages across all types
+  getTotalPackages(site: SiteWithOverview): number {
+    if (!site.stockOverview) return 0;
+    return site.stockOverview.reduce((total, stock) => total + (stock.totalPackages || 0), 0);
+  }
+
+  // New helper method to get total stock across all types
+  getTotalStock(site: SiteWithOverview): number {
+    if (!site.stockOverview) return 0;
+    return site.stockOverview.reduce((total, stock) => total + (stock.totalStock || 0), 0);
   }
 }

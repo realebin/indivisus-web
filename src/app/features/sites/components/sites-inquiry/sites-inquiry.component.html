@@ -2,48 +2,47 @@
   <ng-template #contentTemplate let-site>
     <div class="row mb-3">
       <div class="col-12">
-        <a href="javascript:;" (click)="navigateToDetail(site.id)" class="text-decoration-none text-primary fw-bold">
-          <h4 class="card-title">{{ site.name }}</h4>
+        <a href="javascript:;" (click)="navigateToDetail(site.siteId)" class="text-decoration-none text-primary fw-bold">
+          <h4 class="card-title">{{ site.siteName }}</h4>
         </a>
       </div>
     </div>
     <div class="row mb-2 text-muted">
       <div class="col-12">
-        <i class="bi bi-geo-alt me-2"></i><b>Address :</b> {{ site.address }},
-        {{ site.city }}
+        <i class="bi bi-geo-alt me-2"></i><b>Address :</b> {{ site.address }}
       </div>
     </div>
     <div class="row justify-content-between mb-4 text-muted">
       <div class="col-12 col-md-6">
-        <i class="bi bi-person me-2"></i><b>PIC :</b> {{ site.pic }}
+        <i class="bi bi-person me-2"></i><b>PIC :</b> {{ site.picFullName }}
       </div>
       <div class="col-12 col-md-6">
-        <i class="bi bi-telephone me-2"></i><b>Phone :</b> {{ site.phone }}
+        <i class="bi bi-telephone me-2"></i><b>Phone :</b> {{ site.phone || 'Not specified' }}
       </div>
     </div>
-    <ng-container *ngIf="site.stocks && site.stocks.length > 0">
+    
+    <!-- Updated stock information section -->
+    <ng-container *ngIf="site.stockOverview && site.stockOverview.length > 0">
       <div class="row mb-2">
         <div class="col-12 text-primary">
           <i class="bi bi-box-seam me-2"></i><b>Stock Information</b>
         </div>
       </div>
-      <div class="card p-3 bg-light rounded-3 border-0 mb-2" *ngIf="site.stocks">
-        <b class="text-secondary">Measure:</b>
+      <div class="card p-3 bg-light rounded-3 border-0 mb-2">
+        <b class="text-secondary">Packages:</b>
         <div class="row">
-          <div class="col-12 col-md-6 text-muted" *ngFor="let stock of site.stocks">
-            <i class="bi bi-tags me-2"></i><b>{{ stock.description }}:</b>
-            <ng-container *ngFor="let size of stock.sizes; let last = last">
-              {{ size.sizeAmount }} {{ size.sizeDesc }}{{ !last ? ", " : "" }}
-            </ng-container>
+          <div class="col-12 col-md-6 text-muted" *ngFor="let stock of site.stockOverview">
+            <i class="bi bi-box me-2"></i><b>{{ stock.type }}:</b>
+            {{ stock.totalPackages }} Pack
           </div>
         </div>
       </div>
-      <div class="card p-3 bg-light rounded-3 border-0" *ngIf="site.packages">
-        <b class="text-secondary">Packages:</b>
+      <div class="card p-3 bg-light rounded-3 border-0">
+        <b class="text-secondary">Stock Amount:</b>
         <div class="row">
-          <div class="col-12 col-md-6 text-muted" *ngFor="let pack of site.packages">
-            <i class="bi bi-box me-2"></i><b>{{ pack.description }}:</b>
-            {{ pack.amount }} Pack
+          <div class="col-12 col-md-6 text-muted" *ngFor="let stock of site.stockOverview">
+            <i class="bi bi-rulers me-2"></i><b>{{ stock.type }}:</b>
+            {{ stock.totalStock }} {{ stock.sizeDescription }}
           </div>
         </div>
       </div>

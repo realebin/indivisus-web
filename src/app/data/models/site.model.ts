@@ -40,8 +40,18 @@ export interface SiteOverviewList {
   changedOn: string;
 }
 
-// Site with overview data
+// Stock overview structure that matches API
+export interface StockOverview {
+  type: string;
+  totalPackages: number;
+  totalStock: number;
+  sizeDescription: string;
+}
+
+// Updated SiteWithOverview to match API structure
 export interface SiteWithOverview extends Site {
+  stockOverview?: StockOverview[];
+  // Legacy property for backward compatibility
   typeOverviews?: {
     [type: string]: {
       totalPackage: number;
@@ -165,18 +175,25 @@ export function transformToSiteInquiryResponse(
       phone: site.phone,
       createdAt: site.created_at,
       changedOn: site.changed_on,
-      typeOverviews: {},
     };
 
-    // Add type overviews if available
-    if (site.type_overviews) {
-      Object.keys(site.type_overviews).forEach((key) => {
-        const typeOverview = site.type_overviews?.[key];
-        if (siteWithOverview.typeOverviews && typeOverview) {
-          siteWithOverview.typeOverviews[key] = {
-            totalPackage: typeOverview.total_package,
-            totalStock: typeOverview.total_stock,
-            sizeDescription: typeOverview.size_description,
+    // Transform stock_overview from API to stockOverview
+    if (site.stock_overview && site.stock_overview.length > 0) {
+      siteWithOverview.stockOverview = site.stock_overview.map(overview => ({
+        type: overview.type,
+        totalPackages: overview.total_packages,
+        totalStock: overview.total_size,
+        sizeDescription: overview.size_description,
+      }));
+
+      // Also create typeOverviews for backward compatibility
+      siteWithOverview.typeOverviews = {};
+      site.stock_overview.forEach(overview => {
+        if (siteWithOverview.typeOverviews) {
+          siteWithOverview.typeOverviews[overview.type] = {
+            totalPackage: overview.total_packages,
+            totalStock: overview.total_size,
+            sizeDescription: overview.size_description,
           };
         }
       });
