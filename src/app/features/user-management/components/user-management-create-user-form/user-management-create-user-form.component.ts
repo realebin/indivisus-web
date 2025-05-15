@@ -108,6 +108,7 @@ export class UserManagementCreateUserFormComponent implements OnInit {
   };
 
   constructor(private fb: FormBuilder, private siteService: SiteService) { }
+  
   ngOnInit(): void {
     this.inquirySitesDropdown();
     this.initForm();
@@ -120,7 +121,6 @@ export class UserManagementCreateUserFormComponent implements OnInit {
     this.patchFormData();
     this.setupFormListeners();
   }
-
 
   private initForm(): void {
     this.formGroup = this.fb.group({
@@ -141,9 +141,6 @@ export class UserManagementCreateUserFormComponent implements OnInit {
     }
   }
 
-
-
-  // In user-management-create-user-form.component.ts
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] && this.formGroup) {
       this.patchFormData();
@@ -205,9 +202,18 @@ export class UserManagementCreateUserFormComponent implements OnInit {
   }
 
   private patchFormData(): void {
-    if (this.data && this.formGroup) {
+    if (this.data && this.formGroup && this.sites.length > 0) {
       // Create a copy of the data to patch
       const patchData = { ...this.data };
+
+      // Convert site name to site ID if in edit mode
+      if (this.isEditMode && patchData.site) {
+        // Find the site by name and get its ID
+        const siteFound = this.sites.find(site => site.siteName === patchData.site);
+        if (siteFound) {
+          patchData.site = siteFound.siteId;
+        }
+      }
 
       // Instead of deleting, set password to empty string in edit mode when not showing password
       if (this.isEditMode && !this.showPasswordFields) {
@@ -239,11 +245,22 @@ export class UserManagementCreateUserFormComponent implements OnInit {
     this.formGroup.valueChanges.subscribe(value => {
       // Update the data
       const formValue = this.formGroup.getRawValue(); // Includes disabled fields
-      const updatedData = {
+      
+      // Convert site ID back to site name for the data model
+      let updatedData = {
         ...this.data,
         ...formValue,
         fullName: `${formValue.firstName || ''} ${formValue.lastName || ''}`.trim()
       };
+
+      // If we have a site ID, convert it back to site name for the model
+      if (formValue.site && this.sites.length > 0) {
+        const selectedSite = this.sites.find(site => site.siteId === formValue.site);
+        if (selectedSite) {
+          updatedData.site = selectedSite.siteName;
+        }
+      }
+
       this.dataChange.emit(updatedData);
     });
 
@@ -252,7 +269,6 @@ export class UserManagementCreateUserFormComponent implements OnInit {
       this.updateFormValidity();
     });
   }
-
 
   togglePasswordFields(): void {
     this.showPasswordFields = !this.showPasswordFields;
@@ -280,8 +296,6 @@ export class UserManagementCreateUserFormComponent implements OnInit {
       this.updateFormValidity();
     }
   }
-
-  // In user-management-create-user-form.component.ts
 
   resetForm(): void {
     if (this.formGroup) {
@@ -323,7 +337,6 @@ export class UserManagementCreateUserFormComponent implements OnInit {
     }
   }
 
-
   isFieldConfig(field: FieldConfig | any): boolean {
     return (field as FieldConfig).name !== undefined;
   }
@@ -335,6 +348,8 @@ export class UserManagementCreateUserFormComponent implements OnInit {
         this.isLoading = false;
         this.sites = data.data;
         this.updateSiteOptions();
+        // Patch form data after sites are loaded
+        this.patchFormData();
       },
       error: ({ message }) => {
         this.isLoading = false;
