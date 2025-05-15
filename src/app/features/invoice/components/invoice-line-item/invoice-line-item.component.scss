@@ -1,12 +1,40 @@
+select option:disabled {
+  color: #6c757d !important;
+  font-style: italic;
+  background-color: #f8f9fa;
+}
+
+/* Warning styling */
+.text-warning small {
+  font-weight: 500;
+}
+
+/* Badge styling */
+.badge {
+  font-size: 0.75rem;
+}
+
+/* Line item card styling */
 .line-item-card {
   border-left: 3px solid #696cff;
   transition: all 0.3s ease;
+}
 
-  &:hover {
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-  }
+.line-item-card:hover {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
 
-  .card-header {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  }
+.line-item-card .card-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Form control focus states */
+.form-control:focus,
+.form-select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.border-warning {
+  border-color: #ffc107 !important;
 }

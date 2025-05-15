@@ -30,7 +30,8 @@
           <!-- Customer Selection -->
           <div class="col-md-6">
             <label for="customerId" class="form-label">Customer*</label>
-            <select class="form-select" id="customerId" formControlName="customerId" [ngClass]="{
+            <select class="form-select" id="customerId" formControlName="customerId"
+              [ngClass]="{
                 'is-invalid':
                   invoiceForm.get('customerId')?.invalid &&
                   invoiceForm.get('customerId')?.touched
@@ -46,7 +47,8 @@
           <!-- Site Selection -->
           <div class="col-md-6">
             <label for="siteId" class="form-label">Site*</label>
-            <select class="form-select" id="siteId" formControlName="siteId" [ngClass]="{
+            <select class="form-select" id="siteId" formControlName="siteId"
+              [ngClass]="{
                 'is-invalid':
                   invoiceForm.get('siteId')?.invalid &&
                   invoiceForm.get('siteId')?.touched
@@ -62,7 +64,8 @@
           <!-- Due Date -->
           <div class="col-md-4">
             <label for="dueDate" class="form-label">Due Date*</label>
-            <input type="date" class="form-control" id="dueDate" formControlName="dueDate" [ngClass]="{
+            <input type="date" class="form-control" id="dueDate" formControlName="dueDate"
+              [ngClass]="{
                 'is-invalid':
                   invoiceForm.get('dueDate')?.invalid &&
                   invoiceForm.get('dueDate')?.touched
@@ -100,96 +103,92 @@
 
           <!-- Warning message when no site is selected -->
           <div *ngIf="!invoiceForm.get('siteId')?.value" class="alert alert-warning py-2">
-            <i class="bi bi-exclamation-triangle me-2"></i>Please select a site
-            to add line items
+            <i class="bi bi-exclamation-triangle me-2"></i>Please select a site to add line items
           </div>
 
           <!-- List of line items -->
           <div *ngIf="lineItems.length === 0 && invoiceForm.get('siteId')?.value" class="alert alert-info py-2">
-            <i class="bi bi-info-circle me-2"></i>Click "Add Item" to add
-            products to this invoice
+            <i class="bi bi-info-circle me-2"></i>Click "Add Item" to add products to this invoice
           </div>
 
-          <div *ngFor="let item of lineItems; let i = index" class="card mb-3 border-primary border-opacity-25">
-            <div class="card-header bg-light d-flex justify-content-between align-items-center">
-              <h6 class="mb-0">Line Item #{{ i + 1 }}</h6>
-              <button type="button" class="btn btn-sm btn-danger" (click)="removeLineItem(i)">
-                <i class="bi bi-trash"></i>
-              </button>
-            </div>
-            <div class="card-body">
-              <div class="row g-3">
-                <!-- Product Selection -->
-                <div class="col-md-6">
-                  <label [for]="'productId-' + i" class="form-label">Product*</label>
-                  <select class="form-select" [id]="'productId-' + i" [(ngModel)]="item.productId"
-                    [ngModelOptions]="{ standalone: true }" (change)="onProductSelected(i)" required>
-                    <option value="">-- Select Product --</option>
-                    <option *ngFor="let product of products" [value]="product.productId">
-                      {{ product.productName }} ({{ product.type }})
-                    </option>
-                  </select>
-                </div>
+          <!-- Line Items with Package Selection Prevention -->
+          <div *ngFor="let item of lineItems; let i = index">
+            <app-invoice-line-item
+              [products]="products"
+              [lineItem]="item"
+              [index]="i"
+              [allLineItems]="lineItems"
+              (lineItemChange)="updateLineItem($event, i)"
+              (removeLineItem)="removeLineItem(i)">
+            </app-invoice-line-item>
+          </div>
 
-                <!-- Big Package Selection -->
-                <div class="col-md-6">
-                  <label [for]="'bigPackage-' + i" class="form-label">Big Package*</label>
-                  <select class="form-select" [id]="'bigPackage-' + i" [(ngModel)]="item.bigPackageNumber"
-                    [ngModelOptions]="{ standalone: true }" (change)="onBigPackageSelected(i)" required
-                    [disabled]="!item.productId">
-                    <option value="">-- Select Package --</option>
-                    <option *ngFor="let pkg of getBigPackages(i)" [value]="pkg.packageNumber">
-                      {{ pkg.packageNumber }} ({{ pkg.totalSizeAmount }}
-                      {{ pkg.sizeDescription }})
-                      {{ pkg.isOpen ? "[Open]" : "[Closed]" }}
-                    </option>
-                  </select>
-                </div>
-
-                <!-- Small Package Multi-Select Dropdown -->
-                <div class="col-md-4">
-                  <label [for]="'smallPackage-' + i" class="form-label">Small Packages*</label>
-
-                  <!-- Hidden field for compatibility with API -->
-                  <input type="hidden" [(ngModel)]="item.smallPackageId" [ngModelOptions]="{standalone: true}">
-
-                  <!-- Multi-select dropdown -->
-                  <app-multi-select-dropdown [options]="getSmallPackageOptions(i)"
-                    [placeholder]="'Select Small Packages'" [isInvalid]="isSmallPackageInvalid(i)"
-                    [invalidMessage]="'Please select at least one small package'" [disabled]="!item.bigPackageNumber"
-                    (selectionChange)="onMultiSmallPackagesSelected($event, i)"></app-multi-select-dropdown>
-
-                  <!-- Selected packages counter -->
-                  <div class="text-muted mt-1"
-                    *ngIf="item._selectedSmallPackages && item._selectedSmallPackages.length > 0">
-                    <small>{{ item._selectedSmallPackages.length }} package(s) selected</small>
-                  </div>
-                </div>
-
-                <!-- Unit Amount -->
-                <div class="col-md-4">
-                  <label [for]="'unitAmount-' + i" class="form-label">Amount*</label>
-                  <input type="number" class="form-control" [id]="'unitAmount-' + i" [(ngModel)]="item.unitAmount"
-                    [ngModelOptions]="{ standalone: true }" required min="0.01" step="0.01"
-                    [disabled]="!item.smallPackageId" />
-                </div>
-
-                <!-- Unit Price -->
-                <div class="col-md-4">
-                  <label [for]="'unitPrice-' + i" class="form-label">Unit Price*</label>
-                  <div class="input-group">
-                    <span class="input-group-text">Rp</span>
-                    <input type="number" class="form-control" [id]="'unitPrice-' + i" [(ngModel)]="item.unitPrice"
-                      [ngModelOptions]="{ standalone: true }" required min="0" step="1000" />
-                  </div>
-                </div>
+          <!-- Enhanced Package Selection Summary -->
+          <div *ngIf="lineItems.length > 0" class="mt-4">
+            <div class="card border-info">
+              <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                  <i class="bi bi-info-circle me-2"></i>Package Selection Summary
+                </h5>
               </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <h6>Selection Status</h6>
+                    <div class="d-flex justify-content-between mb-2">
+                      <span>Total Line Items:</span>
+                      <span class="badge bg-primary">{{ lineItems.length }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                      <span>Valid Items:</span>
+                      <span class="badge bg-success">{{ getValidLineItemsCount() }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                      <span>Items with Issues:</span>
+                      <span class="badge bg-warning">{{ getInvalidLineItemsCount() }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                      <span>Completion Rate:</span>
+                      <span class="badge" [ngClass]="getCompletionBadgeClass()">
+                        {{ getCompletionPercentage() }}%
+                      </span>
+                    </div>
+                  </div>
 
-              <!-- Item Total -->
-              <div class="row mt-3">
-                <div class="col-12 text-end">
-                  <strong>Total:</strong> Rp
-                  {{ getLineItemTotal(i) | number : "1.0-0" }}
+                  <div class="col-md-6">
+                    <h6>Package Usage</h6>
+                    <div class="d-flex justify-content-between mb-2">
+                      <span>Big Packages Used:</span>
+                      <span class="badge bg-secondary">{{ getUsedBigPackagesCount() }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                      <span>Small Packages Used:</span>
+                      <span class="badge bg-secondary">{{ getUsedSmallPackagesCount() }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                      <span>Total Amount:</span>
+                      <span class="badge bg-info">{{ getTotalAmount() | number:'1.2-2' }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Show validation errors if any -->
+                <div *ngIf="getValidationErrors().length > 0" class="mt-3">
+                  <div class="alert alert-warning mb-0">
+                    <h6 class="alert-heading">
+                      <i class="bi bi-exclamation-triangle me-2"></i>Please resolve these issues:
+                    </h6>
+                    <ul class="mb-0">
+                      <li *ngFor="let error of getValidationErrors()">{{ error }}</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Show success message when all items are valid -->
+                <div *ngIf="getValidationErrors().length === 0 && lineItems.length > 0" class="mt-3">
+                  <div class="alert alert-success mb-0">
+                    <i class="bi bi-check-circle me-2"></i>All line items are valid and ready for submission!
+                  </div>
                 </div>
               </div>
             </div>
@@ -215,7 +214,8 @@
           <button type="button" class="btn btn-secondary" (click)="cancel()">
             <i class="bi bi-x-circle me-1"></i>Cancel
           </button>
-          <button type="submit" class="btn btn-primary" [disabled]="
+          <button type="submit" class="btn btn-primary"
+            [disabled]="
               invoiceForm.invalid ||
               isLoading ||
               lineItems.length === 0 ||

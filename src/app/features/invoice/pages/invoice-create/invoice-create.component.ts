@@ -7,9 +7,9 @@ import { ProductForInvoice } from '@models/invoice.model';
 import { UserManagementService } from '@services/user-management.service';
 import { SiteService } from '@services/site.service';
 import { InvoiceService } from '@services/invoice.service';
+import { PackageSelectionService } from '@services/package-selection.service';
 import { MultiSelectOption } from 'src/app/shared-components/multi-select-dropdown/multi-select-dropdown.component';
 import { LineItemData } from '@models/line-item-extensions';
-
 
 @Component({
   selector: 'app-invoice-create',
@@ -46,7 +46,8 @@ export class InvoiceCreateComponent implements OnInit {
     private router: Router,
     private invoiceService: InvoiceService,
     private userManagementService: UserManagementService,
-    private siteService: SiteService
+    private siteService: SiteService,
+    private packageSelectionService: PackageSelectionService
   ) {
     this.invoiceForm = this.fb.group({
       customerId: ['', Validators.required],
@@ -78,6 +79,50 @@ export class InvoiceCreateComponent implements OnInit {
         this.loadProducts(siteId);
       }
     });
+  }
+
+  // Helper methods to check if packages are already selected
+  isBigPackageSelected(packageNumber: string, currentIndex: number): boolean {
+    return this.packageSelectionService.isBigPackageSelected(this.lineItems, packageNumber, currentIndex);
+  }
+
+  isSmallPackageSelected(packageId: string, currentIndex: number): boolean {
+    return this.packageSelectionService.isSmallPackageSelected(this.lineItems, packageId, currentIndex);
+  }
+
+  // Updated method to get big packages with availability check
+  getBigPackages(index: number): any[] {
+    const product = this.selectedProducts[index];
+    if (!product) return [];
+
+    return this.packageSelectionService.getAvailableBigPackages(
+      product.bigPackages,
+      this.lineItems,
+      index
+    );
+  }
+
+  // Updated method to get small package options with availability check
+  getSmallPackageOptions(index: number): MultiSelectOption[] {
+    if (!this.selectedBigPackages[index]) return [];
+
+    const availablePackages = this.packageSelectionService.getAvailableSmallPackages(
+      this.selectedBigPackages[index],
+      this.lineItems,
+      index,
+      this.lineItems[index]._selectedSmallPackages || []
+    );
+
+    return availablePackages.map((sp: any) => ({
+      id: sp.packageId,
+      label: `${sp.packageId} - ${sp.sizeAmount} ${sp.sizeDescription}${sp.isAlreadySelected ? ' (Already Selected)' : ''}`,
+      selected: (this.lineItems[index]._selectedSmallPackages || []).includes(sp.packageId),
+      disabled: sp.isDisabled,
+      data: {
+        sizeAmount: sp.sizeAmount,
+        sizeDescription: sp.sizeDescription
+      }
+    }));
   }
 
   loadCustomers(): void {
@@ -203,11 +248,50 @@ export class InvoiceCreateComponent implements OnInit {
     });
   }
 
+  // FIXED: Enhanced removeLineItem method with proper cache cleanup
   removeLineItem(index: number): void {
+    console.log('Removing line item at index:', index);
+
+    // Remove the line item from the array
     this.lineItems.splice(index, 1);
-    // Clean up caches
-    delete this.selectedProducts[index];
-    delete this.selectedBigPackages[index];
+
+    // Clean up caches - create new objects to avoid reference issues
+    const newSelectedProducts: { [index: number]: ProductForInvoice | null } = {};
+    const newSelectedBigPackages: { [index: number]: any | null } = {};
+
+    // Rebuild caches with correct indices
+    Object.keys(this.selectedProducts).forEach(key => {
+      const oldIndex = parseInt(key);
+      if (oldIndex < index) {
+        // Keep items before the removed index as-is
+        newSelectedProducts[oldIndex] = this.selectedProducts[oldIndex];
+      } else if (oldIndex > index) {
+        // Shift items after the removed index down by 1
+        newSelectedProducts[oldIndex - 1] = this.selectedProducts[oldIndex];
+      }
+      // Skip the removed index
+    });
+
+    Object.keys(this.selectedBigPackages).forEach(key => {
+      const oldIndex = parseInt(key);
+      if (oldIndex < index) {
+        // Keep items before the removed index as-is
+        newSelectedBigPackages[oldIndex] = this.selectedBigPackages[oldIndex];
+      } else if (oldIndex > index) {
+        // Shift items after the removed index down by 1
+        newSelectedBigPackages[oldIndex - 1] = this.selectedBigPackages[oldIndex];
+      }
+      // Skip the removed index
+    });
+
+    // Replace the old caches with the new ones
+    this.selectedProducts = newSelectedProducts;
+    this.selectedBigPackages = newSelectedBigPackages;
+
+    // Force change detection to update the view
+    this.triggerValidationUpdate();
+
+    console.log('Line item removed. Remaining items:', this.lineItems.length);
   }
 
   onProductSelected(index: number): void {
@@ -227,6 +311,12 @@ export class InvoiceCreateComponent implements OnInit {
 
       // Set unit price from product
       this.lineItems[index].unitPrice = selectedProduct.price;
+
+      // Clear big package and small package selections when product changes
+      this.lineItems[index].bigPackageNumber = '';
+      this.lineItems[index].smallPackageId = '';
+      this.lineItems[index]._selectedSmallPackages = [];
+      this.selectedBigPackages[index] = null;
     }
   }
 
@@ -242,21 +332,10 @@ export class InvoiceCreateComponent implements OnInit {
       if (selectedBigPackage) {
         this.selectedBigPackages[index] = selectedBigPackage;
 
-        // Reset small package selection
-        this.lineItems[index].smallPackageId =
-          this.lineItems[index]._selectedSmallPackages?.[0] || '';
-
-        // Update unit amount and size description based on selected small package
-        if (this.lineItems[index]._selectedSmallPackages?.length) {
-          const smallPackage = selectedBigPackage.smallPackages.find(
-            sp => sp.packageId === this.lineItems[index].smallPackageId
-          );
-
-          if (smallPackage) {
-            this.lineItems[index].unitAmount = smallPackage.sizeAmount;
-            this.lineItems[index].sizeDescription = smallPackage.sizeDescription;
-          }
-        }
+        // Reset small package selection when big package changes
+        this.lineItems[index].smallPackageId = '';
+        this.lineItems[index]._selectedSmallPackages = [];
+        this.lineItems[index].unitAmount = 0;
       }
     }
   }
@@ -279,34 +358,11 @@ export class InvoiceCreateComponent implements OnInit {
     }
   }
 
-  // Multi-select specific methods
-  // In invoice-create.component.ts
-
-  // Updated method to filter out zero quantity packages before they reach the dropdown
-  getSmallPackageOptions(index: number): MultiSelectOption[] {
-    if (!this.selectedBigPackages[index]) return [];
-
-    return this.selectedBigPackages[index].smallPackages
-      // First, filter to only include open packages with size amount > 0
-      .filter((sp: any) => {
-        return (sp.sizeAmount > 0 || sp.quantity > 0);
-      })
-      // Then map to dropdown options
-      .map((sp: any) => ({
-        id: sp.packageId,
-        label: `${sp.packageId} - ${sp.sizeAmount} ${sp.sizeDescription}`,
-        selected: (this.lineItems[index]._selectedSmallPackages || []).includes(sp.packageId),
-        disabled: false,
-        data: {
-          sizeAmount: sp.sizeAmount,
-          sizeDescription: sp.sizeDescription
-        }
-      }));
-  }
-
   onMultiSmallPackagesSelected(selectedOptions: MultiSelectOption[], index: number): void {
-    // Get selected IDs
-    const selectedIds = selectedOptions.map(option => option.id);
+    // Get selected IDs, filtering out disabled options
+    const selectedIds = selectedOptions
+      .filter(option => !option.disabled)
+      .map(option => option.id);
 
     // Update the lineItem
     this.lineItems[index]._selectedSmallPackages = selectedIds;
@@ -341,11 +397,6 @@ export class InvoiceCreateComponent implements OnInit {
     this.lineItems[index].unitAmount = totalAmount;
   }
 
-  // Standard methods
-  getBigPackages(index: number): any[] {
-    return this.selectedProducts[index]?.bigPackages || [];
-  }
-
   getSmallPackages(index: number): any[] {
     return this.selectedBigPackages[index]?.smallPackages || [];
   }
@@ -366,113 +417,130 @@ export class InvoiceCreateComponent implements OnInit {
     return !this.lineItems[index].smallPackageId && !!this.lineItems[index].bigPackageNumber;
   }
 
-// Correct onSubmit method that includes line items in update requests
-
-onSubmit(): void {
-  if (this.invoiceForm.invalid) {
-    // Mark all controls as touched to trigger validation messages
-    Object.keys(this.invoiceForm.controls).forEach(key => {
-      this.invoiceForm.get(key)?.markAsTouched();
-    });
-    return;
+  // Add validation method for big package selection
+  isBigPackageInvalid(index: number): boolean {
+    const packageNumber = this.lineItems[index].bigPackageNumber;
+    return packageNumber ? this.isBigPackageSelected(packageNumber, index) : false;
   }
 
-  if (this.lineItems.length === 0) {
-    this.error = 'At least one line item is required';
-    return;
+  // Method to find duplicate packages across line items
+  findDuplicatePackages(): string[] {
+    const { allDuplicates } = this.packageSelectionService.findDuplicatePackages(this.lineItems);
+    return allDuplicates;
   }
 
-  const formValue = this.invoiceForm.value;
+  onSubmit(): void {
+    if (this.invoiceForm.invalid) {
+      // Mark all controls as touched to trigger validation messages
+      Object.keys(this.invoiceForm.controls).forEach(key => {
+        this.invoiceForm.get(key)?.markAsTouched();
+      });
+      return;
+    }
 
-  if (this.isEditMode) {
-    // Process multi-selected small packages before submitting
-    const expandedLineItems = this.expandMultiSelectedPackages();
+    if (this.lineItems.length === 0) {
+      this.error = 'At least one line item is required';
+      return;
+    }
 
-    // Update existing invoice - NOW INCLUDES LINE ITEMS as per API documentation
-    const updateData = {
-      invoiceNumber: this.invoiceNumber,
-      customerId: formValue.customerId,
-      siteId: formValue.siteId,
-      dueDate: formValue.dueDate,
-      notes: formValue.notes,
-      status: formValue.status,
-      lineItems: expandedLineItems, // Include line items in update request
-      changedBy: localStorage.getItem('username') || 'admin'
-    };
+    // Validate no duplicate packages are selected
+    const duplicatePackages = this.findDuplicatePackages();
+    if (duplicatePackages.length > 0) {
+      this.error = `Duplicate packages selected: ${duplicatePackages.join(', ')}`;
+      return;
+    }
 
-    this.isLoading = true;
-    this.invoiceService.updateInvoice(updateData).subscribe({
-      next: () => {
-        this.router.navigate(['/invoice/detail', this.invoiceNumber]);
-      },
-      error: (error) => {
-        this.error = error.message || 'Error updating invoice';
-        this.isLoading = false;
-      }
-    });
-  } else {
-    // Create new invoice logic remains the same
-    const expandedLineItems = this.expandMultiSelectedPackages();
+    const formValue = this.invoiceForm.value;
 
-    const createData = {
-      customerId: formValue.customerId,
-      siteId: formValue.siteId,
-      dueDate: formValue.dueDate,
-      notes: formValue.notes,
-      lineItems: expandedLineItems,
-      createdBy: localStorage.getItem('username') || 'admin'
-    };
+    if (this.isEditMode) {
+      // Process multi-selected small packages before submitting
+      const expandedLineItems = this.expandMultiSelectedPackages();
 
-    this.isLoading = true;
-    this.invoiceService.createInvoice(createData).subscribe({
-      next: () => {
-        this.router.navigate(['/invoice']);
-      },
-      error: (error) => {
-        this.error = error.message || 'Error creating invoice';
-        this.isLoading = false;
-      }
-    });
+      // Update existing invoice - NOW INCLUDES LINE ITEMS as per API documentation
+      const updateData = {
+        invoiceNumber: this.invoiceNumber,
+        customerId: formValue.customerId,
+        siteId: formValue.siteId,
+        dueDate: formValue.dueDate,
+        notes: formValue.notes,
+        status: formValue.status,
+        lineItems: expandedLineItems, // Include line items in update request
+        changedBy: localStorage.getItem('username') || 'admin'
+      };
+
+      this.isLoading = true;
+      this.invoiceService.updateInvoice(updateData).subscribe({
+        next: () => {
+          this.router.navigate(['/invoice/detail', this.invoiceNumber]);
+        },
+        error: (error) => {
+          this.error = error.message || 'Error updating invoice';
+          this.isLoading = false;
+        }
+      });
+    } else {
+      // Create new invoice logic remains the same
+      const expandedLineItems = this.expandMultiSelectedPackages();
+
+      const createData = {
+        customerId: formValue.customerId,
+        siteId: formValue.siteId,
+        dueDate: formValue.dueDate,
+        notes: formValue.notes,
+        lineItems: expandedLineItems,
+        createdBy: localStorage.getItem('username') || 'admin'
+      };
+
+      this.isLoading = true;
+      this.invoiceService.createInvoice(createData).subscribe({
+        next: () => {
+          this.router.navigate(['/invoice']);
+        },
+        error: (error) => {
+          this.error = error.message || 'Error creating invoice';
+          this.isLoading = false;
+        }
+      });
+    }
   }
-}
 
-// Expand multi-selected small packages into individual line items
-expandMultiSelectedPackages(): any[] {
-  return this.lineItems.flatMap(item => {
-    const selectedPackages = item._selectedSmallPackages || [];
+  // Expand multi-selected small packages into individual line items
+  expandMultiSelectedPackages(): any[] {
+    return this.lineItems.flatMap(item => {
+      const selectedPackages = item._selectedSmallPackages || [];
 
-    if (selectedPackages.length > 1) {
-      // Create a separate line item for each selected package
-      return selectedPackages.map(packageId => {
-        // Find the small package to get its size amount
-        const smallPackage = this.findSmallPackageById(item.productId, item.bigPackageNumber, packageId);
-        const sizeAmount = smallPackage ? smallPackage.sizeAmount :
-          (item.unitAmount / selectedPackages.length);
+      if (selectedPackages.length > 1) {
+        // Create a separate line item for each selected package
+        return selectedPackages.map(packageId => {
+          // Find the small package to get its size amount
+          const smallPackage = this.findSmallPackageById(item.productId, item.bigPackageNumber, packageId);
+          const sizeAmount = smallPackage ? smallPackage.sizeAmount :
+            (item.unitAmount / selectedPackages.length);
 
-        return {
+          return {
+            // DON'T include lineItemId - the API doesn't expect it
+            stockId: item.stockId,
+            productId: item.productId,
+            bigPackageNumber: item.bigPackageNumber,
+            smallPackageId: packageId,
+            unitAmount: sizeAmount,
+            unitPrice: item.unitPrice
+          };
+        });
+      } else {
+        // If there's only one or no selected packages, return the original
+        return [{
           // DON'T include lineItemId - the API doesn't expect it
           stockId: item.stockId,
           productId: item.productId,
           bigPackageNumber: item.bigPackageNumber,
-          smallPackageId: packageId,
-          unitAmount: sizeAmount,
+          smallPackageId: item.smallPackageId,
+          unitAmount: item.unitAmount,
           unitPrice: item.unitPrice
-        };
-      });
-    } else {
-      // If there's only one or no selected packages, return the original
-      return [{
-        // DON'T include lineItemId - the API doesn't expect it
-        stockId: item.stockId,
-        productId: item.productId,
-        bigPackageNumber: item.bigPackageNumber,
-        smallPackageId: item.smallPackageId,
-        unitAmount: item.unitAmount,
-        unitPrice: item.unitPrice
-      }];
-    }
-  });
-}
+        }];
+      }
+    });
+  }
 
   // Helper method to find a small package by ID
   findSmallPackageById(productId: string, bigPackageNumber: string, smallPackageId: string): any {
@@ -498,6 +566,9 @@ expandMultiSelectedPackages(): any[] {
 
     if (this.lineItems.length === 0) return false;
 
+    // Check for duplicate packages
+    if (this.findDuplicatePackages().length > 0) return false;
+
     // Check if all line items are complete
     return this.lineItems.every(item =>
       item.productId &&
@@ -505,5 +576,111 @@ expandMultiSelectedPackages(): any[] {
       item.smallPackageId &&
       item.unitAmount > 0
     );
+  }
+
+  // Helper methods for template
+  getValidLineItemsCount(): number {
+    return this.lineItems.filter(item => this.isLineItemValid(item)).length;
+  }
+
+  getInvalidLineItemsCount(): number {
+    return this.lineItems.length - this.getValidLineItemsCount();
+  }
+
+  private isLineItemValid(item: LineItemData): boolean {
+    // Check if line item is complete
+    const isComplete = !!(
+      item.productId &&
+      item.bigPackageNumber &&
+      item.smallPackageId &&
+      item.unitAmount > 0 &&
+      item.unitPrice > 0
+    );
+
+    if (!isComplete) return false;
+
+    // Check for package conflicts
+    const bigPackageIndex = this.lineItems.findIndex(li => li === item);
+    const hasBigPackageConflict = this.isBigPackageSelected(item.bigPackageNumber, bigPackageIndex);
+
+    // Check small package conflicts
+    const smallPackages = item._selectedSmallPackages || (item.smallPackageId ? [item.smallPackageId] : []);
+    const hasSmallPackageConflict = smallPackages.some(packageId =>
+      this.isSmallPackageSelected(packageId, bigPackageIndex)
+    );
+
+    return !hasBigPackageConflict && !hasSmallPackageConflict;
+  }
+
+  getValidationErrors(): string[] {
+    const errors: string[] = [];
+
+    // Check for incomplete line items
+    const incompleteItems = this.lineItems.filter(item => !this.isLineItemValid(item));
+    if (incompleteItems.length > 0) {
+      errors.push(`${incompleteItems.length} line item(s) are incomplete or have conflicts`);
+    }
+
+    // Check for specific duplicate packages
+    const duplicates = this.findDuplicatePackages();
+    if (duplicates.length > 0) {
+      errors.push(`Duplicate packages: ${duplicates.join(', ')}`);
+    }
+
+    return errors;
+  }
+
+  // Enhanced updateLineItem method to trigger validation
+  updateLineItem(lineItem: LineItemData, index: number): void {
+    this.lineItems[index] = lineItem;
+
+    // Trigger validation update for all line items
+    // This ensures that if a package becomes available again, other line items can use it
+    this.triggerValidationUpdate();
+  }
+
+  private triggerValidationUpdate(): void {
+    // Force update of all line item validations
+    // This is needed when packages become available/unavailable
+    setTimeout(() => {
+      // Trigger change detection if needed
+    }, 0);
+  }
+
+  // Template helper methods for package summary
+  getCompletionPercentage(): number {
+    if (this.lineItems.length === 0) return 0;
+    return Math.round((this.getValidLineItemsCount() / this.lineItems.length) * 100);
+  }
+
+  getCompletionBadgeClass(): string {
+    const percentage = this.getCompletionPercentage();
+    if (percentage === 100) return 'bg-success';
+    if (percentage >= 75) return 'bg-info';
+    if (percentage >= 50) return 'bg-warning';
+    return 'bg-danger';
+  }
+
+  getUsedBigPackagesCount(): number {
+    const usedPackages = new Set(
+      this.lineItems
+        .filter(item => item.bigPackageNumber)
+        .map(item => item.bigPackageNumber)
+    );
+    return usedPackages.size;
+  }
+
+  getUsedSmallPackagesCount(): number {
+    const usedPackages = new Set<string>();
+    this.lineItems.forEach(item => {
+      const packages = item._selectedSmallPackages ||
+        (item.smallPackageId ? [item.smallPackageId] : []);
+      packages.forEach(pkg => usedPackages.add(pkg));
+    });
+    return usedPackages.size;
+  }
+
+  getTotalAmount(): number {
+    return this.lineItems.reduce((total, item) => total + (item.unitAmount || 0), 0);
   }
 }
