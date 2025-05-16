@@ -37,7 +37,7 @@ export class MultiSelectDropdownComponent implements OnInit, OnChanges {
   ) { }
 
   ngOnInit(): void {
-    this.filterOptions();
+    this.initializeOptions();
 
     // Listen for search input changes
     this.searchControl.valueChanges.subscribe(searchTerm => {
@@ -47,68 +47,44 @@ export class MultiSelectDropdownComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['options']) {
-      this.filterOptions();
+      this.initializeOptions();
     }
   }
 
-  filterOptions(): void {
-    // More robust filtering with multiple checks
-    this.filteredOptions = this.options.filter(option => {
-      // Check multiple possible ways to determine if the option should be shown
-      const sizeAmount =
-        option.sizeAmount ??
-        option.quantity ??
-        (option.data && (option.data.sizeAmount || option.data.quantity)) ??
-        0;
-
-      // Keep options with size/quantity > 0
-      return sizeAmount > 0;
-    });
-
-    // If no options pass the filter, fall back to original options
-    // if (this.filteredOptions.length === 0) {
-    //   this.filteredOptions = this.options;
-    // }
-
-    // Update select all state after filtering
+  private initializeOptions(): void {
+    // Create a working copy of options
+    this.filteredOptions = this.options.map(option => ({ ...option }));
+    
+    // Update select all state
     this.updateSelectAllState();
-
-    // Initial emission of selections
-    this.emitSelections();
-
-    // Force change detection
-    this.cdr.detectChanges();
-
+    
     // Apply search if there's a search term
     if (this.searchControl.value) {
       this.applySearch(this.searchControl.value);
     }
+    
+    // Force change detection
+    this.cdr.detectChanges();
   }
 
-  applySearch(searchTerm: string): void {
+  private applySearch(searchTerm: string): void {
     if (!searchTerm.trim()) {
-      // If search is empty, restore to the quantity-filtered list
-      // We don't need to do anything here as filteredOptions already has the quantity-filtered items
-      return;
+      // If search is empty, show all options
+      this.filteredOptions = this.options.map(option => ({ ...option }));
+    } else {
+      // Apply search filter
+      const term = searchTerm.toLowerCase().trim();
+      this.filteredOptions = this.options
+        .filter(option => option.label.toLowerCase().includes(term))
+        .map(option => ({ ...option }));
     }
-
-    // Store the original quantity-filtered options if needed
-    const quantityFilteredOptions = [...this.filteredOptions];
-
-    // Apply the search filter to the already quantity-filtered options
-    const term = searchTerm.toLowerCase().trim();
-    this.filteredOptions = quantityFilteredOptions.filter(option =>
-      option.label.toLowerCase().includes(term)
-    );
-
-    // If debugging is needed
-    console.log('After search filter:', this.filteredOptions.length, 'items remain');
 
     // Update select all state after search
     this.updateSelectAllState();
+    this.cdr.detectChanges();
   }
 
-  updateSelectAllState(): void {
+  private updateSelectAllState(): void {
     const enabledOptions = this.filteredOptions.filter(opt => !opt.disabled);
     const selectedOptions = enabledOptions.filter(opt => opt.selected);
 
@@ -141,7 +117,8 @@ export class MultiSelectDropdownComponent implements OnInit, OnChanges {
 
       // Clear search when opening dropdown
       if (this.isOpen && this.allowSearch) {
-        this.searchControl.setValue('');
+        this.searchControl.setValue('', { emitEvent: false });
+        this.applySearch('');
       }
 
       this.cdr.detectChanges();
@@ -150,13 +127,19 @@ export class MultiSelectDropdownComponent implements OnInit, OnChanges {
 
   toggleOption(option: MultiSelectOption): void {
     if (!option.disabled) {
-      // Toggle the selected state
-      option.selected = !option.selected;
+      // Find the original option in the main options array and toggle it
+      const originalOption = this.options.find(opt => opt.id === option.id);
+      if (originalOption) {
+        originalOption.selected = !originalOption.selected;
+        
+        // Update the filtered option as well
+        option.selected = originalOption.selected;
+      }
 
       // Update select all state after toggling
       this.updateSelectAllState();
 
-      // Force change detection to update the view immediately
+      // Force change detection
       this.cdr.detectChanges();
 
       // Emit the selection change
@@ -172,16 +155,22 @@ export class MultiSelectDropdownComponent implements OnInit, OnChanges {
     // Determine new state based on current state
     const newSelectedState = this.selectAllState !== 'checked';
 
-    // Select or deselect all enabled options
-    const enabledOptions = this.filteredOptions.filter(opt => !opt.disabled);
-    enabledOptions.forEach(option => {
-      option.selected = newSelectedState;
+    // Select or deselect all enabled options in both arrays
+    const enabledFilteredOptions = this.filteredOptions.filter(opt => !opt.disabled);
+    
+    // Update both the filtered options and the original options
+    enabledFilteredOptions.forEach(filteredOption => {
+      const originalOption = this.options.find(opt => opt.id === filteredOption.id);
+      if (originalOption) {
+        originalOption.selected = newSelectedState;
+        filteredOption.selected = newSelectedState;
+      }
     });
 
     // Manually set the select all state
     this.selectAllState = newSelectedState ? 'checked' : 'unchecked';
 
-    // Force change detection to update the view immediately
+    // Force change detection
     this.cdr.detectChanges();
 
     // Emit the selection change
@@ -204,22 +193,19 @@ export class MultiSelectDropdownComponent implements OnInit, OnChanges {
     this.selectionChange.emit(this.getSelectedOptions());
   }
 
-  // Handle checkbox interaction
+  // Handle checkbox interaction with improved event handling
   handleOptionInteraction(option: MultiSelectOption, event: MouseEvent): void {
-    // Crucial part: Prevent default and stop propagation, 
-    // but WITHOUT using methods that might trigger scrolling
+    // Prevent default behavior but don't stop propagation completely
     event.preventDefault();
 
-    // Use a microtask to toggle to avoid potential scroll behavior
-    Promise.resolve().then(() => {
-      this.toggleOption(option);
-    });
+    // Toggle option directly
+    this.toggleOption(option);
   }
 
   // Clear search input
   clearSearch(event: Event): void {
     event.stopPropagation();
-    this.searchControl.setValue('');
+    this.searchControl.setValue('', { emitEvent: true });
   }
 
   // Stop propagation for search input clicks

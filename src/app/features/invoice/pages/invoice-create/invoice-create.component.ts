@@ -190,7 +190,7 @@ export class InvoiceCreateComponent implements OnInit {
   }
 
   addLineItem(): void {
-    this.lineItems.push({
+    const newLineItem: LineItemData = {
       stockId: '',
       productId: '',
       bigPackageNumber: '',
@@ -198,54 +198,65 @@ export class InvoiceCreateComponent implements OnInit {
       unitAmount: 0,
       unitPrice: 0,
       _selectedSmallPackages: []
-    });
+    };
+    
+    this.lineItems.push(newLineItem);
+    
+    // Force change detection
+    this.cdr.detectChanges();
+    
+    console.log('Line item added. Total items:', this.lineItems.length);
   }
 
   removeLineItem(index: number): void {
     console.log('Removing line item at index:', index);
-  
-    // Remove the line item from the array immediately
+    
+    // Validate index
+    if (index < 0 || index >= this.lineItems.length) {
+      console.error('Invalid line item index:', index);
+      return;
+    }
+    
+    // Remove the line item from the array
     this.lineItems.splice(index, 1);
-  
-    // Clean up caches - create new objects to avoid reference issues
-    const newSelectedProducts: { [index: number]: ProductForInvoice | null } = {};
-    const newSelectedBigPackages: { [index: number]: any | null } = {};
-  
-    // Rebuild caches with correct indices
-    Object.keys(this.selectedProducts).forEach(key => {
-      const oldIndex = parseInt(key);
-      if (oldIndex < index) {
-        newSelectedProducts[oldIndex] = this.selectedProducts[oldIndex];
-      } else if (oldIndex > index) {
-        newSelectedProducts[oldIndex - 1] = this.selectedProducts[oldIndex];
-      }
-    });
-  
-    Object.keys(this.selectedBigPackages).forEach(key => {
-      const oldIndex = parseInt(key);
-      if (oldIndex < index) {
-        newSelectedBigPackages[oldIndex] = this.selectedBigPackages[oldIndex];
-      } else if (oldIndex > index) {
-        newSelectedBigPackages[oldIndex - 1] = this.selectedBigPackages[oldIndex];
-      }
-    });
-  
-    // Replace the old caches with the new ones
-    this.selectedProducts = newSelectedProducts;
-    this.selectedBigPackages = newSelectedBigPackages;
-  
+    
+    // Clean up caches using the service method
+    this.selectedProducts = this.packageSelectionService.reindexCaches(this.selectedProducts, index);
+    this.selectedBigPackages = this.packageSelectionService.reindexCaches(this.selectedBigPackages, index);
+    
+    // Force immediate change detection
+    this.cdr.detectChanges();
+    
     console.log('Line item removed. Remaining items:', this.lineItems.length);
+    
+    // Update validation after removal
+    setTimeout(() => {
+      this.forceValidationUpdate();
+    }, 100);
   }
 
   updateLineItem(lineItem: LineItemData, index: number): void {
-    // Update immediately without setTimeout
-    this.lineItems[index] = { ...lineItem };
+    // Validate index and line item
+    if (index < 0 || index >= this.lineItems.length) {
+      console.error('Invalid line item index:', index);
+      return;
+    }
     
+    if (!lineItem) {
+      console.error('Invalid line item data:', lineItem);
+      return;
+    }
+    
+    // Create a safe copy of the line item
+    const safeLineItem = { ...lineItem };
+    
+    // Update the line item safely
+    this.lineItems[index] = safeLineItem;
+    
+    // Force change detection
     this.cdr.detectChanges();
-
-    // Force a manual change detection if needed
-    // This ensures the package selection summary updates immediately
-    console.log('Line item updated at index', index, ':', lineItem);
+    
+    console.log('Line item updated at index', index, ':', safeLineItem);
   }
 
   getInvoiceTotal(): number {
@@ -264,7 +275,11 @@ export class InvoiceCreateComponent implements OnInit {
     return this.packageSelectionService.isSmallPackageSelected(this.lineItems, packageId, currentIndex);
   }
   forceValidationUpdate(): void {
+    // Ensure change detection is run
     this.cdr.detectChanges();
+    
+    // Optional: Mark for check if using OnPush strategy
+    this.cdr.markForCheck();
   }
   
 

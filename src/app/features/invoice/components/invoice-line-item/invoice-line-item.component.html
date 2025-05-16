@@ -9,7 +9,7 @@
   <div class="card-body">
     <form [formGroup]="form">
       <div class="row g-3">
-        <!-- Product Selection - Simplified -->
+        <!-- Product Selection - Always visible -->
         <div class="col-md-6">
           <label for="productId-{{ index }}" class="form-label">Product</label>
           <select class="form-select" id="productId-{{ index }}" formControlName="productId"
@@ -25,106 +25,155 @@
           </div>
         </div>
 
-        <!-- Big Package Selection -->
-        <div class="col-md-6">
-          <label for="bigPackageNumber-{{ index }}" class="form-label">Big Package</label>
-          <select class="form-select" id="bigPackageNumber-{{ index }}" formControlName="bigPackageNumber"
-            (change)="onBigPackageSelected()" [ngClass]="{
-      'is-invalid': formControls['bigPackageNumber'].invalid && formControls['bigPackageNumber'].touched,
-      'border-warning': isBigPackageInvalid()
-    }">
-            <option value="">-- Select Package --</option>
-            <option *ngFor="let pkg of getAvailableBigPackages()" [value]="pkg.packageNumber"
-              [disabled]="isBigPackageOptionDisabled(pkg)"
-              [selected]="pkg.packageNumber === formControls['bigPackageNumber'].value"
-              [style.color]="isBigPackageOptionDisabled(pkg) ? '#6c757d' : 'inherit'"
-              [style.font-style]="isBigPackageOptionDisabled(pkg) ? 'italic' : 'normal'">
-              {{ pkg.packageNumber }} - {{ pkg.totalSizeAmount }} {{ pkg.sizeDescription }}
-              {{ pkg.isOpen ? '(Open)' : '(Closed)' }}
-              {{ pkg.isAlreadySelected ? ' ⚠ Already Selected' : '' }}
-            </option>
-          </select>
-
-          <div class="invalid-feedback" *ngIf="formControls['bigPackageNumber'].errors?.['required']">
-            Big Package is required
-          </div>
-          <div class="text-warning mt-1" *ngIf="isBigPackageInvalid()">
-            <small><i class="bi bi-exclamation-triangle me-1"></i>{{ getBigPackageErrorMessage() }}</small>
+        <!-- Product Info Display -->
+        <div class="col-md-6" *ngIf="selectedProduct">
+          <label class="form-label">Product Information</label>
+          <div class="form-control-plaintext">
+            <strong>{{ selectedProduct.productName }}</strong><br>
+            <small class="text-muted">Type: {{ selectedProduct.type }}</small><br>
+            <small class="text-muted">Price: {{ selectedProduct.price | currency:'IDR' }}</small>
           </div>
         </div>
 
-        <!-- Small Package Multi-Selection -->
-        <div class="col-md-6">
-          <label for="smallPackages-{{ index }}" class="form-label">Small Packages</label>
-
-          <!-- Hidden form control for compatibility -->
-          <input type="hidden" formControlName="smallPackageId">
-
-          <!-- Multi-select dropdown -->
-          <app-multi-select-dropdown [options]="smallPackageOptions" [placeholder]="'Select Small Packages'"
-            [isInvalid]="formControls['smallPackageId'].invalid && formControls['smallPackageId'].touched || isSmallPackageInvalid()"
-            [invalidMessage]="getSmallPackageErrorMessage()" [disabled]="!selectedBigPackage" [allowSearch]="true"
-            (selectionChange)="onSmallPackagesSelected($event)">
-          </app-multi-select-dropdown>
-
-          <!-- Selected packages summary -->
-          <div class="text-muted mt-1" *ngIf="smallPackageOptions.length > 0">
-            <small>
-              Total selected: {{ totalSelectedAmount | number:'1.2-2' }} {{ getSelectedSizeDescription() }}
-              <span *ngIf="selectedSmallPackages.length > 0" class="ms-1">
-                ({{ selectedSmallPackages.length }} packages)
-              </span>
-            </small>
-          </div>
-
-          <!-- Warning for already selected packages -->
-          <div class="text-warning mt-1" *ngIf="isSmallPackageInvalid()">
-            <small><i class="bi bi-exclamation-triangle me-1"></i>{{ getSmallPackageErrorMessage() }}</small>
-          </div>
-
-          <!-- Regular validation message -->
-          <div class="invalid-feedback"
-            *ngIf="formControls['smallPackageId'].errors?.['required'] && !isSmallPackageInvalid()">
-            At least one small package is required
+        <!-- No Product Selected Message -->
+        <div class="col-12" *ngIf="!selectedProduct">
+          <div class="alert alert-info" role="alert">
+            <i class="bi bi-info-circle me-2"></i>
+            Please select a product from the dropdown above to continue configuring this line item.
           </div>
         </div>
 
-        <!-- Unit Price -->
-        <div class="col-md-6">
-          <label for="unitPrice-{{ index }}" class="form-label">Unit Price</label>
-          <div class="input-group">
-            <span class="input-group-text">Rp</span>
-            <input type="number" class="form-control" id="unitPrice-{{ index }}" formControlName="unitPrice"
-              [ngClass]="{'is-invalid': formControls['unitPrice'].invalid && formControls['unitPrice'].touched}" min="0"
-              step="1000">
-          </div>
-          <div class="invalid-feedback" *ngIf="formControls['unitPrice'].errors?.['required']">
-            Unit Price is required
-          </div>
-          <div class="invalid-feedback" *ngIf="formControls['unitPrice'].errors?.['min']">
-            Unit Price must be greater than 0
+        <!-- No Packages Warning -->
+        <div class="col-12" *ngIf="selectedProduct && !hasAvailablePackages()">
+          <div class="alert alert-warning" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <strong>No packages available</strong><br>
+            This product ({{ selectedProduct.productName }}) doesn't have any packages configured. 
+            Please add packages to this product or select a different product.
           </div>
         </div>
-      </div>
 
-      <!-- Total Price Display -->
-      <div class="row mt-3">
-        <div class="col-12">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <strong>Line Total:</strong> Rp {{ calculateTotal() | number:'1.0-0' }}
+        <!-- Package Selection Section - Only show if product is selected and has packages -->
+        <ng-container *ngIf="selectedProduct && hasAvailablePackages()">
+          <!-- Big Package Selection -->
+          <div class="col-md-6">
+            <label for="bigPackageNumber-{{ index }}" class="form-label">Big Package</label>
+            <select class="form-select" id="bigPackageNumber-{{ index }}" formControlName="bigPackageNumber"
+              (change)="onBigPackageSelected()" [ngClass]="{
+        'is-invalid': formControls['bigPackageNumber'].invalid && formControls['bigPackageNumber'].touched,
+        'border-warning': isBigPackageInvalid()
+      }">
+              <option value="">-- Select Package --</option>
+              <option *ngFor="let pkg of getAvailableBigPackages()" [value]="pkg.packageNumber"
+                [disabled]="isBigPackageOptionDisabled(pkg)"
+                [selected]="pkg.packageNumber === formControls['bigPackageNumber'].value"
+                [style.color]="isBigPackageOptionDisabled(pkg) ? '#6c757d' : 'inherit'"
+                [style.font-style]="isBigPackageOptionDisabled(pkg) ? 'italic' : 'normal'">
+                {{ pkg.packageNumber }} - {{ pkg.totalSizeAmount }} {{ pkg.sizeDescription }}
+                {{ pkg.isOpen ? '(Open)' : '(Closed)' }}
+                {{ pkg.isAlreadySelected ? ' ⚠ Already Selected' : '' }}
+              </option>
+            </select>
+
+            <div class="invalid-feedback" *ngIf="formControls['bigPackageNumber'].errors?.['required']">
+              Big Package is required
             </div>
-            <div>
-              <!-- Status indicator -->
-              <span *ngIf="form.valid && !isBigPackageInvalid() && !isSmallPackageInvalid()" class="badge bg-success">
-                <i class="bi bi-check-circle me-1"></i>Valid
-              </span>
-              <span *ngIf="form.invalid || isBigPackageInvalid() || isSmallPackageInvalid()" class="badge bg-warning">
-                <i class="bi bi-exclamation-triangle me-1"></i>Needs attention
-              </span>
+            <div class="text-warning mt-1" *ngIf="isBigPackageInvalid()">
+              <small><i class="bi bi-exclamation-triangle me-1"></i>{{ getBigPackageErrorMessage() }}</small>
             </div>
           </div>
-        </div>
+
+          <!-- Small Package Multi-Selection -->
+          <div class="col-md-6">
+            <label for="smallPackages-{{ index }}" class="form-label">Small Packages</label>
+
+            <!-- Hidden form control for compatibility -->
+            <input type="hidden" formControlName="smallPackageId">
+
+            <!-- Multi-select dropdown -->
+            <app-multi-select-dropdown [options]="smallPackageOptions" [placeholder]="'Select Small Packages'"
+              [isInvalid]="formControls['smallPackageId'].invalid && formControls['smallPackageId'].touched || isSmallPackageInvalid()"
+              [invalidMessage]="getSmallPackageErrorMessage()" [disabled]="!selectedBigPackage" [allowSearch]="true"
+              (selectionChange)="onSmallPackagesSelected($event)">
+            </app-multi-select-dropdown>
+
+            <!-- Selected packages summary -->
+            <div class="text-muted mt-1" *ngIf="smallPackageOptions.length > 0">
+              <small>
+                Total selected: {{ totalSelectedAmount | number:'1.2-2' }} {{ getSelectedSizeDescription() }}
+                <span *ngIf="selectedSmallPackages.length > 0" class="ms-1">
+                  ({{ selectedSmallPackages.length }} packages)
+                </span>
+              </small>
+            </div>
+
+            <!-- Warning for already selected packages -->
+            <div class="text-warning mt-1" *ngIf="isSmallPackageInvalid()">
+              <small><i class="bi bi-exclamation-triangle me-1"></i>{{ getSmallPackageErrorMessage() }}</small>
+            </div>
+
+            <!-- Regular validation message -->
+            <div class="invalid-feedback"
+              *ngIf="formControls['smallPackageId'].errors?.['required'] && !isSmallPackageInvalid()">
+              At least one small package is required
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- Fields that show when product is selected (regardless of packages) -->
+        <ng-container *ngIf="selectedProduct">
+          <!-- Unit Price -->
+          <div class="col-md-6">
+            <label for="unitPrice-{{ index }}" class="form-label">Unit Price</label>
+            <div class="input-group">
+              <span class="input-group-text">Rp</span>
+              <input type="number" class="form-control" id="unitPrice-{{ index }}" formControlName="unitPrice"
+                [ngClass]="{'is-invalid': formControls['unitPrice'].invalid && formControls['unitPrice'].touched}" min="0"
+                step="1000">
+            </div>
+            <div class="invalid-feedback" *ngIf="formControls['unitPrice'].errors?.['required']">
+              Unit Price is required
+            </div>
+            <div class="invalid-feedback" *ngIf="formControls['unitPrice'].errors?.['min']">
+              Unit Price must be greater than 0
+            </div>
+          </div>
+
+          <!-- Unit Amount - Manual input when no packages available -->
+          <div class="col-md-6" *ngIf="!hasAvailablePackages()">
+            <label for="unitAmount-{{ index }}" class="form-label">Unit Amount</label>
+            <div class="input-group">
+              <input type="number" class="form-control" id="unitAmount-{{ index }}" formControlName="unitAmount"
+                [ngClass]="{'is-invalid': formControls['unitAmount'].invalid && formControls['unitAmount'].touched}" 
+                min="0.01" step="0.01">
+              <span class="input-group-text">{{ selectedProduct.sizeDescription }}</span>
+            </div>
+            <div class="invalid-feedback" *ngIf="formControls['unitAmount'].errors?.['required']">
+              Unit Amount is required
+            </div>
+            <div class="invalid-feedback" *ngIf="formControls['unitAmount'].errors?.['min']">
+              Unit Amount must be greater than 0
+            </div>
+          </div>
+
+          <!-- Total Price Display -->
+          <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <strong>Line Total:</strong> Rp {{ calculateTotal() | number:'1.0-0' }}
+              </div>
+              <div>
+                <!-- Status indicator -->
+                <span *ngIf="form.valid && !isBigPackageInvalid() && !isSmallPackageInvalid()" class="badge bg-success">
+                  <i class="bi bi-check-circle me-1"></i>Valid
+                </span>
+                <span *ngIf="form.invalid || isBigPackageInvalid() || isSmallPackageInvalid()" class="badge bg-warning">
+                  <i class="bi bi-exclamation-triangle me-1"></i>Needs attention
+                </span>
+              </div>
+            </div>
+          </div>
+        </ng-container>
       </div>
     </form>
   </div>
