@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProductForInvoice } from '@models/invoice.model';
 import { MultiSelectOption } from 'src/app/shared-components/multi-select-dropdown/multi-select-dropdown.component';
@@ -32,10 +32,12 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
 
   private destroy$ = new Subject<void>();
   private initialized = false;
+  private isUpdating = false;
 
   constructor(
     private fb: FormBuilder,
-    private packageSelectionService: PackageSelectionService
+    private packageSelectionService: PackageSelectionService,
+    private cdr: ChangeDetectorRef
   ) {
     this.form = this.fb.group({
       stockId: ['', Validators.required],
@@ -48,22 +50,22 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Initialize component state
     this.initializeComponent();
 
-    // Set up form change subscriptions with debounce
+    // Set up form change subscriptions with immediate emission
     this.form.valueChanges
       .pipe(
         takeUntil(this.destroy$),
-        debounceTime(200)
+        debounceTime(100) // Minimal debounce to avoid excessive calls
       )
       .subscribe(() => {
-        if (this.initialized) {
+        if (this.initialized && !this.isUpdating) {
           this.emitChanges();
         }
       });
 
     this.initialized = true;
+    console.log('Line item component initialized for index:', this.index);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -73,6 +75,13 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
 
     if (changes['lineItem'] && this.lineItem && !changes['lineItem'].firstChange) {
       this.initializeFromLineItem();
+    }
+
+    if (changes['products'] && this.initialized) {
+      // Update selected product when products change
+      if (this.lineItem?.productId) {
+        this.setSelectedProduct(this.lineItem.productId);
+      }
     }
   }
 
@@ -91,8 +100,10 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
   private initializeFromLineItem(): void {
     if (!this.lineItem) return;
 
+    console.log('Initializing line item', this.index, 'from data:', this.lineItem);
+    
     // Stop emissions during initialization
-    this.initialized = false;
+    this.isUpdating = true;
 
     // Initialize packages
     this.selectedSmallPackages = this.lineItem._selectedSmallPackages ||
@@ -106,18 +117,22 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
       smallPackageId: this.lineItem.smallPackageId,
       unitAmount: this.lineItem.unitAmount,
       unitPrice: this.lineItem.unitPrice
-    });
+    }, { emitEvent: false });
 
     // Set selected product and packages
     this.setSelectedProduct(this.lineItem.productId);
     this.setSelectedBigPackage(this.lineItem.bigPackageNumber);
 
     // Re-enable emissions
-    this.initialized = true;
+    this.isUpdating = false;
+    
+    // Force change detection
+    this.cdr.detectChanges();
   }
 
   private setSelectedProduct(productId: string): void {
     this.selectedProduct = this.products.find(p => p.productId === productId) || null;
+    console.log('Line item', this.index, '- Selected product:', this.selectedProduct?.productName);
     this.updateControlStates();
   }
 
@@ -127,12 +142,16 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
         bp => bp.packageNumber === packageNumber
       ) || null;
 
+      console.log('Line item', this.index, '- Selected big package:', this.selectedBigPackage?.packageNumber);
+
       if (this.selectedBigPackage) {
         this.updateSmallPackageOptions();
         if (this.lineItem?._selectedSmallPackages) {
           this.restoreSmallPackageSelections();
         }
       }
+    } else {
+      this.selectedBigPackage = null;
     }
   }
 
@@ -141,11 +160,11 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
     const bigPackageControl = this.form.get('bigPackageNumber');
     if (this.selectedProduct) {
       if (bigPackageControl?.disabled) {
-        bigPackageControl.enable();
+        bigPackageControl.enable({ emitEvent: false });
       }
     } else {
       if (bigPackageControl?.enabled) {
-        bigPackageControl.disable();
+        bigPackageControl.disable({ emitEvent: false });
       }
     }
   }
@@ -156,6 +175,7 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
 
   // Event handlers
   onProductSelected(): void {
+    console.log('Product selected for line item', this.index);
     const productId = this.form.get('productId')?.value;
     this.setSelectedProduct(productId);
 
@@ -167,7 +187,7 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
         bigPackageNumber: '',
         smallPackageId: '',
         unitAmount: 0
-      });
+      }, { emitEvent: false });
 
       // Reset package selections
       this.selectedBigPackage = null;
@@ -177,9 +197,11 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     this.validateAndUpdateOptions();
+    this.emitChanges();
   }
 
   onBigPackageSelected(): void {
+    console.log('Big package selected for line item', this.index);
     const packageNumber = this.form.get('bigPackageNumber')?.value;
     this.setSelectedBigPackage(packageNumber);
 
@@ -188,7 +210,7 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
       this.form.patchValue({
         smallPackageId: '',
         unitAmount: 0
-      });
+      }, { emitEvent: false });
       this.selectedSmallPackages = [];
       this.totalSelectedAmount = 0;
     } else {
@@ -196,20 +218,24 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     this.validateAndUpdateOptions();
+    this.emitChanges();
   }
 
   onSmallPackagesSelected(selectedOptions: MultiSelectOption[]): void {
+    console.log('Small packages selected for line item', this.index, ':', selectedOptions);
+    
     // Filter out disabled options
     const validSelections = selectedOptions.filter(option => !option.disabled);
     this.selectedSmallPackages = validSelections.map(option => option.id);
 
     // Set the first package as smallPackageId for form compatibility
     const firstPackageId = this.selectedSmallPackages.length > 0 ? this.selectedSmallPackages[0] : '';
-    this.form.patchValue({ smallPackageId: firstPackageId });
+    this.form.patchValue({ smallPackageId: firstPackageId }, { emitEvent: false });
 
     // Update total amount
     this.updateTotalAmount();
     this.validateAndUpdateOptions();
+    this.emitChanges();
   }
 
   // Helper methods
@@ -229,25 +255,6 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
     this.smallPackagesAlreadySelected = this.selectedSmallPackages.filter(packageId =>
       this.packageSelectionService.isSmallPackageSelected(this.allLineItems, packageId, this.index)
     );
-
-    // Set form errors
-    const bigPackageControl = this.form.get('bigPackageNumber');
-    if (this.bigPackageAlreadySelected) {
-      bigPackageControl?.setErrors({ alreadySelected: true });
-    } else if (bigPackageControl?.hasError('alreadySelected')) {
-      const errors = { ...bigPackageControl.errors };
-      delete errors['alreadySelected'];
-      bigPackageControl.setErrors(Object.keys(errors).length > 0 ? errors : null);
-    }
-
-    const smallPackageControl = this.form.get('smallPackageId');
-    if (this.smallPackagesAlreadySelected.length > 0) {
-      smallPackageControl?.setErrors({ alreadySelected: true });
-    } else if (smallPackageControl?.hasError('alreadySelected')) {
-      const errors = { ...smallPackageControl.errors };
-      delete errors['alreadySelected'];
-      smallPackageControl.setErrors(Object.keys(errors).length > 0 ? errors : null);
-    }
   }
 
   private updateSmallPackageOptions(): void {
@@ -271,6 +278,8 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
           data: sp
         };
       });
+
+    console.log('Updated small package options for line item', this.index, ':', this.smallPackageOptions);
   }
 
   private restoreSmallPackageSelections(): void {
@@ -289,7 +298,7 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
   private updateTotalAmount(): void {
     if (!this.selectedBigPackage || this.selectedSmallPackages.length === 0) {
       this.totalSelectedAmount = 0;
-      this.form.patchValue({ unitAmount: 0 });
+      this.form.patchValue({ unitAmount: 0 }, { emitEvent: false });
       return;
     }
 
@@ -298,7 +307,7 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
       .filter((sp: any) => this.selectedSmallPackages.includes(sp.packageId));
 
     this.totalSelectedAmount = selectedPackages.reduce((sum: number, sp: any) => sum + sp.sizeAmount, 0);
-    this.form.patchValue({ unitAmount: this.totalSelectedAmount });
+    this.form.patchValue({ unitAmount: this.totalSelectedAmount }, { emitEvent: false });
   }
 
   private emitChanges(): void {
@@ -308,19 +317,36 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
       productName: this.selectedProduct?.productName || '',
       type: this.selectedProduct?.type || '',
       sizeDescription: this.getSelectedSizeDescription(),
-      _selectedSmallPackages: this.selectedSmallPackages,
+      _selectedSmallPackages: [...this.selectedSmallPackages],
       _bigPackageInfo: this.selectedBigPackage
     };
 
+    console.log('Emitting line item change for index', this.index, ':', lineItemData);
     this.lineItemChange.emit(lineItemData);
   }
 
   // Getters and utility methods
   getAvailableBigPackages(): any[] {
-    if (!this.selectedProduct) return [];
-    return this.packageSelectionService.getAvailableBigPackages(
-      this.selectedProduct.bigPackages, this.allLineItems, this.index
+    if (!this.selectedProduct) {
+      console.log('Line item', this.index, '- No selected product');
+      return [];
+    }
+
+    // Filter big packages to only include those with available small packages
+    const availablePackages = this.selectedProduct.bigPackages.filter(bigPackage => 
+      bigPackage.smallPackages.some(smallPackage => 
+        smallPackage.quantity > 0 || smallPackage.sizeAmount > 0
+      )
     );
+
+    console.log('Line item', this.index, '- Available big packages:', availablePackages);
+
+    const packagesWithStatus = this.packageSelectionService.getAvailableBigPackages(
+      availablePackages, this.allLineItems, this.index
+    );
+
+    console.log('Line item', this.index, '- Big packages with status:', packagesWithStatus);
+    return packagesWithStatus;
   }
 
   calculateTotal(): number {
@@ -364,6 +390,7 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onRemove(): void {
+    console.log('Removing line item', this.index);
     this.removeLineItem.emit(this.index);
   }
 }

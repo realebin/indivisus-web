@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Customer } from '@models/user-management.model';
@@ -47,7 +47,8 @@ export class InvoiceCreateComponent implements OnInit {
     private invoiceService: InvoiceService,
     private userManagementService: UserManagementService,
     private siteService: SiteService,
-    private packageSelectionService: PackageSelectionService
+    private packageSelectionService: PackageSelectionService,
+    private cdr: ChangeDetectorRef
   ) {
     this.invoiceForm = this.fb.group({
       customerId: ['', Validators.required],
@@ -79,50 +80,6 @@ export class InvoiceCreateComponent implements OnInit {
         this.loadProducts(siteId);
       }
     });
-  }
-
-  // Helper methods to check if packages are already selected
-  isBigPackageSelected(packageNumber: string, currentIndex: number): boolean {
-    return this.packageSelectionService.isBigPackageSelected(this.lineItems, packageNumber, currentIndex);
-  }
-
-  isSmallPackageSelected(packageId: string, currentIndex: number): boolean {
-    return this.packageSelectionService.isSmallPackageSelected(this.lineItems, packageId, currentIndex);
-  }
-
-  // Updated method to get big packages with availability check
-  getBigPackages(index: number): any[] {
-    const product = this.selectedProducts[index];
-    if (!product) return [];
-
-    return this.packageSelectionService.getAvailableBigPackages(
-      product.bigPackages,
-      this.lineItems,
-      index
-    );
-  }
-
-  // Updated method to get small package options with availability check
-  getSmallPackageOptions(index: number): MultiSelectOption[] {
-    if (!this.selectedBigPackages[index]) return [];
-
-    const availablePackages = this.packageSelectionService.getAvailableSmallPackages(
-      this.selectedBigPackages[index],
-      this.lineItems,
-      index,
-      this.lineItems[index]._selectedSmallPackages || []
-    );
-
-    return availablePackages.map((sp: any) => ({
-      id: sp.packageId,
-      label: `${sp.packageId} - ${sp.sizeAmount} ${sp.sizeDescription}${sp.isAlreadySelected ? ' (Already Selected)' : ''}`,
-      selected: (this.lineItems[index]._selectedSmallPackages || []).includes(sp.packageId),
-      disabled: sp.isDisabled,
-      data: {
-        sizeAmount: sp.sizeAmount,
-        sizeDescription: sp.sizeDescription
-      }
-    }));
   }
 
   loadCustomers(): void {
@@ -157,7 +114,9 @@ export class InvoiceCreateComponent implements OnInit {
     this.isLoading = true;
     this.invoiceService.getProductListForInvoice(siteId).subscribe({
       next: (response) => {
+        // Store all products without filtering
         this.products = response.productList.products;
+        console.log('Products loaded for site', siteId, ':', this.products);
         this.isLoading = false;
       },
       error: (error) => {
@@ -209,12 +168,6 @@ export class InvoiceCreateComponent implements OnInit {
               };
             });
 
-            // Setup product and package selections for each line item
-            this.lineItems.forEach((lineItem, index) => {
-              this.onProductSelected(index);
-              this.onBigPackageSelected(index);
-            });
-
             this.isLoading = false;
           },
           error: (error) => {
@@ -248,161 +201,51 @@ export class InvoiceCreateComponent implements OnInit {
     });
   }
 
-  // FIXED: Enhanced removeLineItem method with proper cache cleanup
   removeLineItem(index: number): void {
     console.log('Removing line item at index:', index);
-
-    // Remove the line item from the array
+  
+    // Remove the line item from the array immediately
     this.lineItems.splice(index, 1);
-
+  
     // Clean up caches - create new objects to avoid reference issues
     const newSelectedProducts: { [index: number]: ProductForInvoice | null } = {};
     const newSelectedBigPackages: { [index: number]: any | null } = {};
-
+  
     // Rebuild caches with correct indices
     Object.keys(this.selectedProducts).forEach(key => {
       const oldIndex = parseInt(key);
       if (oldIndex < index) {
-        // Keep items before the removed index as-is
         newSelectedProducts[oldIndex] = this.selectedProducts[oldIndex];
       } else if (oldIndex > index) {
-        // Shift items after the removed index down by 1
         newSelectedProducts[oldIndex - 1] = this.selectedProducts[oldIndex];
       }
-      // Skip the removed index
     });
-
+  
     Object.keys(this.selectedBigPackages).forEach(key => {
       const oldIndex = parseInt(key);
       if (oldIndex < index) {
-        // Keep items before the removed index as-is
         newSelectedBigPackages[oldIndex] = this.selectedBigPackages[oldIndex];
       } else if (oldIndex > index) {
-        // Shift items after the removed index down by 1
         newSelectedBigPackages[oldIndex - 1] = this.selectedBigPackages[oldIndex];
       }
-      // Skip the removed index
     });
-
+  
     // Replace the old caches with the new ones
     this.selectedProducts = newSelectedProducts;
     this.selectedBigPackages = newSelectedBigPackages;
-
-    // Force change detection to update the view
-    this.triggerValidationUpdate();
-
+  
     console.log('Line item removed. Remaining items:', this.lineItems.length);
   }
 
-  onProductSelected(index: number): void {
-    const productId = this.lineItems[index].productId;
-    const selectedProduct = this.products.find(p => p.productId === productId);
+  updateLineItem(lineItem: LineItemData, index: number): void {
+    // Update immediately without setTimeout
+    this.lineItems[index] = { ...lineItem };
+    
+    this.cdr.detectChanges();
 
-    if (selectedProduct) {
-      this.selectedProducts[index] = selectedProduct;
-
-      // Update line item details
-      this.lineItems[index].stockId = selectedProduct.stockId;
-      this.lineItems[index].productName = selectedProduct.productName;
-      this.lineItems[index].type = selectedProduct.type;
-
-      // Update big package info
-      this.selectedBigPackages[index] = this.lineItems[index]._bigPackageInfo || null;
-
-      // Set unit price from product
-      this.lineItems[index].unitPrice = selectedProduct.price;
-
-      // Clear big package and small package selections when product changes
-      this.lineItems[index].bigPackageNumber = '';
-      this.lineItems[index].smallPackageId = '';
-      this.lineItems[index]._selectedSmallPackages = [];
-      this.selectedBigPackages[index] = null;
-    }
-  }
-
-  onBigPackageSelected(index: number): void {
-    const product = this.selectedProducts[index];
-    const packageNumber = this.lineItems[index].bigPackageNumber;
-
-    if (product) {
-      const selectedBigPackage = product.bigPackages.find(
-        bp => bp.packageNumber === packageNumber
-      );
-
-      if (selectedBigPackage) {
-        this.selectedBigPackages[index] = selectedBigPackage;
-
-        // Reset small package selection when big package changes
-        this.lineItems[index].smallPackageId = '';
-        this.lineItems[index]._selectedSmallPackages = [];
-        this.lineItems[index].unitAmount = 0;
-      }
-    }
-  }
-
-  onSmallPackageSelected(index: number): void {
-    if (!this.selectedBigPackages[index]) return;
-
-    const packageId = this.lineItems[index].smallPackageId;
-    const smallPackage = this.selectedBigPackages[index].smallPackages.find(
-      (sp: { packageId: string }) => sp.packageId === packageId
-    );
-
-    if (smallPackage) {
-      // Set the unit amount to the available size amount
-      this.lineItems[index].unitAmount = smallPackage.sizeAmount;
-      this.lineItems[index].sizeDescription = smallPackage.sizeDescription;
-
-      // Also update the _selectedSmallPackages array for multi-select compatibility
-      this.lineItems[index]._selectedSmallPackages = [packageId];
-    }
-  }
-
-  onMultiSmallPackagesSelected(selectedOptions: MultiSelectOption[], index: number): void {
-    // Get selected IDs, filtering out disabled options
-    const selectedIds = selectedOptions
-      .filter(option => !option.disabled)
-      .map(option => option.id);
-
-    // Update the lineItem
-    this.lineItems[index]._selectedSmallPackages = selectedIds;
-
-    // For compatibility, set the first one as smallPackageId
-    if (selectedIds.length > 0) {
-      this.lineItems[index].smallPackageId = selectedIds[0];
-    } else {
-      this.lineItems[index].smallPackageId = '';
-    }
-
-    // Update the unit amount
-    this.updateLineItemAmount(index);
-  }
-
-  updateLineItemAmount(index: number): void {
-    if (!this.selectedBigPackages[index]) return;
-
-    let totalAmount = 0;
-    const selectedIds = this.lineItems[index]._selectedSmallPackages || [];
-
-    if (selectedIds.length > 0) {
-      // Find all selected small packages
-      const selectedPackages = this.selectedBigPackages[index].smallPackages
-        .filter((sp: any) => selectedIds.includes(sp.packageId));
-
-      // Sum up their size amounts
-      totalAmount = selectedPackages.reduce((sum: number, sp: any) => sum + sp.sizeAmount, 0);
-    }
-
-    // Update unit amount
-    this.lineItems[index].unitAmount = totalAmount;
-  }
-
-  getSmallPackages(index: number): any[] {
-    return this.selectedBigPackages[index]?.smallPackages || [];
-  }
-
-  getLineItemTotal(index: number): number {
-    return (this.lineItems[index].unitAmount || 0) * (this.lineItems[index].unitPrice || 0);
+    // Force a manual change detection if needed
+    // This ensures the package selection summary updates immediately
+    console.log('Line item updated at index', index, ':', lineItem);
   }
 
   getInvoiceTotal(): number {
@@ -412,16 +255,18 @@ export class InvoiceCreateComponent implements OnInit {
     }, 0);
   }
 
-  // Check if a small package is invalid (for template binding)
-  isSmallPackageInvalid(index: number): boolean {
-    return !this.lineItems[index].smallPackageId && !!this.lineItems[index].bigPackageNumber;
+  // Helper methods to check if packages are already selected
+  isBigPackageSelected(packageNumber: string, currentIndex: number): boolean {
+    return this.packageSelectionService.isBigPackageSelected(this.lineItems, packageNumber, currentIndex);
   }
 
-  // Add validation method for big package selection
-  isBigPackageInvalid(index: number): boolean {
-    const packageNumber = this.lineItems[index].bigPackageNumber;
-    return packageNumber ? this.isBigPackageSelected(packageNumber, index) : false;
+  isSmallPackageSelected(packageId: string, currentIndex: number): boolean {
+    return this.packageSelectionService.isSmallPackageSelected(this.lineItems, packageId, currentIndex);
   }
+  forceValidationUpdate(): void {
+    this.cdr.detectChanges();
+  }
+  
 
   // Method to find duplicate packages across line items
   findDuplicatePackages(): string[] {
@@ -562,20 +407,41 @@ export class InvoiceCreateComponent implements OnInit {
   }
 
   isFormValid(): boolean {
-    if (!this.invoiceForm.valid) return false;
-
-    if (this.lineItems.length === 0) return false;
-
+    console.log('Checking form validity...');
+    
+    if (!this.invoiceForm.valid) {
+      console.log('Form is invalid');
+      return false;
+    }
+  
+    if (this.lineItems.length === 0) {
+      console.log('No line items');
+      return false;
+    }
+  
     // Check for duplicate packages
-    if (this.findDuplicatePackages().length > 0) return false;
-
+    const duplicates = this.findDuplicatePackages();
+    if (duplicates.length > 0) {
+      console.log('Duplicate packages found:', duplicates);
+      return false;
+    }
+  
     // Check if all line items are complete
-    return this.lineItems.every(item =>
-      item.productId &&
-      item.bigPackageNumber &&
-      item.smallPackageId &&
-      item.unitAmount > 0
-    );
+    const allValid = this.lineItems.every(item => {
+      const isValid = !!(
+        item.productId &&
+        item.bigPackageNumber &&
+        item.smallPackageId &&
+        item.unitAmount > 0
+      );
+      if (!isValid) {
+        console.log('Invalid line item:', item);
+      }
+      return isValid;
+    });
+  
+    console.log('Form validation result:', allValid);
+    return allValid;
   }
 
   // Helper methods for template
@@ -630,15 +496,6 @@ export class InvoiceCreateComponent implements OnInit {
     return errors;
   }
 
-  // Enhanced updateLineItem method to trigger validation
-  updateLineItem(lineItem: LineItemData, index: number): void {
-    this.lineItems[index] = lineItem;
-
-    // Trigger validation update for all line items
-    // This ensures that if a package becomes available again, other line items can use it
-    this.triggerValidationUpdate();
-  }
-
   private triggerValidationUpdate(): void {
     // Force update of all line item validations
     // This is needed when packages become available/unavailable
@@ -682,5 +539,15 @@ export class InvoiceCreateComponent implements OnInit {
 
   getTotalAmount(): number {
     return this.lineItems.reduce((total, item) => total + (item.unitAmount || 0), 0);
+  }
+
+  // Debug method
+  debugLineItems(): void {
+    console.log('=== DEBUG LINE ITEMS ===');
+    console.log('Line items:', this.lineItems);
+    console.log('Selected products cache:', this.selectedProducts);
+    console.log('Selected big packages cache:', this.selectedBigPackages);
+    console.log('Products array:', this.products);
+    console.log('=== END DEBUG ===');
   }
 }
