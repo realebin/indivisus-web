@@ -1,4 +1,15 @@
-import { Component, EventEmitter, Input, Output, OnInit, OnChanges, SimpleChanges, HostListener, ElementRef, ChangeDetectorRef } from '@angular/core';
+import { 
+  Component, 
+  EventEmitter, 
+  Input, 
+  Output, 
+  OnInit, 
+  OnChanges, 
+  SimpleChanges, 
+  ElementRef, 
+  ChangeDetectorRef,
+  OnDestroy
+} from '@angular/core';
 import { FormControl } from '@angular/forms';
 
 export interface MultiSelectOption {
@@ -16,7 +27,7 @@ export interface MultiSelectOption {
   templateUrl: './multi-select-dropdown.component.html',
   styleUrls: ['./multi-select-dropdown.component.scss']
 })
-export class MultiSelectDropdownComponent implements OnInit, OnChanges {
+export class MultiSelectDropdownComponent implements OnInit, OnChanges, OnDestroy {
   @Input() options: MultiSelectOption[] = [];
   @Input() placeholder: string = 'Select options';
   @Input() isInvalid: boolean = false;
@@ -34,14 +45,32 @@ export class MultiSelectDropdownComponent implements OnInit, OnChanges {
   constructor(
     private elementRef: ElementRef,
     private cdr: ChangeDetectorRef
-  ) { }
+  ) {}
 
   ngOnInit(): void {
+    console.log('🔵 MultiSelect: Component initialized');
     this.initializeOptions();
 
-    // Listen for search input changes
     this.searchControl.valueChanges.subscribe(searchTerm => {
       this.applySearch(searchTerm || '');
+    });
+
+    // Add document click listener for debugging
+    document.addEventListener('click', (event: Event) => {
+      if (this.isOpen) {
+        const isClickInside = this.elementRef.nativeElement.contains(event.target);
+        console.log('📍 Document click:', {
+          isClickInside: isClickInside,
+          target: event.target,
+          dropdownWasOpen: this.isOpen
+        });
+        
+        if (!isClickInside) {
+          console.log('⛔ Closing dropdown due to outside click');
+          this.isOpen = false;
+          this.cdr.detectChanges();
+        }
+      }
     });
   }
 
@@ -51,35 +80,25 @@ export class MultiSelectDropdownComponent implements OnInit, OnChanges {
     }
   }
 
+  ngOnDestroy(): void {
+    console.log('🔴 MultiSelect: Component destroyed');
+  }
+
   private initializeOptions(): void {
-    // Create a working copy of options
     this.filteredOptions = this.options.map(option => ({ ...option }));
-    
-    // Update select all state
     this.updateSelectAllState();
-    
-    // Apply search if there's a search term
-    if (this.searchControl.value) {
-      this.applySearch(this.searchControl.value);
-    }
-    
-    // Force change detection
     this.cdr.detectChanges();
   }
 
   private applySearch(searchTerm: string): void {
     if (!searchTerm.trim()) {
-      // If search is empty, show all options
       this.filteredOptions = this.options.map(option => ({ ...option }));
     } else {
-      // Apply search filter
       const term = searchTerm.toLowerCase().trim();
       this.filteredOptions = this.options
         .filter(option => option.label.toLowerCase().includes(term))
         .map(option => ({ ...option }));
     }
-
-    // Update select all state after search
     this.updateSelectAllState();
     this.cdr.detectChanges();
   }
@@ -97,25 +116,23 @@ export class MultiSelectDropdownComponent implements OnInit, OnChanges {
     }
   }
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    // Only close if the click is outside our component
-    if (!this.elementRef.nativeElement.contains(event.target) && this.isOpen) {
-      this.isOpen = false;
-      this.cdr.detectChanges();
-    }
-  }
-
+  // Let's see when this gets called
   toggleDropdown(event?: Event): void {
+    console.log('🟢 MultiSelect: toggleDropdown called', {
+      currentState: this.isOpen,
+      event: event?.type,
+      target: event?.target
+    });
+
     if (event) {
-      event.preventDefault();
       event.stopPropagation();
+      event.preventDefault();
     }
 
     if (!this.disabled) {
       this.isOpen = !this.isOpen;
+      console.log('🟡 MultiSelect: isOpen changed to:', this.isOpen);
 
-      // Clear search when opening dropdown
       if (this.isOpen && this.allowSearch) {
         this.searchControl.setValue('', { emitEvent: false });
         this.applySearch('');
@@ -125,40 +142,55 @@ export class MultiSelectDropdownComponent implements OnInit, OnChanges {
     }
   }
 
-  toggleOption(option: MultiSelectOption): void {
+  // This is our main test - let's see if this gets called and if the dropdown stays open
+  selectOption(option: MultiSelectOption, event?: Event): void {
+    console.log('🟠 MultiSelect: selectOption called', {
+      optionId: option.id,
+      currentSelected: option.selected,
+      dropdownOpen: this.isOpen,
+      event: event?.type
+    });
+
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+
     if (!option.disabled) {
-      // Find the original option in the main options array and toggle it
       const originalOption = this.options.find(opt => opt.id === option.id);
       if (originalOption) {
         originalOption.selected = !originalOption.selected;
-        
-        // Update the filtered option as well
         option.selected = originalOption.selected;
+        
+        console.log('🟣 MultiSelect: Option toggled', {
+          optionId: option.id,
+          newSelected: option.selected,
+          dropdownStillOpen: this.isOpen
+        });
       }
 
-      // Update select all state after toggling
       this.updateSelectAllState();
-
-      // Force change detection
       this.cdr.detectChanges();
-
-      // Emit the selection change
       this.emitSelections();
+
+      // Check if dropdown is still open after all this
+      setTimeout(() => {
+        console.log('🔵 MultiSelect: After timeout, dropdown is:', this.isOpen);
+      }, 0);
     }
   }
 
-  toggleSelectAll(event: MouseEvent): void {
-    // Prevent all default behaviors
-    event.preventDefault();
-    event.stopPropagation();
-
-    // Determine new state based on current state
-    const newSelectedState = this.selectAllState !== 'checked';
-
-    // Select or deselect all enabled options in both arrays
-    const enabledFilteredOptions = this.filteredOptions.filter(opt => !opt.disabled);
+  toggleSelectAll(event?: Event): void {
+    console.log('🟤 MultiSelect: toggleSelectAll called');
     
-    // Update both the filtered options and the original options
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+
+    const newSelectedState = this.selectAllState !== 'checked';
+    const enabledFilteredOptions = this.filteredOptions.filter(opt => !opt.disabled);
+
     enabledFilteredOptions.forEach(filteredOption => {
       const originalOption = this.options.find(opt => opt.id === filteredOption.id);
       if (originalOption) {
@@ -167,14 +199,23 @@ export class MultiSelectDropdownComponent implements OnInit, OnChanges {
       }
     });
 
-    // Manually set the select all state
     this.selectAllState = newSelectedState ? 'checked' : 'unchecked';
-
-    // Force change detection
     this.cdr.detectChanges();
-
-    // Emit the selection change
     this.emitSelections();
+  }
+
+  // Let's also add a simple outside click detector
+  onOutsideClick(event: Event): void {
+    console.log('⭕ MultiSelect: Outside click detected', {
+      dropdownOpen: this.isOpen,
+      target: event.target
+    });
+
+    if (this.isOpen) {
+      this.isOpen = false;
+      console.log('⭕ MultiSelect: Dropdown closed by outside click');
+      this.cdr.detectChanges();
+    }
   }
 
   hasSelectedOptions(): boolean {
@@ -191,25 +232,5 @@ export class MultiSelectDropdownComponent implements OnInit, OnChanges {
 
   emitSelections(): void {
     this.selectionChange.emit(this.getSelectedOptions());
-  }
-
-  // Handle checkbox interaction with improved event handling
-  handleOptionInteraction(option: MultiSelectOption, event: MouseEvent): void {
-    // Prevent default behavior but don't stop propagation completely
-    event.preventDefault();
-
-    // Toggle option directly
-    this.toggleOption(option);
-  }
-
-  // Clear search input
-  clearSearch(event: Event): void {
-    event.stopPropagation();
-    this.searchControl.setValue('', { emitEvent: true });
-  }
-
-  // Stop propagation for search input clicks
-  onSearchInputClick(event: MouseEvent): void {
-    event.stopPropagation();
   }
 }
