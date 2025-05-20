@@ -15,7 +15,6 @@ export class AppComponent {
     private loadingService: LoadingService,
     private autoLogoutService: AutoLogoutService
   ) {
-    // console.log('AppComponent loaded, AutoLogoutService should start.');
     this.isLoading$ = this.loadingService.loading$;
   }
 }

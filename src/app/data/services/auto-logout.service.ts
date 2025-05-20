@@ -18,7 +18,6 @@ export class AutoLogoutService {
     private ngZone: NgZone,
     private authService: AuthService
   ) {
-    // console.log('AutoLogoutService initialized!');
     this.startIdleDetection();
   }
 
@@ -38,26 +37,21 @@ export class AutoLogoutService {
 
   private resetIdleTimer() {
     if (this.router.url === '/login') {
-      // console.log('🛑 Idle detection disabled on login page.');
       return; // Prevent idle detection on login page
     }
 
     if (this.idleSubscription) {
       this.idleSubscription.unsubscribe();
-      // console.log('⏳ Previous idle timer canceled.');
     }
 
     this.idleSubscription = timer(IDLE_TIMEOUT).subscribe(() => {
-      // console.log('⚠️ User inactive, logging out...');
       this.logoutUser();
     });
 
-    // console.log('✅ New idle timer started.');
   }
 
   private logoutUser() {
     this.ngZone.run(() => {
-      // console.log('🚪 Logging out due to inactivity...');
       this.authService.logout();
       localStorage.removeItem('token');
       sessionStorage.clear();

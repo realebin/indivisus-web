@@ -8,7 +8,6 @@ import { UserManagementService } from '@services/user-management.service';
 import { SiteService } from '@services/site.service';
 import { InvoiceService } from '@services/invoice.service';
 import { PackageSelectionService } from '@services/package-selection.service';
-import { MultiSelectOption } from 'src/app/shared-components/multi-select-dropdown/multi-select-dropdown.component';
 import { LineItemData } from '@models/line-item-extensions';
 
 @Component({
@@ -116,7 +115,6 @@ export class InvoiceCreateComponent implements OnInit {
       next: (response) => {
         // Store all products without filtering
         this.products = response.productList.products;
-        console.log('Products loaded for site', siteId, ':', this.products);
         this.isLoading = false;
       },
       error: (error) => {
@@ -199,36 +197,33 @@ export class InvoiceCreateComponent implements OnInit {
       unitPrice: 0,
       _selectedSmallPackages: []
     };
-    
+
     this.lineItems.push(newLineItem);
-    
+
     // Force change detection
     this.cdr.detectChanges();
-    
-    console.log('Line item added. Total items:', this.lineItems.length);
+
   }
 
   removeLineItem(index: number): void {
-    console.log('Removing line item at index:', index);
-    
+
     // Validate index
     if (index < 0 || index >= this.lineItems.length) {
       console.error('Invalid line item index:', index);
       return;
     }
-    
+
     // Remove the line item from the array
     this.lineItems.splice(index, 1);
-    
+
     // Clean up caches using the service method
     this.selectedProducts = this.packageSelectionService.reindexCaches(this.selectedProducts, index);
     this.selectedBigPackages = this.packageSelectionService.reindexCaches(this.selectedBigPackages, index);
-    
+
     // Force immediate change detection
     this.cdr.detectChanges();
-    
-    console.log('Line item removed. Remaining items:', this.lineItems.length);
-    
+
+
     // Update validation after removal
     setTimeout(() => {
       this.forceValidationUpdate();
@@ -241,22 +236,21 @@ export class InvoiceCreateComponent implements OnInit {
       console.error('Invalid line item index:', index);
       return;
     }
-    
+
     if (!lineItem) {
       console.error('Invalid line item data:', lineItem);
       return;
     }
-    
+
     // Create a safe copy of the line item
     const safeLineItem = { ...lineItem };
-    
+
     // Update the line item safely
     this.lineItems[index] = safeLineItem;
-    
+
     // Force change detection
     this.cdr.detectChanges();
-    
-    console.log('Line item updated at index', index, ':', safeLineItem);
+
   }
 
   getInvoiceTotal(): number {
@@ -277,11 +271,11 @@ export class InvoiceCreateComponent implements OnInit {
   forceValidationUpdate(): void {
     // Ensure change detection is run
     this.cdr.detectChanges();
-    
+
     // Optional: Mark for check if using OnPush strategy
     this.cdr.markForCheck();
   }
-  
+
 
   // Method to find duplicate packages across line items
   findDuplicatePackages(): string[] {
@@ -422,25 +416,21 @@ export class InvoiceCreateComponent implements OnInit {
   }
 
   isFormValid(): boolean {
-    console.log('Checking form validity...');
-    
+
     if (!this.invoiceForm.valid) {
-      console.log('Form is invalid');
       return false;
     }
-  
+
     if (this.lineItems.length === 0) {
-      console.log('No line items');
       return false;
     }
-  
+
     // Check for duplicate packages
     const duplicates = this.findDuplicatePackages();
     if (duplicates.length > 0) {
-      console.log('Duplicate packages found:', duplicates);
       return false;
     }
-  
+
     // Check if all line items are complete
     const allValid = this.lineItems.every(item => {
       const isValid = !!(
@@ -449,13 +439,10 @@ export class InvoiceCreateComponent implements OnInit {
         item.smallPackageId &&
         item.unitAmount > 0
       );
-      if (!isValid) {
-        console.log('Invalid line item:', item);
-      }
+
       return isValid;
     });
-  
-    console.log('Form validation result:', allValid);
+
     return allValid;
   }
 

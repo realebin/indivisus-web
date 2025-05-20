@@ -8,7 +8,6 @@ import { SharedComponentsModule } from 'src/app/shared-components/shared-compone
 import { StockIndexComponent } from './pages/stock-index/stock-index.component';
 import { StockDetailComponent } from './pages/stock-detail/stock-detail.component';
 
-import { StockAddStocksComponent } from './pages/stock-add-stocks/stock-add-stocks.component';
 
 // Components
 
@@ -27,7 +26,6 @@ import { StockManagementTableComponent } from './components/stock-management-tab
     StockIndexComponent,
     StockDetailComponent,
     StockFormComponent,
-    StockAddStocksComponent,
 
     // Components
     StockListsComponent,

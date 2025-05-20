@@ -61,7 +61,7 @@ export class StockFormComponent implements OnInit {
       let sizeDescValue = '';
 
       if (type === 'FABRIC') {
-        sizeDescValue = 'Yard';
+        sizeDescValue = 'Yard/Meter';
         mainSizeDescriptionControl?.setValue(sizeDescValue);
         mainSizeDescriptionControl?.disable();
       } else if (type === 'ROPE') {
@@ -70,7 +70,7 @@ export class StockFormComponent implements OnInit {
         mainSizeDescriptionControl?.disable();
       } else {
         mainSizeDescriptionControl?.enable();
-        if (mainSizeDescriptionControl?.value === 'Yard' || mainSizeDescriptionControl?.value === 'Kg') {
+        if (mainSizeDescriptionControl?.value === 'Yard/Meter' || mainSizeDescriptionControl?.value === 'Kg') {
           mainSizeDescriptionControl?.setValue('');
         }
         return; // Don't update children for 'OTHER' type
@@ -110,7 +110,7 @@ export class StockFormComponent implements OnInit {
     let sizeDesc = '';
 
     if (currentType === 'FABRIC') {
-      sizeDesc = 'Yard';
+      sizeDesc = 'Yard/Meter';
     } else if (currentType === 'ROPE') {
       sizeDesc = 'Kg';
     }
@@ -158,7 +158,7 @@ export class StockFormComponent implements OnInit {
     let sizeDesc = '';
 
     if (currentType === 'FABRIC') {
-      sizeDesc = 'Yard';
+      sizeDesc = 'Yard/Meter';
     } else if (currentType === 'ROPE') {
       sizeDesc = 'Kg';
     }

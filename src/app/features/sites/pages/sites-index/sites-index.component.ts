@@ -63,7 +63,6 @@ export class SitesIndexComponent implements OnInit {
       .pipe(finalize(() => this.isLoading = false))
       .subscribe({
         next: (response) => {
-          console.log('Sites response:', response); // Debug log
           this.sites = response.sites;
           this.filteredSites = [...this.sites];
           this.applyFilters();

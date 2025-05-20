@@ -1,84 +1,66 @@
-<div class="debug-multiselect">
-  
-  <!-- Toggle button with detailed logging -->
-  <div class="toggle-btn" 
-       [class.invalid]="isInvalid"
-       [class.disabled]="disabled" 
-       (click)="toggleDropdown($event)">
+<div class="dropdown-container position-relative">
+  <!-- Toggle button -->
+  <div class="form-control d-flex justify-content-between align-items-center" [class.is-invalid]="isInvalid"
+    [class.disabled]="disabled" (click)="toggleDropdown($event)">
     <div class="selected-text">
       <span *ngIf="!hasSelectedOptions()">{{ placeholder }}</span>
       <span *ngIf="hasSelectedOptions()">
         {{ getSelectedCount() }} {{ getSelectedCount() === 1 ? 'item' : 'items' }} selected
       </span>
     </div>
-    <div class="toggle-icon">
-      <i class="bi" [ngClass]="isOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
-    </div>
+    <i class="bi" [ngClass]="isOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
   </div>
 
-  <!-- Simple dropdown with extensive logging -->
-  <div class="dropdown-area" 
-       *ngIf="isOpen"
-       (click)="$event.stopPropagation()"
-       (mousedown)="$event.stopPropagation()">
+  <!-- Dropdown menu with improved event handling -->
+  <div class="dropdown-menu w-100" [class.show]="isOpen" (click)="$event.stopPropagation()">
 
-    <!-- Search -->
-    <div class="search-area" *ngIf="allowSearch">
-      <input type="text" 
-             class="search-box" 
-             placeholder="Search..."
-             [formControl]="searchControl" 
-             (click)="$event.stopPropagation()"
-             autocomplete="off">
-      <button *ngIf="searchControl.value" 
-              class="clear-btn" 
-              (click)="searchControl.setValue(''); $event.stopPropagation()">
-        ×
-      </button>
-    </div>
-
-    <!-- Select All -->
-    <div class="select-all-area">
-      <label class="checkbox-label" 
-             (click)="toggleSelectAll($event)">
-        <input type="checkbox" 
-               [checked]="selectAllState === 'checked'"
-               [indeterminate]="selectAllState === 'indeterminate'"
-               (click)="$event.stopPropagation()"
-               readonly>
-        <span>Select All</span>
-      </label>
-    </div>
-
-    <!-- Options -->
-    <div class="options-area">
-      <div *ngIf="filteredOptions.length === 0" class="no-options">
-        No options
+    <!-- Search input -->
+    <div class="px-2 pt-2 pb-1 border-bottom" *ngIf="allowSearch">
+      <div class="input-group input-group-sm">
+        <input type="text" class="form-control form-control-sm" placeholder="Search packages..."
+          [formControl]="searchControl" (click)="onSearchInputClick($event)" autocomplete="off">
+        <button *ngIf="searchControl.value" class="btn btn-outline-secondary btn-sm" type="button"
+          (click)="clearSearch($event)">
+          <i class="bi bi-x"></i>
+        </button>
       </div>
-      
-      <div *ngFor="let option of filteredOptions; let i = index" 
-           class="option-row">
-        <label class="checkbox-label" 
-               [class.disabled]="option.disabled"
-               (click)="selectOption(option, $event)">
-          <input type="checkbox" 
-                 [checked]="option.selected" 
-                 [disabled]="option.disabled"
-                 (click)="$event.stopPropagation()"
-                 readonly>
-          <span>{{ option.label }}</span>
+    </div>
+
+    <!-- Select All option -->
+    <div class="px-2 py-1 border-bottom">
+      <div class="custom-checkbox">
+        <input type="checkbox" id="selectAll" [checked]="selectAllState === 'checked'" #selectAllCheckbox
+          (click)="toggleSelectAll($event)">
+        <label for="selectAll">
+          Select All
         </label>
       </div>
     </div>
+
+    <!-- Options list -->
+    <div class="dropdown-options py-1">
+      <div *ngIf="filteredOptions.length === 0" class="p-3 text-muted">
+        No options available
+      </div>
+      <div *ngFor="let option of filteredOptions; let i = index" class="dropdown-item">
+        <div class="custom-checkbox">
+          <input type="checkbox" [id]="'option-' + i" [checked]="option.selected" [disabled]="option.disabled"
+            (mousedown)="handleOptionInteraction(option, $event)">
+          <label [for]="'option-' + i" [title]="option.label" (mousedown)="handleOptionInteraction(option, $event)">
+            {{ option.label }}
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- No results message -->
+    <div *ngIf="searchControl.value && filteredOptions.length === 0" class="p-2 text-center">
+      <small class="text-muted">No matches found</small>
+    </div>
   </div>
 
-  <!-- Error message -->
-  <div *ngIf="isInvalid" class="error-msg">
+  <!-- Validation message -->
+  <div *ngIf="isInvalid" class="invalid-feedback">
     {{ invalidMessage }}
   </div>
-</div>
-
-<!-- Add this to see when the component itself gets clicked -->
-<div *ngIf="isOpen" class="debug-info" style="background: yellow; padding: 4px; font-size: 10px;">
-  Dropdown is OPEN - clicking options should keep it open
 </div>

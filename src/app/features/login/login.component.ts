@@ -45,7 +45,6 @@ export class LoginComponent implements OnInit, OnDestroy {
 
         // Extract token
         const token = response?.data?.token;
-        // console.log(response);
         if (token) {
           localStorage.setItem('authToken', token);
           this.router.navigate(['/dashboard']);

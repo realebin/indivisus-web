@@ -50,8 +50,6 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit(): void {
-    console.log('Line item component initialized for index:', this.index);
-    
     // Set up form change subscriptions with debounce
     this.form.valueChanges
       .pipe(
@@ -77,17 +75,17 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
     if (this.isDestroyed) return;
 
     if (changes['products'] && !changes['products'].firstChange) {
-      console.log('Products changed for line item', this.index);
+
       this.updateProductSelection();
     }
 
     if (changes['allLineItems'] && !changes['allLineItems'].firstChange) {
-      console.log('All line items changed, updating validation for', this.index);
+
       this.safeUpdateAvailableOptions();
     }
 
     if (changes['lineItem'] && !changes['lineItem'].firstChange && this.lineItem) {
-      console.log('Line item data changed for index', this.index);
+
       this.initializeFromLineItem();
     }
   }
@@ -122,7 +120,7 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
         _bigPackageInfo: this.selectedBigPackage
       };
 
-      console.log('Emitting line item change for index', this.index, ':', lineItemData);
+
       this.lineItemChange.emit(lineItemData);
     } catch (error) {
       console.error('Error emitting line item changes:', error);
@@ -143,13 +141,13 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
   private initializeFromLineItem(): void {
     if (!this.lineItem || this.isDestroyed) return;
 
-    console.log('Initializing line item', this.index, 'from data:', this.lineItem);
-    
+
+
     this.isInitializing = true;
 
     try {
       // Set selected packages first
-      this.selectedSmallPackages = this.lineItem._selectedSmallPackages || 
+      this.selectedSmallPackages = this.lineItem._selectedSmallPackages ||
         (this.lineItem.smallPackageId ? [this.lineItem.smallPackageId] : []);
 
       // Update form with values
@@ -166,7 +164,7 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
       if (this.lineItem.productId) {
         this.setSelectedProduct(this.lineItem.productId);
       }
-      
+
       if (this.lineItem.bigPackageNumber) {
         this.setSelectedBigPackage(this.lineItem.bigPackageNumber);
       }
@@ -189,8 +187,8 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
     if (this.isDestroyed) return;
 
     this.selectedProduct = this.products.find(p => p.productId === productId) || null;
-    console.log('Line item', this.index, '- Selected product:', this.selectedProduct?.productName);
-    
+
+
     if (this.selectedProduct) {
       // Update stock ID and unit price automatically
       this.form.patchValue({
@@ -200,20 +198,19 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
 
       // Check if product has big packages
       if (!this.selectedProduct.bigPackages || this.selectedProduct.bigPackages.length === 0) {
-        console.log('Product has no big packages available');
         // Reset package-related fields and make them not required
         this.form.patchValue({
           bigPackageNumber: '',
           smallPackageId: '',
           unitAmount: 0
         }, { emitEvent: false });
-        
+
         // Update validators for products without packages
         this.form.get('bigPackageNumber')?.clearValidators();
         this.form.get('smallPackageId')?.clearValidators();
         this.form.get('bigPackageNumber')?.updateValueAndValidity({ emitEvent: false });
         this.form.get('smallPackageId')?.updateValueAndValidity({ emitEvent: false });
-        
+
         this.selectedBigPackage = null;
         this.smallPackageOptions = [];
         this.selectedSmallPackages = [];
@@ -239,7 +236,6 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
         bp => bp.packageNumber === packageNumber
       ) || null;
 
-      console.log('Line item', this.index, '- Selected big package:', this.selectedBigPackage?.packageNumber);
 
       if (this.selectedBigPackage) {
         this.updateSmallPackageOptions();
@@ -257,7 +253,7 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
     if (this.isDestroyed) return;
 
     const bigPackageControl = this.form.get('bigPackageNumber');
-    
+
     if (this.selectedProduct && this.selectedProduct.bigPackages && this.selectedProduct.bigPackages.length > 0 && bigPackageControl) {
       if (bigPackageControl.disabled) {
         bigPackageControl.enable({ emitEvent: false });
@@ -307,8 +303,8 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
           };
         });
 
-      console.log('Updated small package options for line item', this.index, ':', this.smallPackageOptions);
     } catch (error) {
+      // TODO : Handle error gracefully
       console.error('Error updating small package options:', error);
       this.smallPackageOptions = [];
     }
@@ -354,11 +350,10 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
   onProductSelected(): void {
     if (this.isDestroyed) return;
 
-    console.log('Product selected for line item', this.index);
     const productId = this.form.get('productId')?.value;
-    
+
     this.isInitializing = true;
-    
+
     try {
       // Reset dependent fields
       this.form.patchValue({
@@ -386,18 +381,17 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
   onBigPackageSelected(): void {
     if (this.isDestroyed) return;
 
-    console.log('Big package selected for line item', this.index);
     const packageNumber = this.form.get('bigPackageNumber')?.value;
-    
+
     this.isInitializing = true;
-    
+
     try {
       // Reset small package selections
       this.form.patchValue({
         smallPackageId: '',
         unitAmount: 0
       }, { emitEvent: false });
-      
+
       this.selectedSmallPackages = [];
       this.totalSelectedAmount = 0;
 
@@ -414,8 +408,7 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
   onSmallPackagesSelected(selectedOptions: MultiSelectOption[]): void {
     if (this.isDestroyed) return;
 
-    console.log('Small packages selected for line item', this.index, ':', selectedOptions);
-    
+
     try {
       // Filter out disabled options
       const validSelections = selectedOptions.filter(option => !option.disabled);
@@ -441,30 +434,26 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
 
   getAvailableBigPackages(): any[] {
     if (!this.selectedProduct || this.isDestroyed) {
-      console.log('Line item', this.index, '- No selected product');
       return [];
     }
 
     if (!this.selectedProduct.bigPackages || this.selectedProduct.bigPackages.length === 0) {
-      console.log('Line item', this.index, '- Product has no big packages');
       return [];
     }
 
     try {
       // Filter big packages to only include those with available small packages
-      const availablePackages = this.selectedProduct.bigPackages.filter(bigPackage => 
-        bigPackage.smallPackages && bigPackage.smallPackages.some(smallPackage => 
+      const availablePackages = this.selectedProduct.bigPackages.filter(bigPackage =>
+        bigPackage.smallPackages && bigPackage.smallPackages.some(smallPackage =>
           smallPackage.quantity > 0 || smallPackage.sizeAmount > 0
         )
       );
 
-      console.log('Line item', this.index, '- Available big packages:', availablePackages);
 
       const packagesWithStatus = this.packageSelectionService.getAvailableBigPackages(
         availablePackages, this.allLineItems, this.index
       );
 
-      console.log('Line item', this.index, '- Big packages with status:', packagesWithStatus);
       return packagesWithStatus;
     } catch (error) {
       console.error('Error getting available big packages:', error);
@@ -519,14 +508,18 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
 
   // Check if the selected product has packages available
   hasAvailablePackages(): boolean {
-    return this.selectedProduct !== null && 
-           this.selectedProduct.bigPackages !== null && 
-           this.selectedProduct.bigPackages !== undefined && 
-           this.selectedProduct.bigPackages.length > 0;
+    return this.selectedProduct !== null &&
+           this.selectedProduct.bigPackages !== null &&
+           this.selectedProduct.bigPackages !== undefined &&
+           this.selectedProduct.bigPackages.length > 0 &&
+           this.selectedProduct.bigPackages.some(pkg =>
+           pkg.smallPackages &&
+           pkg.smallPackages.length > 0 &&
+           pkg.smallPackages.some(smallPkg => smallPkg.quantity > 0)
+         );
   }
 
   onRemove(): void {
-    console.log('Removing line item', this.index);
     this.removeLineItem.emit(this.index);
   }
 }

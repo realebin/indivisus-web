@@ -76,10 +76,10 @@
                       (click)="openCreateSmallPackageModal(bigPackage.packageNumber)">
                       <i class="bi bi-plus-circle"></i>
                     </button>
-                    <button class="btn btn-sm btn-warning me-1" *ngIf="!bigPackage.isOpen"
+                    <!-- <button class="btn btn-sm btn-warning me-1" *ngIf="!bigPackage.isOpen"
                       (click)="markBigPackageAsOpen(bigPackage.packageNumber)">
                       <i class="bi bi-box-arrow-in-up-right"></i>
-                    </button>
+                    </button> -->
                     <button class="btn btn-sm btn-danger" (click)="deleteBigPackage(bigPackage.packageNumber)">
                       <i class="bi bi-trash"></i>
                     </button>
@@ -124,10 +124,10 @@
                 </td> -->
                 <td>
                   <div class="btn-group">
-                    <button class="btn btn-sm btn-warning me-1" *ngIf="!smallPackage.isOpen"
+                    <!-- <button class="btn btn-sm btn-warning me-1" *ngIf="!smallPackage.isOpen"
                       (click)="markSmallPackageAsOpen(smallPackage.packageId)">
                       <i class="bi bi-box-arrow-in-up-right"></i>
-                    </button>
+                    </button> -->
                     <button class="btn btn-sm btn-danger" (click)="deleteSmallPackage(smallPackage.packageId)">
                       <i class="bi bi-trash"></i>
                     </button>

@@ -9,11 +9,12 @@ import { ActivatedRoute } from '@node_modules/@angular/router';
 export class SitesSmallerPackageDetailComponent {
 
   constructor(private route: ActivatedRoute) { }
+  // TODO : This one not used yet, because Fendy said small and big package only
   ngOnInit(): void {
-    this.route.paramMap.subscribe((params) => {
-      const productId = params.get('productId');
-      console.log('SitesSmallerPackageDetailComponent initialized with productId:', productId);
+    // this.route.paramMap.subscribe((params) => {
+      // const productId = params.get('productId');
+      // console.log('SitesSmallerPackageDetailComponent initialized with productId:', productId);
       // Add your logic to fetch product details using productId
-    });
+    // });
   }
 }
