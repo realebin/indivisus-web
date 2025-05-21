@@ -1,5 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FieldConfig } from '@models/_component-base.model';
 import { SiteOverviewList } from '@models/site.model';
@@ -107,8 +114,8 @@ export class UserManagementCreateUserFormComponent implements OnInit {
     },
   };
 
-  constructor(private fb: FormBuilder, private siteService: SiteService) { }
-  
+  constructor(private fb: FormBuilder, private siteService: SiteService) {}
+
   ngOnInit(): void {
     this.inquirySitesDropdown();
     this.initForm();
@@ -163,7 +170,7 @@ export class UserManagementCreateUserFormComponent implements OnInit {
         passwordControl?.setValidators([
           Validators.required,
           Validators.minLength(8),
-          Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)
+          Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/),
         ]);
         passwordControl?.updateValueAndValidity();
       }
@@ -184,10 +191,14 @@ export class UserManagementCreateUserFormComponent implements OnInit {
         // In edit mode without password showing, only check other fields
         isValid = true;
         Object.keys(this.formGroup.controls)
-          .filter(key => key !== 'password')
-          .forEach(key => {
+          .filter((key) => key !== 'password')
+          .forEach((key) => {
             const control = this.formGroup.get(key);
-            if (control && control.invalid && (control.touched || control.dirty)) {
+            if (
+              control &&
+              control.invalid &&
+              (control.touched || control.dirty)
+            ) {
               isValid = false;
             }
           });
@@ -203,21 +214,20 @@ export class UserManagementCreateUserFormComponent implements OnInit {
 
   private patchFormData(): void {
     if (this.data && this.formGroup && this.sites.length > 0) {
-      // Create a copy of the data to patch
       const patchData = { ...this.data };
 
-      // Convert site name to site ID if in edit mode
-      if (this.isEditMode && patchData.site) {
-        // Find the site by name and get its ID
-        const siteFound = this.sites.find(site => site.siteName === patchData.site);
+      // Find the site ID based on the site name from the data
+      if (patchData.site) {
+        const siteFound = this.sites.find(
+          (site) => site.siteName === patchData.site
+        );
         if (siteFound) {
-          patchData.site = siteFound.siteId;
+          patchData.site = siteFound.siteId; // Set the site ID in the form
         }
       }
 
-      // Instead of deleting, set password to empty string in edit mode when not showing password
       if (this.isEditMode && !this.showPasswordFields) {
-        patchData.password = '';  // Set to empty string instead of deleting
+        patchData.password = '';
       }
 
       this.formGroup.patchValue(patchData);
@@ -241,30 +251,30 @@ export class UserManagementCreateUserFormComponent implements OnInit {
   }
 
   private setupFormListeners(): void {
-    // Listen for form changes
-    this.formGroup.valueChanges.subscribe(value => {
-      // Update the data
-      const formValue = this.formGroup.getRawValue(); // Includes disabled fields
-      
-      // Convert site ID back to site name for the data model
+    this.formGroup.valueChanges.subscribe((value) => {
+      const formValue = this.formGroup.getRawValue();
+
       let updatedData = {
         ...this.data,
         ...formValue,
-        fullName: `${formValue.firstName || ''} ${formValue.lastName || ''}`.trim()
+        fullName: `${formValue.firstName || ''} ${
+          formValue.lastName || ''
+        }`.trim(),
       };
 
-      // If we have a site ID, convert it back to site name for the model
-      if (formValue.site && this.sites.length > 0) {
-        const selectedSite = this.sites.find(site => site.siteId === formValue.site);
+      // Convert site ID back to site name for the data model
+      if (formValue.site) {
+        const selectedSite = this.sites.find(
+          (site) => site.siteId === formValue.site
+        );
         if (selectedSite) {
-          updatedData.site = selectedSite.siteName;
+          updatedData.site = selectedSite.siteName; // Convert back to site name for the model
         }
       }
 
       this.dataChange.emit(updatedData);
     });
 
-    // Listen for form status changes
     this.formGroup.statusChanges.subscribe(() => {
       this.updateFormValidity();
     });
@@ -283,7 +293,7 @@ export class UserManagementCreateUserFormComponent implements OnInit {
         passwordControl.setValidators([
           Validators.required,
           Validators.minLength(8),
-          Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)
+          Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/),
         ]);
         passwordControl.setValue(''); // Clear any existing password
       } else {
@@ -309,13 +319,13 @@ export class UserManagementCreateUserFormComponent implements OnInit {
         firstName: '',
         lastName: '',
         site: '',
-        password: ''
+        password: '',
       };
 
       this.formGroup.patchValue(defaultValues);
 
       // Important: Mark all controls as pristine and untouched
-      Object.keys(this.formGroup.controls).forEach(key => {
+      Object.keys(this.formGroup.controls).forEach((key) => {
         const control = this.formGroup.get(key);
         control?.markAsPristine();
         control?.markAsUntouched();
@@ -360,7 +370,7 @@ export class UserManagementCreateUserFormComponent implements OnInit {
 
   updateSiteOptions() {
     const siteField = this.fields.find((field) => field.name === 'site');
-    if (siteField) {
+    if (siteField && this.sites) {
       siteField.options = this.sites.map((site) => ({
         label: site.siteName,
         value: site.siteId,
