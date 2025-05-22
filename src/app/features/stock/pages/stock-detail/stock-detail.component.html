@@ -61,7 +61,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let bigPackage of stock?.bigPackages || []">
+              <tr *ngFor="let bigPackage of nonZeroBigPackages">
                 <td>{{ bigPackage.packageNumber }}</td>
                 <td>{{ bigPackage.totalQuantity }}</td>
                 <td>{{ bigPackage.totalSizeAmount }} {{ bigPackage.sizeDescription }}</td>
@@ -86,7 +86,7 @@
                   </div>
                 </td>
               </tr>
-              <tr *ngIf="!stock.bigPackages || stock.bigPackages.length === 0">
+              <tr *ngIf="!stock.bigPackages || stock.bigPackages.length === 0 || !hasNonZeroQuantityPackages()">
                 <td colspan="5" class="text-center">No big packages available</td>
               </tr>
             </tbody>
@@ -95,6 +95,7 @@
       </div>
     </div>
 
+    <!-- TODO : smallPackage[] and smallPackage with 0 quantity not showing the same behavior ([] has no table at all, 0 quantity shows a table with 0 rows) -->
     <!-- Small Packages Section -->
     <div class="card shadow-sm mb-4" *ngFor="let bigPackage of stock.bigPackages">
       <div class="card-header bg-light">
@@ -113,7 +114,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let smallPackage of bigPackage.smallPackages">
+              <tr *ngFor="let smallPackage of getNonZeroSmallPackages(bigPackage)">
                 <td>{{ smallPackage.packageId }}</td>
                 <td>{{ smallPackage.quantity }}</td>
                 <td>{{ smallPackage.sizeAmount }} {{ smallPackage.sizeDescription }}</td>
@@ -134,7 +135,7 @@
                   </div>
                 </td>
               </tr>
-              <tr *ngIf="!bigPackage.smallPackages || bigPackage.smallPackages.length === 0">
+              <tr *ngIf="!hasNonZeroSmallPackages(bigPackage)">
                 <td colspan="5" class="text-center">No small packages available</td>
               </tr>
             </tbody>

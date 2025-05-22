@@ -89,6 +89,9 @@ export class StockIndexComponent implements OnInit, OnDestroy {
       this.stockService.deleteStock(stock.stockId).subscribe({
         next: () => {
           this.loadStocks();
+          // TODO : masih belum muncul error msg nya
+          this.errorMessage = `Successfully deleted stock ${stock.productName}`;
+          this.isLoading = false;
         },
         error: (error) => {
           this.errorMessage = error.message || 'Error deleting stock';

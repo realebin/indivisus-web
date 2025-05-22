@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, TemplateRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { StockHeaderModel } from '@models/stock.model';
+import { BigPackageModel, SmallPackageModel, StockHeaderModel } from '@models/stock.model';
 import { StockManagementService } from '@services/stock.service';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { BigPackageCreateComponent } from '../../components/big-package-create/big-package-create.component';
@@ -32,7 +32,7 @@ export class StockDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     private stockService: StockManagementService,
     private modalService: BsModalService
-  ) { }
+  ) {}
 
   ngOnDestroy(): void {
     if (this.modalRef) {
@@ -232,4 +232,22 @@ export class StockDetailComponent implements OnInit, OnDestroy {
         });
     }
   }
+
+get nonZeroBigPackages(): BigPackageModel[] {
+  return (
+    this.stock?.bigPackages?.filter((pkg: BigPackageModel) => pkg.totalQuantity > 0) || []
+  );
+}
+
+getNonZeroSmallPackages(bigPackage: BigPackageModel): SmallPackageModel[] {
+  return bigPackage.smallPackages?.filter((pkg: SmallPackageModel) => pkg.quantity > 0) || [];
+}
+
+hasNonZeroSmallPackages(bigPackage: BigPackageModel): boolean {
+  return this.getNonZeroSmallPackages(bigPackage).length > 0;
+}
+
+hasNonZeroQuantityPackages(): boolean {
+  return this.nonZeroBigPackages.length > 0;
+}
 }

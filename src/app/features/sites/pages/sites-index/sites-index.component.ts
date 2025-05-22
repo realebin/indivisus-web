@@ -241,4 +241,5 @@ export class SitesIndexComponent implements OnInit {
     if (!site.stockOverview) return 0;
     return site.stockOverview.reduce((total, stock) => total + (stock.totalStock || 0), 0);
   }
+
 }
