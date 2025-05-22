@@ -23,6 +23,9 @@
     <div class="alert alert-danger" *ngIf="errorMessage">
       {{ errorMessage }}
     </div>
+    <div class="alert alert-success" *ngIf="successMessage">
+      {{ successMessage }}
+    </div>
 
     <ng-container *ngIf="!isLoading; else loading">
       <app-stock-management-table [data]="filteredStocks" (editStockEvent)="editStock($event)"

@@ -14,6 +14,7 @@ import { Subscription } from 'rxjs';
 export class StockIndexComponent implements OnInit, OnDestroy {
   isLoading = false;
   errorMessage: string = '';
+  successMessage: string = '';
   stocks: StockHeaderModel[] = [];
   filteredStocks: StockHeaderModel[] = [];
 
@@ -84,13 +85,15 @@ export class StockIndexComponent implements OnInit, OnDestroy {
   }
 
   deleteStock(stock: StockHeaderModel): void {
+    this.errorMessage = '';
+    this.successMessage = '';
     if (confirm(`Are you sure you want to delete ${stock.productName}?`)) {
       this.isLoading = true;
       this.stockService.deleteStock(stock.stockId).subscribe({
         next: () => {
           this.loadStocks();
           // TODO : masih belum muncul error msg nya
-          this.errorMessage = `Successfully deleted stock ${stock.productName}`;
+          this.successMessage = `Successfully deleted stock ${stock.productName}`;
           this.isLoading = false;
         },
         error: (error) => {
