@@ -20,7 +20,10 @@ export interface AppUser {
   fullName: string;
   username: string;
   password?: string;
-  site: string;
+  site: {
+    siteId: string;
+    siteName: string;
+  };
 }
 
 export interface Customer {
@@ -125,7 +128,10 @@ export function transformToUserManagementInquiryAppUserModelResponse(
         lastName: d.last_name,
         password: d?.password,
         username: d.username,
-        site: d.site
+        site: {
+          siteId: d.site_id,
+          siteName: d.site_name,
+        }
       };
     }),
   };
@@ -148,7 +154,7 @@ export function transformToUserManagementInquiryCustomerModelResponse(
         city: d.city,
         phoneNumber: d.phone_number,
         postalCode: d.postal_code,
-        notes: d.notes
+        notes: d.notes,
       };
     }),
   };
@@ -193,7 +199,7 @@ export function transformToUserManagementCreateAppUserHttpRequest(
     last_name: request.lastName,
     password: request.password,
     username: request.username,
-    site: request.site
+    site_id: request.site,
   };
 
   return result;

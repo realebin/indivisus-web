@@ -212,27 +212,30 @@ export class UserManagementCreateUserFormComponent implements OnInit {
     this.formValidityChange.emit(isValid);
   }
 
-  private patchFormData(): void {
-    if (this.data && this.formGroup && this.sites.length > 0) {
-      const patchData = { ...this.data };
+private patchFormData(): void {
+  if (this.data && this.formGroup && this.sites.length > 0) {
+    const patchData = { ...this.data };
 
-      // Find the site ID based on the site name from the data
-      if (patchData.site) {
-        const siteFound = this.sites.find(
-          (site) => site.siteName === patchData.site
-        );
+    // Handle site object patching
+    if (patchData.site) {
+      if (typeof patchData.site === 'string') {
+        // If site is a string (site name), find the corresponding site object
+        const siteFound = this.sites.find((site) => site.siteName === patchData.site);
         if (siteFound) {
-          patchData.site = siteFound.siteId; // Set the site ID in the form
+          patchData.site = siteFound.siteId;
         }
+      } else if (typeof patchData.site === 'object' && 'siteId' in patchData.site) {
+        // If site is an object with siteId, use that directly
+        patchData.site = (patchData.site as { siteId: string }).siteId;
       }
-
-      if (this.isEditMode && !this.showPasswordFields) {
-        patchData.password = '';
-      }
-
-      this.formGroup.patchValue(patchData);
+    } else if (patchData.site) {
+      // Use the site value directly
+      patchData.site = patchData.site;
     }
+
+    this.formGroup.patchValue(patchData);
   }
+}
 
   getPasswordField(): FieldConfig | undefined {
     // if (!this.isEditMode || this.showPasswordFields) {
@@ -250,35 +253,35 @@ export class UserManagementCreateUserFormComponent implements OnInit {
     return undefined;
   }
 
-  private setupFormListeners(): void {
-    this.formGroup.valueChanges.subscribe((value) => {
-      const formValue = this.formGroup.getRawValue();
+private setupFormListeners(): void {
+  this.formGroup.valueChanges.subscribe((value) => {
+    const formValue = this.formGroup.getRawValue();
 
-      let updatedData = {
-        ...this.data,
-        ...formValue,
-        fullName: `${formValue.firstName || ''} ${
-          formValue.lastName || ''
-        }`.trim(),
-      };
+    let updatedData = {
+      ...this.data,
+      ...formValue,
+      fullName: `${formValue.firstName || ''} ${formValue.lastName || ''}`.trim(),
+    };
 
-      // Convert site ID back to site name for the data model
-      if (formValue.site) {
-        const selectedSite = this.sites.find(
-          (site) => site.siteId === formValue.site
-        );
-        if (selectedSite) {
-          updatedData.site = selectedSite.siteName; // Convert back to site name for the model
-        }
+    // Convert site ID to site object for the data model
+    if (formValue.site) {
+      const selectedSite = this.sites.find((site) => site.siteId === formValue.site);
+      if (selectedSite) {
+        updatedData.site = selectedSite.siteId
+          // siteName: selectedSite.siteName
+
+        // Also set site_id for backward compatibility
+        updatedData.site_id = selectedSite.siteId;
       }
+    }
 
-      this.dataChange.emit(updatedData);
-    });
+    this.dataChange.emit(updatedData);
+  });
 
-    this.formGroup.statusChanges.subscribe(() => {
-      this.updateFormValidity();
-    });
-  }
+  this.formGroup.statusChanges.subscribe(() => {
+    this.updateFormValidity();
+  });
+}
 
   togglePasswordFields(): void {
     this.showPasswordFields = !this.showPasswordFields;
@@ -318,7 +321,7 @@ export class UserManagementCreateUserFormComponent implements OnInit {
         username: '',
         firstName: '',
         lastName: '',
-        site: '',
+        siteId: '',
         password: '',
       };
 

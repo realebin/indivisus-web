@@ -87,7 +87,7 @@ export class UserManagementTableInquiryComponent implements OnInit, OnChanges, O
           { field: 'firstName', label: 'First Name' },
           { field: 'lastName', label: 'Last Name' },
           { field: 'role', label: 'Role' },
-          { field: 'site', label: 'Site' }
+          { field: 'site.siteName', label: 'Site' }
         ];
         break;
       case UserManagementDictionaryEnum.Customer:
@@ -145,7 +145,7 @@ export class UserManagementTableInquiryComponent implements OnInit, OnChanges, O
       { field: 'firstName', headerName: 'First Name' },
       { field: 'lastName', headerName: 'Last Name' },
       { field: 'username', headerName: 'Username' },
-      { field: 'site', headerName: 'Site' },
+      { field: 'site.siteName', headerName: 'Site' },
       {
         headerName: 'Actions',
         cellRenderer: this.actionsRenderer.bind(this),

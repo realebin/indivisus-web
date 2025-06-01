@@ -11,7 +11,8 @@ export interface UserManagementInquiryAppUserHttpResponse {
     username: string;
     password?: string;
     full_name: string;
-    site: string;
+    site_id: string;
+    site_name: string;
   }[];
 }
 
@@ -55,7 +56,7 @@ export interface UserManagementCreateAppUserHttpRequest {
   username: string;
   password: string;
   full_name: string; // gaperlu kirim
-  site: string;
+  site_id: string;
 }
 
 export interface UserManagementCreateCustomerHttpRequest {
