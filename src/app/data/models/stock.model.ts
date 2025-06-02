@@ -31,6 +31,9 @@ export interface BigPackageModel {
   totalSizeAmount: number;
   sizeDescription: string;
   isOpen: boolean;
+  supplierId?: string;
+  supplierName?: string;
+  arrivalDate?: string;
   smallPackages: SmallPackageModel[];
   createdAt: string;
   createdBy: string;
@@ -74,15 +77,16 @@ export function transformToStockHeaderModel(
   };
 }
 
-export function transformToBigPackageModel(
-  bigPackage: BigPackage
-): BigPackageModel {
+export function transformToBigPackageModel(bigPackage: BigPackage): BigPackageModel {
   return {
     packageNumber: bigPackage.package_number,
     totalQuantity: bigPackage.total_quantity,
     totalSizeAmount: bigPackage.total_size_amount,
     sizeDescription: bigPackage.size_description,
     isOpen: bigPackage.is_open,
+    supplierId: bigPackage.supplier_id,
+    supplierName: bigPackage.supplier_name,
+    arrivalDate: bigPackage.arrival_date,
     smallPackages: bigPackage.small_packages.map(transformToSmallPackageModel),
     createdAt: bigPackage.created_at,
     createdBy: bigPackage.created_by,

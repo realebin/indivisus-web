@@ -93,36 +93,40 @@ export class StockManagementHttpService {
     >(`${this.baseUrl}/stock/delete/${stockId}`);
   }
 
-  createBigPackage(
-    stockId: string,
-    request: {
-      package_number: string;
-      size_description: string;
-      small_packages: {
-        size_amount: number;
-        size_description: string;
-        created_by: string;
-      }[];
-      created_by: string;
-    }
-  ): Observable<ApiResponse<{ epoch: number }>> {
-    return this.httpClient.post<ApiResponse<{ epoch: number }>>(
-      `${this.baseUrl}/stock/${stockId}/big-package/create`,
-      request
-    );
-  }
-
-  updateBigPackage(request: {
+createBigPackage(
+  stockId: string,
+  request: {
     package_number: string;
     size_description: string;
-    is_open: boolean;
-    changed_by: string;
-  }): Observable<ApiResponse<{ epoch: number }>> {
-    return this.httpClient.put<ApiResponse<{ epoch: number }>>(
-      `${this.baseUrl}/stock/big-package/update`,
-      request
-    );
+    supplier_id?: string;
+    arrival_date?: string;
+    small_packages: {
+      size_amount: number;
+      size_description: string;
+      created_by: string;
+    }[];
+    created_by: string;
   }
+): Observable<ApiResponse<{ epoch: number }>> {
+  return this.httpClient.post<ApiResponse<{ epoch: number }>>(
+    `${this.baseUrl}/stock/${stockId}/big-package/create`,
+    request
+  );
+}
+
+updateBigPackage(request: {
+  package_number: string;
+  size_description: string;
+  is_open: boolean;
+  supplier_id?: string;
+  arrival_date?: string;
+  changed_by: string;
+}): Observable<ApiResponse<{ epoch: number }>> {
+  return this.httpClient.put<ApiResponse<{ epoch: number }>>(
+    `${this.baseUrl}/stock/big-package/update`,
+    request
+  );
+}
 
   deleteBigPackage(packageNumber: string): Observable<
     ApiResponse<{

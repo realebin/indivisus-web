@@ -160,79 +160,75 @@ export class StockManagementService {
     );
   }
 
-  // Big Package Methods
-  createBigPackage(
-    stockId: string,
-    bigPackageData: {
-      packageNumber: string;
-      sizeDescription: string;
-      smallPackages: {
-        sizeAmount: number;
-        sizeDescription: string;
-        createdBy: string;
-      }[];
-      createdBy: string;
-    }
-  ): Observable<string> {
-    return this.stockManagementHttpService
-      .createBigPackage(stockId, {
-        package_number: bigPackageData.packageNumber,
-        size_description: bigPackageData.sizeDescription,
-        small_packages: bigPackageData.smallPackages.map((sp) => ({
-          size_amount: sp.sizeAmount,
-          size_description: sp.sizeDescription,
-          created_by: sp.createdBy,
-        })),
-        created_by: bigPackageData.createdBy,
-      })
-      .pipe(
-        map((response) => {
-          const language = 'indonesian';
-          const errorMessage = response.error_schema.error_message;
-          // const language =
-          // this.translocoService.getActiveLang() === LanguageEnum.EN ? 'english' : 'indonesian';
-          // return response.error_schema.error_message[language];
 
-          // Check if errorMessage is an object with language properties
-          if (typeof errorMessage === 'object' && errorMessage !== null) {
-            return errorMessage[language];
-          }
-          // If it's a string, return it directly
-          return errorMessage;
-        })
-      );
-  }
-
-  updateBigPackage(bigPackageData: {
+createBigPackage(
+  stockId: string,
+  bigPackageData: {
     packageNumber: string;
     sizeDescription: string;
-    isOpen: boolean;
-    changedBy: string;
-  }): Observable<string> {
-    return this.stockManagementHttpService
-      .updateBigPackage({
-        package_number: bigPackageData.packageNumber,
-        size_description: bigPackageData.sizeDescription,
-        is_open: bigPackageData.isOpen,
-        changed_by: bigPackageData.changedBy,
-      })
-      .pipe(
-        map((response) => {
-          const language = 'indonesian';
-          const errorMessage = response.error_schema.error_message;
-          // const language =
-          // this.translocoService.getActiveLang() === LanguageEnum.EN ? 'english' : 'indonesian';
-          // return response.error_schema.error_message[language];
-
-          // Check if errorMessage is an object with language properties
-          if (typeof errorMessage === 'object' && errorMessage !== null) {
-            return errorMessage[language];
-          }
-          // If it's a string, return it directly
-          return errorMessage;
-        }),
-      );
+    supplierId?: string;
+    arrivalDate?: string;
+    smallPackages: {
+      sizeAmount: number;
+      sizeDescription: string;
+      createdBy: string;
+    }[];
+    createdBy: string;
   }
+): Observable<string> {
+  return this.stockManagementHttpService
+    .createBigPackage(stockId, {
+      package_number: bigPackageData.packageNumber,
+      size_description: bigPackageData.sizeDescription,
+      supplier_id: bigPackageData.supplierId,
+      arrival_date: bigPackageData.arrivalDate,
+      small_packages: bigPackageData.smallPackages.map((sp) => ({
+        size_amount: sp.sizeAmount,
+        size_description: sp.sizeDescription,
+        created_by: sp.createdBy,
+      })),
+      created_by: bigPackageData.createdBy,
+    })
+    .pipe(
+      map((response) => {
+        const language = 'indonesian';
+        const errorMessage = response.error_schema.error_message;
+        if (typeof errorMessage === 'object' && errorMessage !== null) {
+          return errorMessage[language];
+        }
+        return errorMessage;
+      })
+    );
+}
+
+updateBigPackage(bigPackageData: {
+  packageNumber: string;
+  sizeDescription: string;
+  isOpen: boolean;
+  supplierId?: string;
+  arrivalDate?: string;
+  changedBy: string;
+}): Observable<string> {
+  return this.stockManagementHttpService
+    .updateBigPackage({
+      package_number: bigPackageData.packageNumber,
+      size_description: bigPackageData.sizeDescription,
+      is_open: bigPackageData.isOpen,
+      supplier_id: bigPackageData.supplierId,
+      arrival_date: bigPackageData.arrivalDate,
+      changed_by: bigPackageData.changedBy,
+    })
+    .pipe(
+      map((response) => {
+        const language = 'indonesian';
+        const errorMessage = response.error_schema.error_message;
+        if (typeof errorMessage === 'object' && errorMessage !== null) {
+          return errorMessage[language];
+        }
+        return errorMessage;
+      }),
+    );
+}
 
   deleteBigPackage(packageNumber: string): Observable<any> {
     return this.stockManagementHttpService.deleteBigPackage(packageNumber).pipe(

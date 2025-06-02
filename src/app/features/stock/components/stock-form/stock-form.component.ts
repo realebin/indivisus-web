@@ -4,14 +4,15 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SiteAllListResponse } from '@models/site.model';
 import { StockHeaderModel } from '@models/stock.model';
+import { Supplier } from '@models/user-management.model';
 import { SiteService } from '@services/site.service';
 import { StockManagementService } from '@services/stock.service';
-
+import { UserManagementService } from '@services/user-management.service';
 
 @Component({
   selector: 'app-stock-form',
   templateUrl: './stock-form.component.html',
-  styleUrls: ['./stock-form.component.scss']
+  styleUrls: ['./stock-form.component.scss'],
 })
 export class StockFormComponent implements OnInit {
   stockForm: FormGroup;
@@ -19,34 +20,33 @@ export class StockFormComponent implements OnInit {
   stockId: string | null;
   isLoading = false;
   errorMessage: string;
+  suppliers: Supplier[] = [];
 
-  sites: { value: string, label: string }[] = [];
+  sites: { value: string; label: string }[] = [];
   stockTypes = [
     { value: 'FABRIC', label: 'Fabric' },
     { value: 'ROPE', label: 'Rope' },
-    { value: 'OTHER', label: 'Other' }
+    { value: 'OTHER', label: 'Other' },
   ];
 
-  breadcrumbs = [
-    { label: 'Stock', url: '/stock' },
-    { label: 'Add Stock' }
-  ];
-
+  breadcrumbs = [{ label: 'Stock', url: '/stock' }, { label: 'Add Stock' }];
 
   constructor(
     private fb: FormBuilder,
     private stockService: StockManagementService,
     private siteService: SiteService,
+    private userManagementService: UserManagementService, // Add this
     private route: ActivatedRoute,
     private router: Router
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.initForm();
     this.loadSites();
+    this.loadSuppliers();
 
     // Check if we're in edit mode
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.subscribe((params) => {
       this.stockId = params.get('id');
       if (this.stockId) {
         this.isEditMode = true;
@@ -56,7 +56,7 @@ export class StockFormComponent implements OnInit {
     });
 
     // Only affect main stock size description
-    this.stockForm.get('type')?.valueChanges.subscribe(type => {
+    this.stockForm.get('type')?.valueChanges.subscribe((type) => {
       const mainSizeDescriptionControl = this.stockForm.get('sizeDescription');
       let sizeDescValue = '';
 
@@ -70,23 +70,50 @@ export class StockFormComponent implements OnInit {
         mainSizeDescriptionControl?.disable();
       } else {
         mainSizeDescriptionControl?.enable();
-        if (mainSizeDescriptionControl?.value === 'Yard/Meter' || mainSizeDescriptionControl?.value === 'Kg') {
+        if (
+          mainSizeDescriptionControl?.value === 'Yard/Meter' ||
+          mainSizeDescriptionControl?.value === 'Kg'
+        ) {
           mainSizeDescriptionControl?.setValue('');
         }
         return; // Don't update children for 'OTHER' type
       }
 
       // Update all big packages size descriptions
-      this.bigPackagesArray.controls.forEach(bigPackage => {
+      this.bigPackagesArray.controls.forEach((bigPackage) => {
         bigPackage.get('sizeDescription')?.setValue(sizeDescValue);
 
         // Update all small packages within this big package
         const smallPackages = bigPackage.get('smallPackages') as FormArray;
-        smallPackages.controls.forEach(smallPackage => {
+        smallPackages.controls.forEach((smallPackage) => {
           smallPackage.get('sizeDescription')?.setValue(sizeDescValue);
         });
       });
     });
+  }
+
+  private loadSuppliers(): void {
+    this.userManagementService.inquirySupplier().subscribe({
+      next: (response) => {
+        this.suppliers = response.suppliers;
+      },
+      error: (error) => {
+        this.errorMessage = error.message || 'Error loading suppliers';
+      },
+    });
+  }
+
+  onSupplierSelect(event: any, bigPackageIndex: number): void {
+    const value = event.target.value;
+    if (value) {
+      const [supplierId, supplierName] = value.split('|');
+      const bigPackage = this.bigPackagesArray.at(bigPackageIndex);
+      bigPackage.patchValue({
+        supplier: value,
+        supplierId,
+        supplierName
+      });
+    }
   }
 
   initForm(): void {
@@ -98,10 +125,8 @@ export class StockFormComponent implements OnInit {
       price: [0, [Validators.required, Validators.min(0)]],
       sizeDescription: [{ value: '', disabled: false }, Validators.required], // Main stock size description
       siteId: ['', [Validators.required]],
-      bigPackages: this.fb.array([
-        this.createBigPackageGroup()
-      ]),
-      createdBy: [localStorage.getItem('username')]
+      bigPackages: this.fb.array([this.createBigPackageGroup()]),
+      createdBy: [localStorage.getItem('username')],
     });
   }
 
@@ -118,6 +143,8 @@ export class StockFormComponent implements OnInit {
     return this.fb.group({
       packageNumber: [''],
       sizeDescription: [sizeDesc, [Validators.required]],
+      supplier: [''],  // Single supplier field
+      arrivalDate: [''],
       smallPackages: this.fb.array([
         this.createSmallPackageGroup(sizeDesc)
       ]),
@@ -129,8 +156,11 @@ export class StockFormComponent implements OnInit {
     return this.fb.group({
       sizeAmount: [null, [Validators.required, Validators.min(0.1)]],
       sizeDescription: [initialSizeDesc, [Validators.required]],
-      multiplier: [1, [Validators.required, Validators.min(1), Validators.max(100)]],
-      createdBy: [localStorage.getItem('username') || 'admin']
+      multiplier: [
+        1,
+        [Validators.required, Validators.min(1), Validators.max(100)],
+      ],
+      createdBy: [localStorage.getItem('username') || 'admin'],
     });
   }
 
@@ -139,7 +169,9 @@ export class StockFormComponent implements OnInit {
   }
 
   getSmallPackagesArray(bigPackageIndex: number): FormArray {
-    return this.bigPackagesArray.at(bigPackageIndex).get('smallPackages') as FormArray;
+    return this.bigPackagesArray
+      .at(bigPackageIndex)
+      .get('smallPackages') as FormArray;
   }
 
   addBigPackage(): void {
@@ -177,16 +209,16 @@ export class StockFormComponent implements OnInit {
     this.isLoading = true;
     this.siteService.getSiteForFilter().subscribe({
       next: (response: SiteAllListResponse) => {
-        this.sites = response.data.map(site => ({
+        this.sites = response.data.map((site) => ({
           value: site.siteId,
-          label: site.siteName
+          label: site.siteName,
         }));
         this.isLoading = false;
       },
       error: (error) => {
         this.errorMessage = error.message || 'Error loading sites';
         this.isLoading = false;
-      }
+      },
     });
   }
 
@@ -203,7 +235,7 @@ export class StockFormComponent implements OnInit {
           specs: stock.specs,
           price: stock.price,
           sizeDescription: stock.sizeDescription,
-          siteId: stock.siteId
+          siteId: stock.siteId,
         });
 
         // If in edit mode, disable productId field as it shouldn't be changed
@@ -214,30 +246,47 @@ export class StockFormComponent implements OnInit {
       error: (error) => {
         this.errorMessage = error.message || 'Error loading stock data';
         this.isLoading = false;
-      }
+      },
     });
   }
 
   // Process small packages with multiplier
   processSmallPackagesWithMultiplier(bigPackages: any[]): any[] {
     return bigPackages.map(bigPackage => {
-      // Process small packages in this big package
+      const {
+        smallPackages,
+        packageNumber,
+        sizeDescription,
+        supplier,
+        arrivalDate,
+        createdBy,
+      } = bigPackage;
+
+      // Extract supplier info
+      const [supplierId, supplierName] = (supplier || '|').split('|');
+
       const expandedSmallPackages: any[] = [];
 
-      bigPackage.smallPackages.forEach((smallPackage: any) => {
+      smallPackages.forEach((smallPackage: any) => {
         const { multiplier, ...packageData } = smallPackage;
         const count = parseInt(multiplier) || 1;
 
-        // Create 'count' copies of this package
         for (let i = 0; i < count; i++) {
-          expandedSmallPackages.push({ ...packageData });
+          expandedSmallPackages.push({
+            ...packageData,
+            createdBy,
+          });
         }
       });
 
-      // Return the big package with expanded small packages
       return {
-        ...bigPackage,
-        smallPackages: expandedSmallPackages
+        packageNumber,
+        sizeDescription,
+        supplierId,
+        supplierName,
+        arrivalDate,
+        smallPackages: expandedSmallPackages,
+        createdBy,
       };
     });
   }
@@ -260,54 +309,60 @@ export class StockFormComponent implements OnInit {
 
     if (this.isEditMode && this.stockId) {
       // Update existing stock
-      this.stockService.updateStock({
-        stockId: this.stockId,
-        productName: formValue.productName,
-        type: formValue.type,
-        specs: formValue.specs,
-        price: formValue.price,
-        sizeDescription: formValue.sizeDescription,
-        siteId: formValue.siteId,
-        changedBy: formValue.createdBy
-      }).subscribe({
-        next: () => {
-          this.router.navigate(['/stock/detail', this.stockId]);
-        },
-        error: (error) => {
-          this.errorMessage = error.message || 'Error updating stock';
-          this.isLoading = false;
-        }
-      });
+      this.stockService
+        .updateStock({
+          stockId: this.stockId,
+          productName: formValue.productName,
+          type: formValue.type,
+          specs: formValue.specs,
+          price: formValue.price,
+          sizeDescription: formValue.sizeDescription,
+          siteId: formValue.siteId,
+          changedBy: formValue.createdBy,
+        })
+        .subscribe({
+          next: () => {
+            this.router.navigate(['/stock/detail', this.stockId]);
+          },
+          error: (error) => {
+            this.errorMessage = error.message || 'Error updating stock';
+            this.isLoading = false;
+          },
+        });
     } else {
       // Process big packages with multiplier
-      const processedBigPackages = this.processSmallPackagesWithMultiplier(formValue.bigPackages);
+      const processedBigPackages = this.processSmallPackagesWithMultiplier(
+        formValue.bigPackages
+      );
 
       // Create new stock with processed big packages
-      this.stockService.createStock({
-        productId: formValue.productId,
-        productName: formValue.productName,
-        type: formValue.type,
-        specs: formValue.specs,
-        price: formValue.price,
-        sizeDescription: formValue.sizeDescription,
-        siteId: formValue.siteId,
-        bigPackages: processedBigPackages,
-        createdBy: formValue.createdBy
-      }).subscribe({
-        next: (stock) => {
-          this.router.navigate(['/stock/detail', stock.stockId]);
-        },
-        error: (error) => {
-          this.errorMessage = error.message || 'Error creating stock';
-          this.isLoading = false;
-        }
-      });
+      this.stockService
+        .createStock({
+          productId: formValue.productId,
+          productName: formValue.productName,
+          type: formValue.type,
+          specs: formValue.specs,
+          price: formValue.price,
+          sizeDescription: formValue.sizeDescription,
+          siteId: formValue.siteId,
+          bigPackages: processedBigPackages,
+          createdBy: formValue.createdBy,
+        })
+        .subscribe({
+          next: (stock) => {
+            this.router.navigate(['/stock/detail', stock.stockId]);
+          },
+          error: (error) => {
+            this.errorMessage = error.message || 'Error creating stock';
+            this.isLoading = false;
+          },
+        });
     }
   }
 
   // Helper method to mark all controls in a form group as touched
   markFormGroupTouched(formGroup: FormGroup | FormArray): void {
-    Object.keys(formGroup.controls).forEach(key => {
+    Object.keys(formGroup.controls).forEach((key) => {
       const control = formGroup.get(key);
 
       if (control instanceof FormGroup || control instanceof FormArray) {

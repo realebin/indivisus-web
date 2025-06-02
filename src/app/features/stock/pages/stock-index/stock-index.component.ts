@@ -24,7 +24,10 @@ export class StockIndexComponent implements OnInit, OnDestroy {
   sortField = '';
   sortDirection: 'asc' | 'desc' = 'asc';
   sortOptions = [
-    { label: 'Name', value: 'name', field: 'name' },
+    { label: 'Product Name', value: 'productName', field: 'productName' },
+    { label: 'Type', value: 'type', field: 'type' },
+    { label: 'Site', value: 'siteName', field: 'siteName' },
+    { label: 'Remaining Stock', value: 'remainingStock', field: 'remainingStock' },
     { label: 'Created Date', value: 'createdAt', field: 'createdAt' }
   ];
   modalRef?: BsModalRef;
@@ -33,6 +36,7 @@ export class StockIndexComponent implements OnInit, OnDestroy {
     { label: 'Dashboard', url: '/dashboard' },
     { label: 'Stock Management' }
   ];
+
 
   private subscriptions: Subscription[] = [];
 
@@ -112,7 +116,6 @@ export class StockIndexComponent implements OnInit, OnDestroy {
   applyFilters(): void {
     let filtered = [...this.stocks];
 
-    // Apply search filter
     if (this.searchFilter.value) {
       const searchTerm = this.searchFilter.value.toLowerCase();
       filtered = filtered.filter(
@@ -120,25 +123,21 @@ export class StockIndexComponent implements OnInit, OnDestroy {
           stock.productName.toLowerCase().includes(searchTerm) ||
           stock.type.toLowerCase().includes(searchTerm) ||
           stock.stockId.toLowerCase().includes(searchTerm) ||
-          stock.productId.toLowerCase().includes(searchTerm) ||
+          stock.specs?.toLowerCase().includes(searchTerm) ||
           stock.siteName.toLowerCase().includes(searchTerm)
       );
     }
 
-    // Apply sorting
+    // Apply sorting with null checks
     if (this.sortField) {
       filtered.sort((a, b) => {
-        const aValue = a[this.sortField as keyof StockHeaderModel];
-        const bValue = b[this.sortField as keyof StockHeaderModel];
+        const aValue = a[this.sortField as keyof StockHeaderModel] ?? '';
+        const bValue = b[this.sortField as keyof StockHeaderModel] ?? '';
 
-        // Handle numeric values
         if (typeof aValue === 'number' && typeof bValue === 'number') {
-          return this.sortDirection === 'asc'
-            ? aValue - bValue
-            : bValue - aValue;
+          return this.sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
         }
 
-        // Handle string values
         const aString = String(aValue).toLowerCase();
         const bString = String(bValue).toLowerCase();
         return this.sortDirection === 'asc'

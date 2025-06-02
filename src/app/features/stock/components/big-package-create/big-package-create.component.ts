@@ -3,11 +3,13 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { StockManagementService } from '@services/stock.service';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import { BigPackageModel } from '@models/stock.model';
+import { UserManagementService } from '@services/user-management.service';
+import { Supplier } from '@models/user-management.model';
 
 @Component({
   selector: 'app-big-package-create',
   templateUrl: './big-package-create.component.html',
-  styleUrls: ['./big-package-create.component.scss']
+  styleUrls: ['./big-package-create.component.scss'],
 })
 export class BigPackageCreateComponent implements OnInit {
   @Input() stockId: string;
@@ -16,23 +18,53 @@ export class BigPackageCreateComponent implements OnInit {
   form: FormGroup;
   isLoading = false;
   errorMessage: string;
+  suppliers: Supplier[] = [];
 
   constructor(
     private fb: FormBuilder,
     private stockService: StockManagementService,
+    private userManagementService: UserManagementService,
     public modalRef: BsModalRef
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.initForm();
+    this.loadSuppliers();
+  }
+
+  private loadSuppliers(): void {
+    this.userManagementService.inquirySupplier().subscribe({
+      next: (response) => {
+        this.suppliers = response.suppliers;
+      },
+      error: (error) => {
+        console.error('Error loading suppliers:', error);
+        this.errorMessage = 'Failed to load suppliers';
+      },
+    });
+  }
+
+  onSupplierSelect(event: any): void {
+    const value = event.target.value;
+    if (value) {
+      const [supplierId, supplierName] = value.split('|');
+      this.form.patchValue({
+        supplier: value,
+      });
+    }
   }
 
   initForm(): void {
     this.form = this.fb.group({
-      packageNumber: [''],  // Auto-generated if empty
+      packageNumber: [''],
       sizeDescription: ['', Validators.required],
+      supplier: [''], // Single supplier field
+      arrivalDate: [''],
       smallPackages: this.fb.array([this.createSmallPackageFormGroup()]),
-      createdBy: [localStorage.getItem('username') || 'admin', Validators.required]
+      createdBy: [
+        localStorage.getItem('username') || 'admin',
+        Validators.required,
+      ],
     });
   }
 
@@ -40,8 +72,14 @@ export class BigPackageCreateComponent implements OnInit {
     return this.fb.group({
       sizeAmount: [null, [Validators.required, Validators.min(0.1)]],
       sizeDescription: ['', Validators.required],
-      createdBy: [localStorage.getItem('username') || 'admin', Validators.required],
-      multiplier: [1, [Validators.required, Validators.min(1), Validators.max(100)]]
+      createdBy: [
+        localStorage.getItem('username') || 'admin',
+        Validators.required,
+      ],
+      multiplier: [
+        1,
+        [Validators.required, Validators.min(1), Validators.max(100)],
+      ],
     });
   }
 
@@ -61,46 +99,50 @@ export class BigPackageCreateComponent implements OnInit {
 
   onSubmit(): void {
     if (this.form.invalid) {
-      // Mark all fields as touched to trigger validation messages
       this.form.markAllAsTouched();
       return;
     }
 
     this.isLoading = true;
-    this.errorMessage = '';
-
     const formValue = this.form.value;
 
+    // Extract supplier ID and name from the combined value
+    const [supplierId, supplierName] = (formValue.supplier || '|').split('|');
 
-    try {
-      // Process small packages with multiplier - Add defensive coding
-      const smallPackages = formValue.smallPackages || [];
-      const expandedSmallPackages = this.processSmallPackagesWithMultiplier(smallPackages);
+    // Process small packages with multiplier
+    const processedSmallPackages = this.processSmallPackagesWithMultiplier(
+      formValue.smallPackages
+    );
 
-      // Create a copy of the form value with expanded small packages
-      const requestPayload = {
-        packageNumber: formValue.packageNumber || '',
-        sizeDescription: formValue.sizeDescription || '',
-        smallPackages: expandedSmallPackages,
-        createdBy: formValue.createdBy || localStorage.getItem('username') || 'admin'
-      };
+    const requestPayload = {
+      packageNumber: formValue.packageNumber,
+      sizeDescription: formValue.sizeDescription,
+      supplierId: supplierId,
+      supplierName: supplierName,
+      arrivalDate: formValue.arrivalDate,
+      smallPackages: processedSmallPackages.map((sp: any) => ({
+        sizeAmount: sp.sizeAmount,
+        sizeDescription: sp.sizeDescription,
+        createdBy: formValue.createdBy,
+      })),
+      createdBy: formValue.createdBy,
+    };
 
-      this.stockService.createBigPackage(this.stockId, requestPayload).subscribe({
-        next: (response) => {
-          this.isLoading = false;
-          this.onSaved.emit();
-          this.modalRef.hide();
-        },
-        error: (error) => {
-          this.isLoading = false;
-          this.errorMessage = error.message || 'Error creating big package';
-        }
-      });
-    } catch (err) {
-      console.error('Exception in onSubmit:', err);
-      this.isLoading = false;
-      this.errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
-    }
+    this.stockService.createBigPackage(this.stockId, requestPayload).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.onSaved.emit();
+        this.modalRef.hide();
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.errorMessage = error.message || 'Failed to create big package';
+        console.error('Error creating big package:', error);
+      },
+      complete: () => {
+        this.isLoading = false;
+      },
+    });
   }
 
   /**
@@ -114,7 +156,7 @@ export class BigPackageCreateComponent implements OnInit {
 
     const expandedPackages: any[] = [];
 
-    smallPackages.forEach(pkg => {
+    smallPackages.forEach((pkg) => {
       if (!pkg) {
         return;
       }

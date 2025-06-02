@@ -23,6 +23,9 @@ export interface BigPackage {
   total_size_amount: number;
   size_description: string;
   is_open: boolean;
+  supplier_id?: string;
+  supplier_name?: string;
+  arrival_date?: string;
   small_packages: SmallPackage[];
   created_at: string;
   created_by: string;
@@ -32,7 +35,7 @@ export interface BigPackage {
 
 export interface SmallPackage {
   package_id: string;
-  quantity: number;
+  quantity: number; // Always 1 as per requirement
   size_amount: number;
   size_description: string;
   is_open: boolean;
@@ -47,20 +50,26 @@ export interface StockCreateRequest {
   product_id: string;
   product_name: string;
   type: string;
-  specs: string;
+  specs?: string;
   price: number;
   size_description: string;
   site_id: string;
-  big_packages: {
-    package_number: string;
-    size_description: string;
-    small_packages: {
-      size_amount: number;
-      size_description: string;
-      created_by: string;
-    }[];
-    created_by: string;
-  }[];
+  big_packages: BigPackageCreateRequest[];
+  created_by: string;
+}
+
+export interface BigPackageCreateRequest {
+  package_number?: string;
+  size_description?: string;
+  supplier_id?: string;
+  arrival_date?: string;
+  small_packages: SmallPackageCreateRequest[];
+  created_by: string;
+}
+
+export interface SmallPackageCreateRequest {
+  size_amount: number;
+  size_description?: string;
   created_by: string;
 }
 
@@ -68,10 +77,25 @@ export interface StockUpdateRequest {
   stock_id: string;
   product_name: string;
   type: string;
-  specs: string;
+  specs?: string;
   price: number;
   size_description: string;
   site_id: string;
+  changed_by: string;
+}
+
+export interface BigPackageUpdateRequest {
+  package_number: string;
+  size_description: string;
+  is_open: boolean;
+  supplier_id?: string;
+  arrival_date?: string;
+  changed_by: string;
+}
+
+export interface MarkPackageRequest {
+  package_number?: string; // for big package
+  package_id?: string; // for small package
   changed_by: string;
 }
 
@@ -79,6 +103,7 @@ export interface StockListResponse {
   epoch: number;
   data: StockHeader[];
 }
+
 export interface StockDetailResponse {
   epoch: number;
   data: StockHeader;

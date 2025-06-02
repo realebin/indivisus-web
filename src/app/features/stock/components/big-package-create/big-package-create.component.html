@@ -1,94 +1,134 @@
 <div class="modal-header">
-  <h5 class="modal-title">Add New Big Package</h5>
+  <h4 class="modal-title">Create New Big Package</h4>
   <button type="button" class="btn-close" (click)="close()"></button>
 </div>
-<div class="modal-body">
-  <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <div class="mb-3">
-      <label for="packageNumber" class="form-label">Package Number</label>
-      <input type="text" class="form-control" id="packageNumber" formControlName="packageNumber"
-        placeholder="Leave empty for auto-generation">
-    </div>
-
-    <div class="mb-3">
-      <label for="sizeDescription" class="form-label">Size Description</label>
-      <input type="text" class="form-control" id="sizeDescription" formControlName="sizeDescription"
-        placeholder="e.g., Yards, Meters, Kilograms" required>
-      <div class="invalid-feedback"
-        *ngIf="form.get('sizeDescription')?.touched && form.get('sizeDescription')?.invalid">
-        Size description is required
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="modal-body">
+    <!-- Package Details -->
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label class="form-label">Package Number</label>
+        <input
+          type="text"
+          class="form-control"
+          formControlName="packageNumber"
+          placeholder="Auto-generated if empty"
+        />
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Size Description *</label>
+        <input
+          type="text"
+          class="form-control"
+          formControlName="sizeDescription"
+          required
+        />
       </div>
     </div>
 
-    <div class="mb-3">
-      <label class="form-label">Small Packages</label>
-      <div formArrayName="smallPackages">
-        <div *ngFor="let smallPackage of smallPackagesFormArray.controls; let i = index" [formGroupName]="i"
-          class="card p-3 mb-2">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <h6 class="mb-0">Small Package #{{ i + 1 }}</h6>
-            <button type="button" class="btn btn-sm btn-danger" (click)="removeSmallPackage(i)"
-              *ngIf="smallPackagesFormArray.length > 1">
-              <i class="bi bi-trash"></i>
-            </button>
-          </div>
+    <!-- Supplier Information -->
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label class="form-label">Supplier</label>
+        <select
+          class="form-select"
+          formControlName="supplier"
+          (change)="onSupplierSelect($event)"
+        >
+          <option value="">Select a supplier</option>
+          <option
+            *ngFor="let supplier of suppliers"
+            [value]="supplier.id + '|' + supplier.name"
+          >
+            {{ supplier.name }}
+          </option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Arrival Date</label>
+        <input type="date" class="form-control" formControlName="arrivalDate" />
+      </div>
+    </div>
 
-          <div class="row g-2 mb-2">
-            <div class="col-md-6">
-              <label class="form-label">Size Amount</label>
-              <input type="number" class="form-control" formControlName="sizeAmount" min="0.1" step="0.1" required>
-              <div class="invalid-feedback"
-                *ngIf="smallPackagesFormArray.at(i).get('sizeAmount')?.touched && smallPackagesFormArray.at(i).get('sizeAmount')?.invalid">
-                Valid size amount is required
-              </div>
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label">Size Description</label>
-              <input type="text" class="form-control" formControlName="sizeDescription" required>
-              <div class="invalid-feedback"
-                *ngIf="smallPackagesFormArray.at(i).get('sizeDescription')?.touched && smallPackagesFormArray.at(i).get('sizeDescription')?.invalid">
-                Size description is required
-              </div>
-            </div>
-          </div>
-          <!-- New Multiplier Field -->
-          <div class="row g-2">
-            <div class="col-md-6">
-              <label class="form-label">Quantity Multiplier</label>
-              <div class="input-group">
-                <input type="number" class="form-control" formControlName="multiplier" min="1" max="100" required>
-                <span class="input-group-text">package(s)</span>
-              </div>
-              <small class="text-muted">Creates multiple identical packages</small>
-              <div class="invalid-feedback"
-                *ngIf="smallPackagesFormArray.at(i).get('multiplier')?.touched && smallPackagesFormArray.at(i).get('multiplier')?.invalid">
-                Multiplier must be between 1 and 100
-              </div>
-            </div>
-          </div>
+    <!-- Small Packages Section -->
+    <div formArrayName="smallPackages" class="mb-3">
+      <h5>Small Packages</h5>
+      <div
+        *ngFor="let pkg of smallPackagesFormArray.controls; let i = index"
+        [formGroupName]="i"
+        class="row g-3 mb-2"
+      >
+        <div class="col-md-3">
+          <label class="form-label">Size Amount *</label>
+          <input
+            type="number"
+            class="form-control"
+            formControlName="sizeAmount"
+            required
+            min="0.1"
+            step="0.1"
+          />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Size Description *</label>
+          <input
+            type="text"
+            class="form-control"
+            formControlName="sizeDescription"
+            required
+          />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Multiplier</label>
+          <input
+            type="number"
+            class="form-control"
+            formControlName="multiplier"
+            min="1"
+            max="100"
+          />
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button
+            type="button"
+            class="btn btn-danger"
+            (click)="removeSmallPackage(i)"
+            [disabled]="smallPackagesFormArray.length === 1"
+          >
+            <i class="bi bi-trash"></i>
+          </button>
         </div>
       </div>
-
-      <div class="d-grid gap-2 mt-2">
-        <button type="button" class="btn btn-outline-primary" (click)="addSmallPackage()">
-          <i class="bi bi-plus-circle"></i> Add Small Package
-        </button>
-      </div>
+      <button
+        type="button"
+        class="btn btn-secondary mt-2"
+        (click)="addSmallPackage()"
+      >
+        Add Small Package
+      </button>
     </div>
 
-    <div class="mb-3">
-      <label for="createdBy" class="form-label">Created By</label>
-      <input type="text" class="form-control" id="createdBy" formControlName="createdBy" readonly>
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
     </div>
-  </form>
-</div>
-<div class="modal-footer">
-  <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
-  <button type="button" class="btn btn-primary" [disabled]="form.invalid || isLoading" (click)="onSubmit()">
-    <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1"></span>
-    Save
-  </button>
-</div>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="close()">
+      Cancel
+    </button>
+    <button
+      type="submit"
+      class="btn btn-primary"
+      [disabled]="form.invalid || isLoading"
+    >
+      <span
+        *ngIf="isLoading"
+        class="spinner-border spinner-border-sm me-1"
+      ></span>
+      Create
+    </button>
+  </div>
+</form>
