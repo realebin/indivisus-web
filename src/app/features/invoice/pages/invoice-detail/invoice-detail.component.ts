@@ -1,3 +1,4 @@
+import { InvoiceUpdateModelRequest } from './../../../../data/models/invoice.model';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { InvoiceService } from '@services/invoice.service';
@@ -51,7 +52,7 @@ export class InvoiceDetailComponent implements OnInit {
     });
   }
 
-  goBack(): void {
+    goBack(): void {
     this.router.navigate(['/invoice']);
   }
 
@@ -85,10 +86,18 @@ export class InvoiceDetailComponent implements OnInit {
       siteId: this.invoice.siteId,
       dueDate: this.invoice.dueDate,
       notes: this.invoice.notes,
+      reference: this.invoice.reference,
       status: status,
-      changedBy: localStorage.getItem('username') || 'admin',
-      lineItems: this.invoice.lineItems
-    };
+      lineItems: this.invoice.lineItems.map(item => ({
+        stockId: item.stockId,
+        productId: item.productId,
+        bigPackageNumber: item.bigPackageNumber,
+        smallPackageId: item.smallPackageId || '', // Provide empty string as fallback
+        unitAmount: item.unitAmount,
+        unitPrice: item.unitPrice
+      })),
+      changedBy: localStorage.getItem('username') || 'admin'
+    } as InvoiceUpdateModelRequest;
 
     this.isLoading = true;
     this.invoiceService.updateInvoice(updateData).subscribe({
@@ -114,7 +123,6 @@ export class InvoiceDetailComponent implements OnInit {
         a.click();
         window.URL.revokeObjectURL(url);
         a.remove();
-
         this.isLoading = false;
       },
       error: (error) => {
@@ -124,30 +132,27 @@ export class InvoiceDetailComponent implements OnInit {
     });
   }
 
-
-  downloadPackingListPdf(): void {
+  downloadSalesInvoicePdf(): void {
     this.isLoading = true;
-    this.invoiceService.generatePackListInvoicePdf(this.invoiceNumber).subscribe({
+    this.invoiceService.generateSalesInvoicePdf(this.invoiceNumber).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Invoice-packing-list-${this.invoiceNumber}.pdf`;
+        a.download = `Sales-Invoice-${this.invoiceNumber}.pdf`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
         a.remove();
-
         this.isLoading = false;
       },
       error: (error) => {
-        this.error = error.message || 'Failed to download PDF';
+        this.error = error.message || 'Failed to download sales invoice PDF';
         this.isLoading = false;
       }
     });
   }
 
-  // Helper methods for formatting and data display
   getStatusBadgeClass(status: string): string {
     switch (status) {
       case 'PENDING': return 'bg-warning text-dark';
@@ -157,7 +162,7 @@ export class InvoiceDetailComponent implements OnInit {
     }
   }
 
-  formatDate(dateString: string): string {
+    formatDate(dateString: string): string {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toLocaleDateString();
@@ -170,13 +175,10 @@ export class InvoiceDetailComponent implements OnInit {
       minimumFractionDigits: 0
     });
   }
-
-  // Group line items by type for the summary
   getLineItemsByType(): { type: string, items: LineItem[], totalAmount: number, totalPrice: number }[] {
     if (!this.invoice?.lineItems) return [];
 
     const groupedItems: { [key: string]: LineItem[] } = {};
-
     for (const item of this.invoice.lineItems) {
       if (!groupedItems[item.type]) {
         groupedItems[item.type] = [];
@@ -186,15 +188,18 @@ export class InvoiceDetailComponent implements OnInit {
 
     return Object.keys(groupedItems).map(type => {
       const items = groupedItems[type];
-      const totalAmount = items.reduce((sum, item) => sum + item.unitAmount, 0);
+      const totalAmount = items.reduce((sum, item) => sum + (item.unitAmount || 0), 0);
       const totalPrice = items.reduce((sum, item) => sum + item.totalPrice, 0);
-
       return { type, items, totalAmount, totalPrice };
     });
   }
 
-  getTotalQuantity(): number {
+    getTotalQuantity(): number {
     if (!this.invoice?.lineItems) return 0;
-    return this.invoice.lineItems.reduce((sum, item) => sum + item.unitAmount, 0);
+    return this.invoice.lineItems.reduce((sum, item) => sum + (item.unitAmount ?? 0), 0);
+  }
+
+  isEntireBigPackage(item: LineItem): boolean {
+    return item.isEntireBigPackage || false;
   }
 }

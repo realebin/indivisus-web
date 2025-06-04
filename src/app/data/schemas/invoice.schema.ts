@@ -13,6 +13,7 @@ export interface InvoiceInquiryHttpResponse {
     total_price: number;
     total_quantity: number;
     notes: string;
+    reference: string; // Added reference field
     status: 'PENDING' | 'PAID' | 'CANCELLED';
     line_items: {
       line_item_id: string;
@@ -26,7 +27,8 @@ export interface InvoiceInquiryHttpResponse {
       unit_price: number;
       total_price: number;
       size_description: string;
-      package_status: string;
+      package_status: 'OPEN' | 'CLOSED'; // Updated to specific values
+      is_entire_big_package?: boolean; // Added for big package sales
     }[];
     created_by: string;
     changed_by: string;
@@ -38,6 +40,7 @@ export interface InvoiceInquiryHttpResponse {
 export interface InvoiceDetailHttpResponse {
   epoch: number;
   data: {
+    reference: string;
     invoice_number: string;
     customer_id: string;
     customer_name: string;
@@ -49,6 +52,7 @@ export interface InvoiceDetailHttpResponse {
     notes: string;
     status: 'PENDING' | 'PAID' | 'CANCELLED';
     line_items: {
+      is_entire_big_package: boolean;
       line_item_id: string;
       stock_id: string;
       product_id: string;
@@ -209,13 +213,15 @@ export interface InvoiceCreateHttpRequest {
   site_id: string;
   due_date: string;
   notes?: string;
+  reference?: string; // Added reference field
   line_items: {
     stock_id: string;
     product_id: string;
     big_package_number: string;
-    small_package_id: string;
-    unit_amount: number;
+    small_package_id?: string; // Optional for entire big package sales
+    unit_amount?: number; // Optional for entire big package sales
     unit_price: number;
+    is_entire_big_package?: boolean; // Added for big package sales
   }[];
   created_by: string;
 }

@@ -17,12 +17,13 @@ export interface LineItem {
   productName: string;
   type: string;
   bigPackageNumber: string;
-  smallPackageId: string;
-  unitAmount: number;
+  smallPackageId?: string;
+  unitAmount?: number;
   unitPrice: number;
   totalPrice: number;
   sizeDescription: string;
-  packageStatus: string;
+  packageStatus: 'OPEN' | 'CLOSED';
+  isEntireBigPackage?: boolean;
 }
 
 export interface Invoice {
@@ -35,6 +36,7 @@ export interface Invoice {
   totalPrice: number;
   totalQuantity: number;
   notes: string;
+  reference?: string;
   status: 'PENDING' | 'PAID' | 'CANCELLED';
   lineItems: LineItem[];
   createdBy: string;
@@ -143,13 +145,15 @@ export interface InvoiceCreateModelRequest {
   siteId: string;
   dueDate: string;
   notes?: string;
+  reference?: string;
   lineItems: {
     stockId: string;
     productId: string;
     bigPackageNumber: string;
-    smallPackageId: string;
-    unitAmount: number;
+    smallPackageId?: string;
+    unitAmount?: number;
     unitPrice: number;
+    isEntireBigPackage?: boolean;
   }[];
   createdBy: string;
 }
@@ -184,6 +188,7 @@ export function transformToInvoiceInquiryModelResponse(
     totalPrice: invoiceData.total_price,
     totalQuantity: invoiceData.total_quantity,
     notes: invoiceData.notes,
+    reference: invoiceData.reference, // Add reference field
     status: invoiceData.status,
     lineItems: invoiceData.line_items.map(item => ({
       lineItemId: item.line_item_id,
@@ -197,7 +202,8 @@ export function transformToInvoiceInquiryModelResponse(
       unitPrice: item.unit_price,
       totalPrice: item.total_price,
       sizeDescription: item.size_description,
-      packageStatus: item.package_status
+      packageStatus: item.package_status,
+      isEntireBigPackage: item.is_entire_big_package // Add new field
     })),
     createdBy: invoiceData.created_by,
     changedBy: invoiceData.changed_by,
@@ -214,7 +220,7 @@ export function transformToInvoiceInquiryModelResponse(
 export function transformToInvoiceDetailModelResponse(
   response: InvoiceDetailHttpResponse
 ): InvoiceDetailModelResponse {
-  const invoice = {
+  const invoice: Invoice = {
     invoiceNumber: response.data.invoice_number,
     customerId: response.data.customer_id,
     customerName: response.data.customer_name,
@@ -224,6 +230,7 @@ export function transformToInvoiceDetailModelResponse(
     totalPrice: response.data.total_price,
     totalQuantity: response.data.total_quantity,
     notes: response.data.notes,
+    reference: response.data.reference || '',
     status: response.data.status,
     lineItems: response.data.line_items.map(item => ({
       lineItemId: item.line_item_id,
@@ -237,7 +244,8 @@ export function transformToInvoiceDetailModelResponse(
       unitPrice: item.unit_price,
       totalPrice: item.total_price,
       sizeDescription: item.size_description,
-      packageStatus: item.package_status
+      packageStatus: item.package_status as 'OPEN' | 'CLOSED',
+      isEntireBigPackage: item.is_entire_big_package || false
     })),
     createdBy: response.data.created_by,
     changedBy: response.data.changed_by,
@@ -277,7 +285,7 @@ export function transformToInvoiceByCustomerModelResponse(
       unitPrice: item.unit_price,
       totalPrice: item.total_price,
       sizeDescription: item.size_description,
-      packageStatus: item.package_status
+      packageStatus: item.package_status as 'OPEN' | 'CLOSED'
     })),
     createdBy: invoiceData.created_by,
     changedBy: invoiceData.changed_by,
@@ -317,7 +325,7 @@ export function transformToInvoiceBySiteModelResponse(
       unitPrice: item.unit_price,
       totalPrice: item.total_price,
       sizeDescription: item.size_description,
-      packageStatus: item.package_status
+      packageStatus: item.package_status as 'OPEN' | 'CLOSED'
     })),
     createdBy: invoiceData.created_by,
     changedBy: invoiceData.changed_by,
@@ -357,7 +365,7 @@ export function transformToInvoiceByDateRangeModelResponse(
       unitPrice: item.unit_price,
       totalPrice: item.total_price,
       sizeDescription: item.size_description,
-      packageStatus: item.package_status
+      packageStatus: item.package_status as 'OPEN' | 'CLOSED'
     })) || [],
     createdBy: invoiceData.created_by,
     changedBy: invoiceData.changed_by,
@@ -418,13 +426,15 @@ export function transformToInvoiceCreateHttpRequest(
     site_id: request.siteId,
     due_date: request.dueDate,
     notes: request.notes,
+    reference: request.reference, // Add reference field
     line_items: request.lineItems.map(item => ({
       stock_id: item.stockId,
       product_id: item.productId,
       big_package_number: item.bigPackageNumber,
       small_package_id: item.smallPackageId,
       unit_amount: item.unitAmount,
-      unit_price: item.unitPrice
+      unit_price: item.unitPrice,
+      is_entire_big_package: item.isEntireBigPackage // Add new field
     })),
     created_by: request.createdBy
   };

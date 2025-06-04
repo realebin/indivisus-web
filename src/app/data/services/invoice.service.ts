@@ -221,4 +221,35 @@ export class InvoiceService {
       })
     );
   }
+
+  generateDailyInvoicePdfs(date: string, outputDir?: string): Observable<{ [key: string]: string }> {
+    return this.invoiceHttpService.generateDailyInvoicePdfs(date, outputDir).pipe(
+      map((response) => response.output_schema),
+      catchError((error) => {
+        return throwError({
+          ...error,
+          data: null,
+        });
+      })
+    );
+  }
+
+  generateSalesInvoicePdf(invoiceNumber: string): Observable<Blob> {
+    return this.invoiceHttpService.generateSalesInvoicePdf(invoiceNumber);
+  }
+
+  generateMultipleSalesInvoicePdfs(
+    data: MultipleInvoicePdfModelRequest
+  ): Observable<{ [key: string]: string }> {
+    const request = transformToMultipleInvoicePdfHttpRequest(data);
+    return this.invoiceHttpService.generateMultipleSalesInvoicePdfs(request).pipe(
+      map((response) => response.output_schema),
+      catchError((error) => {
+        return throwError({
+          ...error,
+          data: null,
+        });
+      })
+    );
+  }
 }

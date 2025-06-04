@@ -27,6 +27,7 @@
             </span>
           </div>
           <div class="card-body">
+            <!-- Basic Info -->
             <div class="row mb-3">
               <div class="col-md-6">
                 <p class="mb-1"><strong>Invoice Number:</strong></p>
@@ -38,6 +39,7 @@
               </div>
             </div>
 
+            <!-- Customer Info -->
             <div class="row mb-3">
               <div class="col-md-6">
                 <p class="mb-1"><strong>Customer:</strong></p>
@@ -49,6 +51,7 @@
               </div>
             </div>
 
+            <!-- Site and Total -->
             <div class="row mb-3">
               <div class="col-md-6">
                 <p class="mb-1"><strong>Site:</strong></p>
@@ -60,49 +63,73 @@
               </div>
             </div>
 
-            <div class="row" *ngIf="invoice.notes">
+            <!-- Notes -->
+            <div class="row mb-3" *ngIf="invoice.notes">
               <div class="col-12">
                 <p class="mb-1"><strong>Notes:</strong></p>
                 <p>{{ invoice.notes }}</p>
               </div>
             </div>
+
+            <!-- Reference -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <p class="mb-1"><strong>Reference:</strong></p>
+                <p>{{ invoice.reference || "N/A" }}</p>
+              </div>
+            </div>
           </div>
+
+          <!-- Footer Actions -->
           <div class="card-footer bg-white">
             <div class="row g-2">
+              <!-- Status Update -->
               <div class="col-4" *ngIf="invoice.status !== 'CANCELLED'">
                 <div class="dropdown w-100">
-                  <button class="btn btn-outline-primary dropdown-toggle w-100" type="button" id="statusDropdown"
-                    data-bs-toggle="dropdown" aria-expanded="false">
+                  <button class="btn btn-outline-primary dropdown-toggle w-100" type="button"
+                          id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-check-circle me-1"></i>Update Status
                   </button>
-                  <ul class="dropdown-menu" aria-labelledby="statusDropdown">
+                  <ul class="dropdown-menu w-100" aria-labelledby="statusDropdown">
                     <li><a class="dropdown-item" (click)="updateStatus('PENDING')"
                         *ngIf="invoice.status !== 'PENDING'">Mark as Pending</a></li>
-                    <li><a class="dropdown-item" (click)="updateStatus('PAID')" *ngIf="invoice.status !== 'PAID'">Mark
-                        as Paid</a></li>
+                    <li><a class="dropdown-item" (click)="updateStatus('PAID')"
+                        *ngIf="invoice.status !== 'PAID'">Mark as Paid</a></li>
                     <li><a class="dropdown-item" (click)="updateStatus('CANCELLED')">Cancel Invoice</a></li>
                   </ul>
                 </div>
               </div>
+
+              <!-- Edit Button -->
               <div class="col-4">
                 <button class="btn btn-outline-primary w-100" (click)="navigateToEdit()">
                   <i class="bi bi-pencil me-1"></i>Edit
                 </button>
               </div>
+
+              <!-- Delete Button -->
               <div class="col-4">
                 <button class="btn btn-outline-danger w-100" (click)="deleteInvoice()">
                   <i class="bi bi-trash me-1"></i>Delete
                 </button>
               </div>
-              <div class="col-6">
-                <button class="btn btn-primary w-100" (click)="downloadPdf()">
-                  <i class="bi bi-file-pdf me-1"></i>Download PDF
-                </button>
-              </div>
-              <div class="col-6">
-                <button class="btn btn-primary w-100" (click)="downloadPackingListPdf()">
-                  <i class="bi bi-file-pdf me-1"></i>Download Packing List PDF
-                </button>
+
+              <!-- Download Options -->
+              <div class="col-12">
+                <div class="dropdown w-100">
+                  <button class="btn btn-primary dropdown-toggle w-100" type="button"
+                          id="downloadDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-file-pdf me-1"></i>Download Documents
+                  </button>
+                  <ul class="dropdown-menu w-100" aria-labelledby="downloadDropdown">
+                    <li><a class="dropdown-item" (click)="downloadPdf()">
+                      <i class="bi bi-file-pdf me-2"></i>Invoice PDF
+                    </a></li>
+                    <li><a class="dropdown-item" (click)="downloadSalesInvoicePdf()">
+                      <i class="bi bi-file-pdf me-2"></i>Sales Invoice PDF
+                    </a></li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -133,8 +160,12 @@
                   </tr>
                   <tr class="table-secondary">
                     <td><strong>Grand Total</strong></td>
-                    <td class="text-center"><strong>{{ getTotalQuantity() | number:'1.2-2' }}</strong></td>
-                    <td class="text-end"><strong>{{ formatCurrency(invoice.totalPrice) }}</strong></td>
+                    <td class="text-center">
+                      <strong>{{ getTotalQuantity() | number:'1.2-2' }}</strong>
+                    </td>
+                    <td class="text-end">
+                      <strong>{{ formatCurrency(invoice.totalPrice) }}</strong>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -161,6 +192,7 @@
                 <th class="text-center">Quantity</th>
                 <th class="text-end">Unit Price</th>
                 <th class="text-end">Total</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
@@ -170,11 +202,29 @@
                 <td>{{ item.type }}</td>
                 <td>
                   <small class="d-block">BP: {{ item.bigPackageNumber }}</small>
-                  <small class="d-block">SP: {{ item.smallPackageId }}</small>
+                  <small class="d-block" *ngIf="!isEntireBigPackage(item)">
+                    SP: {{ item.smallPackageId }}
+                  </small>
+                  <small class="badge bg-info" *ngIf="isEntireBigPackage(item)">
+                    Entire Big Package
+                  </small>
                 </td>
-                <td class="text-center">{{ item.unitAmount | number:'1.2-2' }} {{ item.sizeDescription }}</td>
+                <td class="text-center">
+                  {{ item.unitAmount | number:'1.2-2' }} {{ item.sizeDescription }}
+                  <small class="d-block text-muted" *ngIf="isEntireBigPackage(item)">
+                    Big Package Sale
+                  </small>
+                </td>
                 <td class="text-end">{{ formatCurrency(item.unitPrice) }}</td>
                 <td class="text-end">{{ formatCurrency(item.totalPrice) }}</td>
+                <td>
+                  <span class="badge" [ngClass]="{
+                    'bg-success': item.packageStatus === 'CLOSED',
+                    'bg-warning text-dark': item.packageStatus === 'OPEN'
+                  }">
+                    {{ item.packageStatus }}
+                  </span>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -182,6 +232,7 @@
       </div>
     </div>
 
+    <!-- Back Button -->
     <div class="d-flex justify-content-start mt-4 mb-5">
       <button class="btn btn-secondary" (click)="goBack()">
         <i class="bi bi-arrow-left me-1"></i> Back to Invoice List

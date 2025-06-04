@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { EnvironmentService } from '@services/environment.service';
@@ -101,6 +101,31 @@ export class InvoiceHttpService {
   generateMultipleInvoicePdfs(request: MultipleInvoicePdfRequest): Observable<ApiResponse<{ [key: string]: string }>> {
     return this.httpClient.post<ApiResponse<{ [key: string]: string }>>(
       `${this.baseUrl}/invoice/multi-pdf`,
+      request
+    );
+  }
+
+  generateDailyInvoicePdfs(date: string, outputDir?: string): Observable<ApiResponse<{ [key: string]: string }>> {
+    const params = new HttpParams()
+      .set('date', date)
+      .set('outputDir', outputDir || '/var/invoices/daily');
+
+    return this.httpClient.get<ApiResponse<{ [key: string]: string }>>(
+      `${this.baseUrl}/invoice/generate-daily`,
+      { params }
+    );
+  }
+
+    generateSalesInvoicePdf(invoiceNumber: string): Observable<Blob> {
+    return this.httpClient.get(
+      `${this.baseUrl}/sales-invoice/single-pdf/${invoiceNumber}`,
+      { responseType: 'blob' }
+    );
+  }
+
+  generateMultipleSalesInvoicePdfs(request: MultipleInvoicePdfRequest): Observable<ApiResponse<{ [key: string]: string }>> {
+    return this.httpClient.post<ApiResponse<{ [key: string]: string }>>(
+      `${this.baseUrl}/sales-invoice/multi-pdf`,
       request
     );
   }

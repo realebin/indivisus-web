@@ -54,6 +54,7 @@ export class InvoiceCreateComponent implements OnInit {
       siteId: ['', Validators.required],
       dueDate: ['', Validators.required],
       notes: [''],
+      reference: [''], // Optional reference field
       status: ['PENDING']
     });
   }
@@ -135,6 +136,7 @@ export class InvoiceCreateComponent implements OnInit {
           customerId: invoice.customerId,
           siteId: invoice.siteId,
           dueDate: this.formatDateForInput(invoice.dueDate),
+          reference: invoice.reference || '', // Optional reference field
           notes: invoice.notes,
           status: invoice.status
         });
@@ -153,8 +155,8 @@ export class InvoiceCreateComponent implements OnInit {
                 stockId: item.stockId,
                 productId: item.productId,
                 bigPackageNumber: item.bigPackageNumber,
-                smallPackageId: item.smallPackageId,
-                unitAmount: item.unitAmount,
+                smallPackageId: item.smallPackageId || '',
+                unitAmount: item.unitAmount || 0,
                 unitPrice: item.unitPrice,
                 productName: item.productName,
                 type: item.type,
@@ -317,6 +319,7 @@ export class InvoiceCreateComponent implements OnInit {
         siteId: formValue.siteId,
         dueDate: formValue.dueDate,
         notes: formValue.notes,
+        reference: formValue.reference || '', // Optional reference field
         status: formValue.status,
         lineItems: expandedLineItems, // Include line items in update request
         changedBy: localStorage.getItem('username') || 'admin'
@@ -341,6 +344,7 @@ export class InvoiceCreateComponent implements OnInit {
         siteId: formValue.siteId,
         dueDate: formValue.dueDate,
         notes: formValue.notes,
+        reference: formValue.reference || '', // Optional reference field
         lineItems: expandedLineItems,
         createdBy: localStorage.getItem('username') || 'admin'
       };
