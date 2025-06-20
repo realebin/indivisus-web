@@ -232,27 +232,45 @@ export class InvoiceCreateComponent implements OnInit {
     }, 100);
   }
 
+  // updateLineItem(lineItem: LineItemData, index: number): void {
+  //   // Validate index and line item
+  //   if (index < 0 || index >= this.lineItems.length) {
+  //     console.error('Invalid line item index:', index);
+  //     return;
+  //   }
+
+  //   if (!lineItem) {
+  //     console.error('Invalid line item data:', lineItem);
+  //     return;
+  //   }
+
+  //   // Create a safe copy of the line item
+  //   const safeLineItem = { ...lineItem };
+
+  //   // Update the line item safely
+  //   this.lineItems[index] = safeLineItem;
+
+  //   // Force change detection
+  //   this.cdr.detectChanges();
+
+  // }
   updateLineItem(lineItem: LineItemData, index: number): void {
     // Validate index and line item
     if (index < 0 || index >= this.lineItems.length) {
       console.error('Invalid line item index:', index);
       return;
     }
-
+  
     if (!lineItem) {
       console.error('Invalid line item data:', lineItem);
       return;
     }
-
-    // Create a safe copy of the line item
-    const safeLineItem = { ...lineItem };
-
-    // Update the line item safely
-    this.lineItems[index] = safeLineItem;
-
-    // Force change detection
+  
+    // Update in a single synchronous operation
+    this.lineItems[index] = { ...lineItem };
+    
+    // Run change detection once
     this.cdr.detectChanges();
-
   }
 
   getInvoiceTotal(): number {

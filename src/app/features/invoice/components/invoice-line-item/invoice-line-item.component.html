@@ -58,6 +58,7 @@
           <!-- Big Package Selection -->
           <div class="col-md-6">
             <label for="bigPackageNumber-{{ index }}" class="form-label">Big Package</label>
+            <pre>{{selectedBigPackage |json}}</pre>
             <select class="form-select" id="bigPackageNumber-{{ index }}" formControlName="bigPackageNumber"
               (change)="onBigPackageSelected()" [ngClass]="{
         'is-invalid': formControls['bigPackageNumber'].invalid && formControls['bigPackageNumber'].touched,

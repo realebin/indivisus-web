@@ -185,17 +185,20 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
 
   private setSelectedProduct(productId: string): void {
     if (this.isDestroyed) return;
-
+  
+    // Store current unit price before updating product
+    const currentUnitPrice = this.form.get('unitPrice')?.value;
+  
     this.selectedProduct = this.products.find(p => p.productId === productId) || null;
-
-
+  
     if (this.selectedProduct) {
-      // Update stock ID and unit price automatically
+      // Only update stockId and set unit price if it's not already set
       this.form.patchValue({
         stockId: this.selectedProduct.stockId,
-        unitPrice: this.selectedProduct.price
+        // Use current price if exists, otherwise use product's default price
+        unitPrice: currentUnitPrice || this.selectedProduct.price
       }, { emitEvent: false });
-
+  
       // Check if product has big packages
       if (!this.selectedProduct.bigPackages || this.selectedProduct.bigPackages.length === 0) {
         // Reset package-related fields and make them not required
@@ -204,13 +207,13 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
           smallPackageId: '',
           unitAmount: 0
         }, { emitEvent: false });
-
+  
         // Update validators for products without packages
         this.form.get('bigPackageNumber')?.clearValidators();
         this.form.get('smallPackageId')?.clearValidators();
         this.form.get('bigPackageNumber')?.updateValueAndValidity({ emitEvent: false });
         this.form.get('smallPackageId')?.updateValueAndValidity({ emitEvent: false });
-
+  
         this.selectedBigPackage = null;
         this.smallPackageOptions = [];
         this.selectedSmallPackages = [];
@@ -222,22 +225,39 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
         this.form.get('bigPackageNumber')?.updateValueAndValidity({ emitEvent: false });
         this.form.get('smallPackageId')?.updateValueAndValidity({ emitEvent: false });
       }
+    } else {
+      // Reset form if no product is selected
+      this.form.patchValue({
+        stockId: '',
+        bigPackageNumber: '',
+        smallPackageId: '',
+        unitAmount: 0,
+        unitPrice: currentUnitPrice // Preserve the current price even if no product selected
+      }, { emitEvent: false });
     }
-
+  
     this.updateControlStates();
     this.safeUpdateAvailableOptions();
   }
 
   private setSelectedBigPackage(packageNumber: string): void {
-    if (this.isDestroyed) return;
-
     if (this.selectedProduct && packageNumber && this.selectedProduct.bigPackages) {
+      // Store current unit price
+      const currentUnitPrice = this.form.get('unitPrice')?.value;
+  
       this.selectedBigPackage = this.selectedProduct.bigPackages.find(
         bp => bp.packageNumber === packageNumber
       ) || null;
-
-
+  
       if (this.selectedBigPackage) {
+        // Only reset smallPackageId and unitAmount, preserve unitPrice
+        this.form.patchValue({
+          smallPackageId: '',
+          unitAmount: 0,
+          // Restore the current unit price
+          unitPrice: currentUnitPrice
+        }, { emitEvent: false });
+  
         this.updateSmallPackageOptions();
         this.restoreSmallPackageSelections();
       }
@@ -245,7 +265,7 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
       this.selectedBigPackage = null;
       this.smallPackageOptions = [];
     }
-
+  
     this.safeUpdateAvailableOptions();
   }
 
@@ -351,15 +371,17 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
     if (this.isDestroyed) return;
 
     const productId = this.form.get('productId')?.value;
+    const currentUnitPrice = this.form.get('unitPrice')?.value;
 
     this.isInitializing = true;
 
     try {
-      // Reset dependent fields
+      // Reset dependent fields but preserve unit price
       this.form.patchValue({
         bigPackageNumber: '',
         smallPackageId: '',
-        unitAmount: 0
+        unitAmount: 0,
+        unitPrice: currentUnitPrice // Preserve current price
       }, { emitEvent: false });
 
       // Reset selections
@@ -376,54 +398,79 @@ export class InvoiceLineItemComponent implements OnInit, OnChanges, OnDestroy {
       this.isInitializing = false;
       this.safeEmitChanges();
     }
-  }
+}
 
-  onBigPackageSelected(): void {
-    if (this.isDestroyed) return;
+onBigPackageSelected(): void {
+  if (this.isDestroyed) return;
 
-    const packageNumber = this.form.get('bigPackageNumber')?.value;
+  const packageNumber = this.form.get('bigPackageNumber')?.value;
+  const currentUnitPrice = this.form.get('unitPrice')?.value;
 
-    this.isInitializing = true;
+  this.isInitializing = true;
 
-    try {
-      // Reset small package selections
-      this.form.patchValue({
-        smallPackageId: '',
-        unitAmount: 0
-      }, { emitEvent: false });
+  try {
+    // Reset only small package selections
+    this.form.patchValue({
+      smallPackageId: '',
+      unitAmount: 0,
+      unitPrice: currentUnitPrice
+    }, { emitEvent: false });
 
-      this.selectedSmallPackages = [];
-      this.totalSelectedAmount = 0;
+    this.selectedSmallPackages = [];
+    this.totalSelectedAmount = 0;
 
-      // Set the selected big package
-      this.setSelectedBigPackage(packageNumber);
-    } catch (error) {
-      console.error('Error in big package selection:', error);
-    } finally {
-      this.isInitializing = false;
-      this.safeEmitChanges();
+    // Set selected big package
+    if (this.selectedProduct && packageNumber) {
+      this.selectedBigPackage = this.selectedProduct.bigPackages.find(
+        bp => bp.packageNumber === packageNumber
+      ) || null;
+
+      // Force immediate UI update
+      this.cdr.detectChanges();
+      
+      // Queue another update
+      setTimeout(() => {
+        this.updateSmallPackageOptions();
+        this.cdr.detectChanges();
+      });
     }
+  } catch (error) {
+    console.error('Error in big package selection:', error);
+  } finally {
+    this.isInitializing = false;
+    this.safeEmitChanges();
   }
+}
 
   onSmallPackagesSelected(selectedOptions: MultiSelectOption[]): void {
     if (this.isDestroyed) return;
-
-
+  
+    this.isInitializing = true;
     try {
-      // Filter out disabled options
-      const validSelections = selectedOptions.filter(option => !option.disabled);
-      this.selectedSmallPackages = validSelections.map(option => option.id);
-
-      // Set the first package as smallPackageId for form compatibility
-      const firstPackageId = this.selectedSmallPackages.length > 0 ? this.selectedSmallPackages[0] : '';
-      this.form.patchValue({ smallPackageId: firstPackageId }, { emitEvent: false });
-
-      // Update total amount
+      // Update selected packages immediately
+      this.selectedSmallPackages = selectedOptions
+        .filter(option => !option.disabled)
+        .map(option => option.id);
+  
+      // Update form control
+      const firstPackageId = this.selectedSmallPackages[0] || '';
+      this.form.patchValue({ 
+        smallPackageId: firstPackageId 
+      }, { emitEvent: false });
+  
+      // Force update small package options to reflect new selections
+      this.updateSmallPackageOptions();
+      
+      // Update amounts
       this.updateTotalAmount();
-      this.safeUpdateAvailableOptions();
-      this.safeEmitChanges();
+      
+      // Force UI update
+      this.cdr.detectChanges();
     } catch (error) {
       console.error('Error in small package selection:', error);
+    } finally {
+      this.isInitializing = false;
+      this.safeEmitChanges();
     }
   }
 
